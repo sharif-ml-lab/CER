@@ -8,6 +8,7 @@ torch
 transformers
 boto3
 botocore
+datasets
 
 # Additional libraries
 requests
