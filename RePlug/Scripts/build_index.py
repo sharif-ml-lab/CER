@@ -4,6 +4,7 @@ from datasets import load_from_disk
 from transformers import AutoTokenizer, AutoModel
 from tqdm import tqdm
 import deepspeed
+import pickle
 
 
 def embed_text_batch(chunks, tokenizer, model, device='cuda'):
@@ -34,8 +35,8 @@ if __name__ == '__main__':
     index = faiss.IndexFlatL2(dimension)
 
     # Define batch size
-    batch_size = 1024
-    text_batch_size = 1024
+    batch_size = 2048
+    text_batch_size = 2048
     all_texts = []
 
     # Collect all texts from the dataset for batch tokenization
@@ -44,6 +45,7 @@ if __name__ == '__main__':
 
     # Tokenize texts in batches
     all_chunks = []
+    chunk_texts = []
     for i in tqdm(range(0, len(all_texts), text_batch_size), desc="Tokenizing texts in batches"):
         batch_texts = all_texts[i:i + text_batch_size]
         batch_tokens = tokenizer(batch_texts, return_tensors="pt", truncation=True, padding=True, max_length=128,
@@ -51,16 +53,23 @@ if __name__ == '__main__':
         for j in range(len(batch_texts)):
             tokens = batch_tokens.input_ids[j]
             chunks = [tokens[k:k + 128] for k in range(0, len(tokens), 128)]
-            chunk_texts = [tokenizer.decode(chunk, skip_special_tokens=True) for chunk in chunks]
-            all_chunks.extend(chunk_texts)
+            chunk_texts_batch = [tokenizer.decode(chunk, skip_special_tokens=True) for chunk in chunks]
+            all_chunks.extend(chunk_texts_batch)
+            chunk_texts.extend(chunk_texts_batch)
 
     # Process chunks in batches to create embeddings and add to FAISS index
+    chunk_metadata = []
     for i in tqdm(range(0, len(all_chunks), batch_size), desc="Embedding and indexing batches"):
         batch_chunks = all_chunks[i:i + batch_size]
         embeddings = embed_text_batch(batch_chunks, tokenizer, ds_model)
         index.add(embeddings)
+        chunk_metadata.extend(batch_chunks)
 
     # Save the FAISS index for future retrieval
     faiss.write_index(index, "/home/aquasar/Desktop/Ideas/data/wiki_embeddings.index")
+
+    # Save chunk metadata (for retrieval) using pickle
+    with open("/home/aquasar/Desktop/Ideas/data/wiki_chunk_texts.pkl", "wb") as f:
+        pickle.dump(chunk_texts, f)
 
     print("Indexing complete!")
