@@ -9,6 +9,8 @@ transformers
 boto3
 botocore
 datasets
+deepspeed
+
 
 # Additional libraries
 requests
