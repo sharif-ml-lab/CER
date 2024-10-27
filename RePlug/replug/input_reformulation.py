@@ -1,5 +1,5 @@
 import numpy as np
-from replug.lm_api import query_lm
+from replug.llm_client import query_lm
 
 
 def reformulate_inputs(context, retrieved_docs):

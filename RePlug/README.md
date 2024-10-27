@@ -12,7 +12,7 @@ REPLUG_Project/
 │
 ├── replug/
 │   ├── inference.py          # Inference pipeline for REPLUG
-│   ├── lm_api.py             # API interaction to query the frozen black-box LM (e.g., GPT-3)
+│   ├── llm_client.py             # API interaction to query the frozen black-box LM (e.g., GPT-3)
 │   └── input_reformulation.py # Code for input reformulation and ensemble method
 │
 ├── utils/

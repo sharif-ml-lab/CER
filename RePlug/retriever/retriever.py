@@ -4,10 +4,10 @@ from transformers import AutoModel, AutoTokenizer
 
 
 class DenseRetriever(nn.Module):
-    def __init__(self, model_name="bert-base-uncased"):
+    def __init__(self, model_name="facebook/contriever"):
         super(DenseRetriever, self).__init__()
-        self.encoder = AutoModel.from_pretrained(model_name)
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+        self.encoder = AutoModel.from_pretrained(model_name).to('cuda')
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name).to('cuda')
 
     def forward(self, texts):
         inputs = self.tokenizer(texts, return_tensors='pt', padding=True, truncation=True)
@@ -15,4 +15,4 @@ class DenseRetriever(nn.Module):
         return torch.mean(embeddings, dim=1)  # Mean pooling over tokens
 
     def get_embedding(self, text):
-        return self.forward([text]).detach()
+        return self.forward([text]).detach().cpu()

@@ -3,7 +3,7 @@ import torch.optim as optim
 import torch.nn.functional as F
 from retriever.retriever import DenseRetriever
 from utils.data_loader import load_training_data
-from replug.lm_api import get_lm_likelihood
+from replug.llm_client import get_lm_likelihood
 
 
 def train_retriever(epochs):

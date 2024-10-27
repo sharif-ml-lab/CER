@@ -1,6 +1,10 @@
 import numpy as np
 
 
+def calculate_result(x):
+    return x
+
+
 def calculate_perplexity(log_probs):
     """
     Calculate perplexity given a list of log probabilities.
