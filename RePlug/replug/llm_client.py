@@ -55,7 +55,7 @@ class OpenAIClient(LLMClient):
         )
         if prob_mode:
             # Extract and return the log probabilities from the response
-            return response.choices[0].logprobs
+            return response.choices[0].text.strip(), response.choices[0].logprobs
         else:
             # Extract and return the text output from the response
             return response.choices[0].text.strip()
@@ -103,7 +103,6 @@ class HuggingFaceClient(LLMClient):
             # Generate output text
             generated_ids = self.model.generate(input_ids, max_length=input_ids.shape[1] + 50)
             return self.tokenizer.decode(generated_ids[0], skip_special_tokens=True)
-
 
 
 # Example Usage
