@@ -26,6 +26,19 @@ def extract_last_numerical_value(text: str) -> Optional[str]:
     return matches[-1] if matches else None
 
 
+def extract_all_numerical_values(text: str) -> List[str]:
+    """
+    Extract all numerical values from a given text.
+
+    Args:
+        text: The text from which to extract numerical values.
+
+    Returns:
+        A list of all numerical values found in the text.
+    """
+    return re.findall(r'\b\d+\.?\d*\b', text)
+
+
 def calculate_confidence_for_final_answer(logits: List[torch.Tensor], answer_ids: torch.Tensor) -> float:
     """
     Calculate the confidence score (Δ) as specified in the paper.
@@ -85,6 +98,7 @@ def cot_decode(
         no_repeat_ngram_size: int = 0,
         early_stopping: bool = False,
         aggregate_paths: bool = False,
+        decoding_mode: str = "baseline",
 ) -> Tuple[str, float, str]:
     """
     Implement CoT-decoding for a given chat input.
@@ -103,6 +117,7 @@ def cot_decode(
         no_repeat_ngram_size: Size of n-grams to avoid repeating.
         early_stopping: Whether to stop generation when all beams are finished.
         aggregate_paths: Whether to aggregate multiple paths.
+        decoding_mode: Mode of decoding, either "baseline" or "new".
 
     Returns:
         A tuple containing the best path (or aggregated result) and its confidence score.
@@ -158,29 +173,65 @@ def cot_decode(
         answer_ids = generated_sequence[len(input_ids[0]):]
         answer_text = tokenizer.decode(answer_ids, skip_special_tokens=True)
 
-        # Extract the final numerical answer
-        final_answer = extract_last_numerical_value(answer_text)
-        if final_answer is not None:
-            final_answer_ids = tokenizer.encode(final_answer, add_special_tokens=False)
+        if decoding_mode == "baseline":
+            # Extract the final numerical answer
+            final_answer = extract_last_numerical_value(answer_text)
+            if final_answer is not None:
+                final_answer_ids = tokenizer.encode(final_answer, add_special_tokens=False)
 
-            # Find the start index of the final occurrence of the final answer in the answer_ids
-            answer_ids_list = answer_ids.tolist()
-            final_answer_ids_list = final_answer_ids
+                # Find the start index of the final occurrence of the final answer in the answer_ids
+                answer_ids_list = answer_ids.tolist()
+                final_answer_ids_list = final_answer_ids
 
-            final_answer_start_idx = -1
-            for i in range(len(answer_ids_list) - len(final_answer_ids_list) + 1):
-                if answer_ids_list[i:i + len(final_answer_ids_list)] == final_answer_ids_list:
-                    final_answer_start_idx = i - 1 # because the first generated token's score is not presented in output.scores
+                final_answer_start_idx = -1
+                for i in range(len(answer_ids_list) - len(final_answer_ids_list) + 1):
+                    if answer_ids_list[i:i + len(final_answer_ids_list)] == final_answer_ids_list:
+                        final_answer_start_idx = i - 1  # because the first generated token's score is not presented in output.scores
 
-            if final_answer_start_idx == -1:
-                continue
+                if final_answer_start_idx == -1:
+                    continue
 
-            final_answer_scores = output.scores[final_answer_start_idx: final_answer_start_idx + len(final_answer_ids)]
+                final_answer_scores = output.scores[
+                                      final_answer_start_idx: final_answer_start_idx + len(final_answer_ids)]
 
-            # Calculate confidence score (Δ) for the final answer only
-            confidence = calculate_confidence_for_final_answer(final_answer_scores,
-                                                               torch.tensor(final_answer_ids, device=device))
-            paths.append((answer_text, confidence, final_answer))
+                # Calculate confidence score (Δ) for the final answer only
+                confidence = calculate_confidence_for_final_answer(final_answer_scores,
+                                                                   torch.tensor(final_answer_ids, device=device))
+                paths.append((answer_text, confidence, final_answer))
+
+        elif decoding_mode == "new":
+            # Extract all numerical values
+            all_numerical_values = extract_all_numerical_values(answer_text)
+            if all_numerical_values:
+                confidence_sum = 0.0
+                total_valid_values = 0
+                for num_value in all_numerical_values:
+                    num_value_ids = tokenizer.encode(num_value, add_special_tokens=False)
+
+                    # Find the start index of the final occurrence of the numerical value in the answer_ids
+                    answer_ids_list = answer_ids.tolist()
+                    num_value_ids_list = num_value_ids
+
+                    num_value_start_idx = -1
+                    for i in range(len(answer_ids_list) - len(num_value_ids_list) + 1):
+                        if answer_ids_list[i:i + len(num_value_ids_list)] == num_value_ids_list:
+                            num_value_start_idx = i - 1  # because the first generated token's score is not presented in output.scores
+
+                    if num_value_start_idx == -1:
+                        continue
+
+                    num_value_scores = output.scores[num_value_start_idx: num_value_start_idx + len(num_value_ids)]
+
+                    # Calculate confidence score (Δ) for this numerical value
+                    confidence_sum += calculate_confidence_for_final_answer(num_value_scores,
+                                                                            torch.tensor(num_value_ids, device=device))
+                    total_valid_values += 1
+
+                if total_valid_values > 0:
+                    confidence = confidence_sum / total_valid_values
+                    final_answer = all_numerical_values[
+                        -1]  # Consider the last numerical value as the final answer for consistency
+                    paths.append((answer_text, confidence, final_answer))
 
     if aggregate_paths:
         return aggregate_paths_based_on_scores(paths)
