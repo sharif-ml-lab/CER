@@ -1,6 +1,7 @@
 import torch
 from transformers import PreTrainedModel, PreTrainedTokenizer
 from typing import List, Tuple, Dict, Optional
+import re
 import numpy as np
 
 
@@ -11,7 +12,21 @@ def get_device():
         return torch.device("cpu")
 
 
-def calculate_confidence(logits: List[torch.Tensor], answer_ids: torch.Tensor) -> float:
+def extract_last_numerical_value(text: str) -> Optional[str]:
+    """
+    Extract the last numerical value from a given text.
+
+    Args:
+        text: The text from which to extract the numerical value.
+
+    Returns:
+        The last numerical value if found, otherwise None.
+    """
+    matches = re.findall(r'\b\d+\.?\d*\b', text)
+    return matches[-1] if matches else None
+
+
+def calculate_confidence_for_final_answer(logits: List[torch.Tensor], answer_ids: torch.Tensor) -> float:
     """
     Calculate the confidence score (Δ) as specified in the paper.
 
@@ -42,13 +57,18 @@ def calculate_confidence(logits: List[torch.Tensor], answer_ids: torch.Tensor) -
     return confidence_sum / valid_tokens if valid_tokens > 0 else 0.0
 
 
-def aggregate_paths_based_on_scores(paths: List[Tuple[str, float]]) -> Tuple[str, float]:
+def aggregate_paths_based_on_scores(paths: List[Tuple[str, float, str]]) -> Tuple[str, float, str]:
     """Aggregate multiple paths based on their confidence scores."""
     answer_scores = {}
-    for answer, delta in paths:
-        answer_scores[answer] = answer_scores.get(answer, 0) + delta
+    best_full_ans = None
+    best_full_ans_delta = -1
+    for answer, delta, final_answer in paths:
+        answer_scores[final_answer] = answer_scores.get(final_answer, 0) + delta
+        if best_full_ans_delta < delta:
+            best_full_ans_delta = delta
+            best_full_ans = answer
     best_answer = max(answer_scores, key=answer_scores.get)
-    return best_answer, answer_scores[best_answer]
+    return best_full_ans, answer_scores[best_answer], best_answer
 
 
 def cot_decode(
@@ -65,7 +85,7 @@ def cot_decode(
         no_repeat_ngram_size: int = 0,
         early_stopping: bool = False,
         aggregate_paths: bool = False,
-) -> Tuple[str, float]:
+) -> Tuple[str, float, str]:
     """
     Implement CoT-decoding for a given chat input.
 
@@ -138,12 +158,31 @@ def cot_decode(
         answer_ids = generated_sequence[len(input_ids[0]):]
         answer_text = tokenizer.decode(answer_ids, skip_special_tokens=True)
 
-        # Calculate confidence score (Δ)
-        confidence = calculate_confidence(output.scores, answer_ids)
-        paths.append((answer_text, confidence))
+        # Extract the final numerical answer
+        final_answer = extract_last_numerical_value(answer_text)
+        if final_answer is not None:
+            final_answer_ids = tokenizer.encode(final_answer, add_special_tokens=False)
+
+            # Find the start index of the final occurrence of the final answer in the answer_ids
+            answer_ids_list = answer_ids.tolist()
+            final_answer_ids_list = final_answer_ids
+
+            final_answer_start_idx = -1
+            for i in range(len(answer_ids_list) - len(final_answer_ids_list) + 1):
+                if answer_ids_list[i:i + len(final_answer_ids_list)] == final_answer_ids_list:
+                    final_answer_start_idx = i - 1 # because the first generated token's score is not presented in output.scores
+
+            if final_answer_start_idx == -1:
+                continue
+
+            final_answer_scores = output.scores[final_answer_start_idx: final_answer_start_idx + len(final_answer_ids)]
+
+            # Calculate confidence score (Δ) for the final answer only
+            confidence = calculate_confidence_for_final_answer(final_answer_scores,
+                                                               torch.tensor(final_answer_ids, device=device))
+            paths.append((answer_text, confidence, final_answer))
 
     if aggregate_paths:
         return aggregate_paths_based_on_scores(paths)
     else:
         return max(paths, key=lambda x: x[1])
-

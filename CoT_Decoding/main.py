@@ -15,5 +15,5 @@ messages = [
 
 # Generate the response using CoT decoding
 print(f"Using device: {get_device()}")
-result, confidence = cot_decode(model, tokenizer, messages, aggregate_paths=True, max_new_tokens=512)
+result, confidence, final_ans = cot_decode(model, tokenizer, messages, aggregate_paths=True, max_new_tokens=512, k=2)
 print(f"CoT Decoding:\n {result}")
