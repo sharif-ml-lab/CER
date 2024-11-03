@@ -123,7 +123,7 @@ def cot_decode(
         A tuple containing the best path (or aggregated result) and its confidence score.
     """
     device = get_device()
-    model.to(device)
+    # model.to(device)
 
     # Use the chat template to format the input
     if tokenizer.chat_template:
