@@ -29,7 +29,7 @@ async def main():
         query_embedding = dense_retriever.get_embedding(question)
 
         # Retrieve the top 10 most similar documents using FaissRetriever
-        similar_docs = faiss_retriever.retrieve(query_embedding, top_n=10)
+        similar_docs, scores = faiss_retriever.retrieve(query_embedding, top_n=10)
 
         # Construct messages for each retrieved document
         messages = [f"Knowledge: {doc}\nQuestion: {question}" for doc in similar_docs]
@@ -45,7 +45,7 @@ async def main():
                 tasks = [client.next_prob(input_ids, prob_mode=True) for input_ids in input_ids_list]
                 responses = await asyncio.gather(*tasks)
 
-            final_probs = aggregate_token_probs(probs=responses, mode='ensemble')
+            final_probs = aggregate_token_probs(probs=responses, scores=scores, mode='ensemble')
 
             next_token_id = client.next_token_id(final_probs)
             result_tokens.append(next_token_id.item())
@@ -60,7 +60,11 @@ async def main():
 
         final_result_text = client.decode_result(result_tokens)
 
+        print(question)
+        print("ANS")
         print(final_result_text)
+
+        exit(0)
 
 
 if __name__ == "__main__":

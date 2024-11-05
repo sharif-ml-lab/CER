@@ -1,19 +1,23 @@
 import numpy as np
 
 
-def ensemble_aggregate(probs):
-    return np.sum(probs, axis=0)
+def ensemble_aggregate(probs, scores):
+    weights = scores.squeeze(0)
+    # Broadcasting weights to match each tensor in probs and summing them
+    weighted_sum = np.sum([weight * prob for weight, prob in zip(weights, probs)], axis=0)
+
+    return weighted_sum
 
 
-def my_aggregate(probs):
+def my_aggregate(probs, scores):
     pass
 
 
-def aggregate_token_probs(probs, mode):
+def aggregate_token_probs(probs, scores, mode):
     if mode == 'ensemble':
-        return ensemble_aggregate(probs)
+        return ensemble_aggregate(probs, scores)
     elif mode == 'new':
-        return my_aggregate(probs)
+        return my_aggregate(probs, scores)
 
     raise NotImplementedError()
 
