@@ -1,68 +1,11 @@
 from abc import ABC, abstractmethod
-import openai
 from transformers import AutoModelForCausalLM, AutoTokenizer, LogitsProcessorList, TopKLogitsWarper
 import torch
 import requests
 import json
 
 
-# Abstract Base Class for LLM Client
-class LLMClient(ABC):
-    @abstractmethod
-    def call(self, input_text: str, prob_mode: bool):
-        """
-        Call the LLM with the provided input.
-
-        Args:
-            input_text (str): The input text to be provided to the LLM.
-            prob_mode (bool): A flag to specify whether to return the log probabilities.
-
-        Returns:
-            Depending on the prob_mode flag, either returns the string output or log probabilities.
-        """
-        pass
-
-
-# OpenAI Client that Implements the LLMClient Abstract Class
-class OpenAIClient(LLMClient):
-    def __init__(self, model_name: str, api_key: str):
-        """
-        Initialize the OpenAI client with a specific model.
-
-        Args:
-            model_name (str): The name of the OpenAI model to be used.
-            api_key (str): The API key to authenticate with OpenAI.
-        """
-        self.model_name = model_name
-        openai.api_key = api_key
-
-    async def call(self, input_text: str, prob_mode: bool):
-        """
-        Call the OpenAI model with the provided input.
-
-        Args:
-            input_text (str): The input text to be provided to the model.
-            prob_mode (bool): A flag to specify whether to return the log probabilities.
-
-        Returns:
-            Either the string output or log probabilities, depending on the prob_mode flag.
-        """
-        response = await openai.Completion.acreate(
-            model=self.model_name,
-            prompt=input_text,
-            max_tokens=150,
-            logprobs=5 if prob_mode else None
-        )
-        if prob_mode:
-            # Extract and return the log probabilities from the response
-            return response.choices[0].text.strip(), response.choices[0].logprobs
-        else:
-            # Extract and return the text output from the response
-            return response.choices[0].text.strip()
-
-
-# HuggingFace Client that Implements the LLMClient Abstract Class
-class HuggingFaceClient(LLMClient):
+class HuggingFaceClient():
     def __init__(self, model_name: str):
         """
         Initialize the HuggingFace client with a specific model.
@@ -72,53 +15,44 @@ class HuggingFaceClient(LLMClient):
         """
         self.model_name = model_name
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self.model = AutoModelForCausalLM.from_pretrained(model_name)
+        self.model = AutoModelForCausalLM.from_pretrained(model_name, device_map='auto')
+        self.device = torch.device("cpu")
+        if torch.cuda.is_available():
+            self.device = torch.device("cuda")
 
-    async def call(self, input_text: str, prob_mode: bool):
+    async def next_prob(self, input_ids: torch.Tensor, prob_mode: bool):
         """
         Call the HuggingFace model with the provided input.
 
         Args:
-            input_text (str): The input text to be provided to the model.
+            input_text (Tensor): The input text to be provided to the model.
             prob_mode (bool): A flag to specify whether to return the log probabilities.
 
         Returns:
             Either the string output or log probabilities, depending on the prob_mode flag.
         """
-        input_ids = self.tokenizer(input_text, return_tensors="pt").input_ids
-        with torch.no_grad():
-            outputs = self.model(input_ids, output_attentions=False, output_hidden_states=False)
-            logits = outputs.logits
-
+        input_ids = input_ids.to(self.device)
         if prob_mode:
-            # Calculate probabilities using softmax
-            probabilities = torch.nn.functional.softmax(logits[:, -1, :], dim=-1)
-            log_probs = torch.log(probabilities)
-            topk_probs, topk_indices = torch.topk(log_probs, k=5, dim=-1)
-            return {
-                "tokens": [self.tokenizer.decode([idx]) for idx in topk_indices[0]],
-                "log_probs": topk_probs[0].tolist()
-            }
+            with torch.no_grad():
+                outputs = self.model(input_ids, output_attentions=False, output_hidden_states=False)
+                logits = outputs.logits
+
+                # Calculate probabilities using softmax for the last token
+                probabilities = torch.nn.functional.softmax(logits[:, -1, :], dim=-1)
+
+            return probabilities.detach().cpu().numpy()
+
         else:
-            # Generate output text
-            generated_ids = self.model.generate(input_ids, max_length=input_ids.shape[1] + 50)
-            return self.tokenizer.decode(generated_ids[0], skip_special_tokens=True)
+            with torch.no_grad():
+                # Generate output text
+                generated_ids = self.model.generate(input_ids, max_length=input_ids.shape[1] + 50)
+                return self.tokenizer.decode(generated_ids[0], skip_special_tokens=True)
 
+    def next_token_id(self, probs):
+        # Get the most probable next token (greedy approach)
+        next_token_id = torch.argmax(torch.from_numpy(probs), dim=-1)
+        return next_token_id
 
-# Example Usage
-if __name__ == "__main__":
-    # OpenAI Client Example
-    model_name = "text-davinci-003"
-    api_key = "YOUR_OPENAI_API_KEY"
-    client = OpenAIClient(model_name=model_name, api_key=api_key)
-    input_text = "What is the capital of France?"
-    output_text = client.call(input_text, prob_mode=False)
-    print("OpenAI Output:", output_text)
-
-    # HuggingFace Client Example
-    hf_model_name = "gpt2"
-    hf_client = HuggingFaceClient(model_name=hf_model_name)
-    hf_output_text = hf_client.call(input_text, prob_mode=False)
-    print("HuggingFace Output:", hf_output_text)
-    hf_log_probs = hf_client.call(input_text, prob_mode=True)
-    print("HuggingFace Log Probabilities:", hf_log_probs)
+    def decode_result(self, result_tokens):
+        res = torch.tensor(result_tokens)
+        return self.tokenizer.decode(res, skip_special_tokens=True)

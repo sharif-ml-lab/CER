@@ -1,8 +1,21 @@
 import numpy as np
 
 
-def calculate_result(x):
-    return x
+def ensemble_aggregate(probs):
+    return np.sum(probs, axis=0)
+
+
+def my_aggregate(probs):
+    pass
+
+
+def aggregate_token_probs(probs, mode):
+    if mode == 'ensemble':
+        return ensemble_aggregate(probs)
+    elif mode == 'new':
+        return my_aggregate(probs)
+
+    raise NotImplementedError()
 
 
 def calculate_perplexity(log_probs):
