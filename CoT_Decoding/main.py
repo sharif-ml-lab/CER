@@ -20,87 +20,98 @@ def multiarith():
     correct_answers = 0
 
     # Iterate through each example in the test set
-    for idx, example in tqdm(enumerate(test_set)):
-        question = example['question']
-        correct_answer = example['final_ans']
-        
-        # Prepare the message for the model
-        messages = [
-            {"role": "user", "content": question}
-        ]
-        
-        # Generate the response using CoT decoding
-        print(f"Processing question {idx + 1}/{total_questions}...")
-        result, confidence, final_ans = cot_decode(model, tokenizer, messages, aggregate_paths=False, max_new_tokens=512, k=10,
-                                                decoding_mode='baseline')
-        
-        # Compare the model's answer with the correct answer
-        try:
-            model_answer = float(final_ans)
-            correct_answer = float(correct_answer)
-            if model_answer == correct_answer:
-                correct_answers += 1
-        except ValueError:
-            # If parsing fails, we assume the answer is incorrect
-            pass
+    with tqdm(total=total_questions, desc="Processing MultiArith", dynamic_ncols=True) as pbar:
+        for idx, example in enumerate(test_set):
+            question = example['question']
+            correct_answer = example['final_ans']
+            
+            # Prepare the message for the model
+            messages = [
+                {"role": "user", "content": question}
+            ]
+            
+            # Generate the response using CoT decoding
+            result, confidence, final_ans = cot_decode(model, tokenizer, messages, aggregate_paths=False, max_new_tokens=512, k=10,
+                                                    decoding_mode='baseline')
+            
+            # Compare the model's answer with the correct answer
+            try:
+                model_answer = float(final_ans)
+                correct_answer = float(correct_answer)
+                if model_answer == correct_answer:
+                    correct_answers += 1
+            except ValueError:
+                # If parsing fails, we assume the answer is incorrect
+                pass
 
-    # Calculate accuracy
+            # Update progress bar with running accuracy
+            running_accuracy = correct_answers / (idx + 1) * 100
+            pbar.set_postfix(idx=idx + 1, running_accuracy=f"{running_accuracy:.2f}%")
+            pbar.update(1)
+
+    # Calculate final accuracy
     accuracy = correct_answers / total_questions * 100
-    print(f"Accuracy: {accuracy:.2f}%")
+    print(f"Final Accuracy: {accuracy:.2f}%")
     return accuracy
 
 def gsm8k():
-    # Load the MultiArith dataset
+    # Load the GSM8K dataset
     dataset = load_dataset("openai/gsm8k", "main")
 
     # Get the test set
     test_set = dataset['test']
 
-    total_questions = len(test_set)
+     # Define your desired sample size
+    n = 300  # Replace with the number of samples you want to take
+    seed = 11  # Define a specific seed to ensure reproducibility
+
+    # Shuffle the dataset with a specific seed
+    shuffled_dataset = test_set.shuffle(seed=seed)
+
+    # Take the first 'n' samples
+    sampled_dataset = shuffled_dataset.select(range(n))
+
+    total_questions = len(sampled_dataset)
     correct_answers = 0
 
     # Iterate through each example in the test set
-    for idx, example in tqdm(enumerate(test_set)):
-        question = example['question']
-        correct_answer = example['answer']
-        correct_answer = correct_answer.split('####')[-1]
-        
-        # Prepare the message for the model
-        messages = [
-            {"role": "user", "content": question}
-        ]
-        
-        # Generate the response using CoT decoding
-        print(f"Processing question {idx + 1}/{total_questions}...")
-        result, confidence, final_ans = cot_decode(model, tokenizer, messages, aggregate_paths=False, max_new_tokens=512, k=10,
-                                                decoding_mode='baseline')
-        
-        # Compare the model's answer with the correct answer
-        try:
-            model_answer = float(final_ans)
-            correct_answer = float(correct_answer)
-            if model_answer == correct_answer:
-                correct_answers += 1
-        except ValueError:
-            # If parsing fails, we assume the answer is incorrect
-            pass
+    with tqdm(total=total_questions, desc="Processing GSM8K", dynamic_ncols=True) as pbar:
+        for idx, example in enumerate(sampled_dataset):
+            question = example['question']
+            correct_answer = example['answer']
+            correct_answer = correct_answer.split('####')[-1]
 
-    # Calculate accuracy
+            # Prepare the message for the model
+            messages = [
+                {"role": "user", "content": question}
+            ]
+            
+            # Generate the response using CoT decoding
+            result, confidence, final_ans = cot_decode(model, tokenizer, messages, aggregate_paths=False, max_new_tokens=512, k=10,
+                                                    decoding_mode='baseline')
+            
+            # Compare the model's answer with the correct answer
+            try:
+                model_answer = float(final_ans)
+                correct_answer = float(correct_answer)
+                if model_answer == correct_answer:
+                    correct_answers += 1
+            except ValueError:
+                # If parsing fails, we assume the answer is incorrect
+                pass
+
+            # Update progress bar with running accuracy
+            running_accuracy = correct_answers / (idx + 1) * 100
+            pbar.set_postfix(idx=idx + 1, running_accuracy=f"{running_accuracy:.2f}%")
+            pbar.update(1)
+
+    # Calculate final accuracy
     accuracy = correct_answers / total_questions * 100
-    print(f"Accuracy: {accuracy:.2f}%")
+    print(f"Final Accuracy: {accuracy:.2f}%")
     return accuracy
 
 
 if __name__ == '__main__':
 
-    messages = [
-    {"role": "user",
-     "content": "In a dance class of 20 students, 20% enrolled in contemporary dance, 25% of the remaining enrolled in jazz dance, and the rest enrolled in hip-hop dance. What percentage of the entire students enrolled in hip-hop dance?"}
-    ]
-
-    # Generate the response using CoT decoding
-    print(f"Using device: {get_device()}")
-    result, confidence, final_ans = cot_decode(model, tokenizer, messages, aggregate_paths=True, max_new_tokens=512, k=2,
-                                            decoding_mode='baseline')
-    print(f"CoT Decoding:\n {final_ans}")
-
+    multiarith()
+    gsm8k()
