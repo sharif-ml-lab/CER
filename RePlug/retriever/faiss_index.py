@@ -42,7 +42,7 @@ class FaissRetriever:
         # Search for the top_n closest indices
         distances, indices = self.index.search(vector, top_n)
         results = [self.chunk_texts[idx] for idx in indices[0]]
-        return results
+        return results, distances
 
 
 # Example usage

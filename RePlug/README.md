@@ -18,7 +18,7 @@ REPLUG_Project/
 ├── utils/
 │   ├── data_loader.py        # Utilities to load data (e.g., document corpus, queries)
 │   ├── similarity.py         # Helper functions for cosine similarity and document embedding
-│   └── evaluation.py         # Functions to evaluate performance on different tasks
+│   └── tools.py         # Functions to evaluate performance on different tasks
 │
 └── main.py                   # Main script for training and inference operations
 ```
