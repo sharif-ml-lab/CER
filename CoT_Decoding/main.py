@@ -20,7 +20,7 @@ def multiarith():
     correct_answers = 0
 
     # Iterate through each example in the test set
-    for idx, example in tqdm(enumerate(test_set)):
+    for idx, example in enumerate(tqdm(test_set)):
         question = example['question']
         correct_answer = example['final_ans']
         
@@ -60,11 +60,11 @@ def gsm8k():
     correct_answers = 0
 
     # Iterate through each example in the test set
-    for idx, example in tqdm(enumerate(test_set)):
+    for idx, example in enumerate(tqdm(test_set)):
         question = example['question']
         correct_answer = example['answer']
         correct_answer = correct_answer.split('####')[-1]
-        
+
         # Prepare the message for the model
         messages = [
             {"role": "user", "content": question}
@@ -93,14 +93,16 @@ def gsm8k():
 
 if __name__ == '__main__':
 
-    messages = [
-    {"role": "user",
-     "content": "In a dance class of 20 students, 20% enrolled in contemporary dance, 25% of the remaining enrolled in jazz dance, and the rest enrolled in hip-hop dance. What percentage of the entire students enrolled in hip-hop dance?"}
-    ]
+    # messages = [
+    # {"role": "user",
+    #  "content": "In a dance class of 20 students, 20% enrolled in contemporary dance, 25% of the remaining enrolled in jazz dance, and the rest enrolled in hip-hop dance. What percentage of the entire students enrolled in hip-hop dance?"}
+    # ]
 
-    # Generate the response using CoT decoding
-    print(f"Using device: {get_device()}")
-    result, confidence, final_ans = cot_decode(model, tokenizer, messages, aggregate_paths=True, max_new_tokens=512, k=2,
-                                            decoding_mode='baseline')
-    print(f"CoT Decoding:\n {final_ans}")
+    # # Generate the response using CoT decoding
+    # print(f"Using device: {get_device()}")
+    # result, confidence, final_ans = cot_decode(model, tokenizer, messages, aggregate_paths=True, max_new_tokens=512, k=2,
+    #                                         decoding_mode='baseline')
+    # print(f"CoT Decoding:\n {final_ans}")
 
+    multiarith()
+    gsm8k()
