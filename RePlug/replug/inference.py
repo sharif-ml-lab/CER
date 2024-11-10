@@ -49,8 +49,10 @@ def initialize_retrievers_and_client(index_path, chunks_path, model_name):
 async def calculate_accuracy(sampled_dataset, faiss_retriever, dense_retriever, client, question_col, choices_col,
                              answer_col):
     acc = 0
+    progress_bar = tqdm(total=len(sampled_dataset), desc='Calculating Accuracy', position=0, leave=True)
+
     # Iterate over records in the dataset
-    for i, record in enumerate(tqdm(sampled_dataset)):
+    for i, record in enumerate(sampled_dataset):
         question = record[question_col]
         choices = record[choices_col]
         answer = record[answer_col]
@@ -70,6 +72,12 @@ async def calculate_accuracy(sampled_dataset, faiss_retriever, dense_retriever, 
         # Check if the prediction is correct
         if prediction_is_correct(final_result_text, answer, 'mmlu'):
             acc += 1
+
+        # Update the progress bar and display running accuracy
+        progress_bar.set_postfix(running_acc=acc / (i + 1))
+        progress_bar.update(1)
+
+    progress_bar.close()
     return acc
 
 
@@ -83,7 +91,7 @@ async def generate_response(client, messages, scores, max_token=32):
             tasks = [client.next_prob(input_ids, prob_mode=True) for input_ids in input_ids_list]
             responses = await asyncio.gather(*tasks)
 
-        final_probs = aggregate_token_probs(probs=responses, scores=scores, mode='ensemble')
+        final_probs = aggregate_token_probs(probs=responses, scores=scores, mode='new')
 
         next_token_id = client.next_token_id(final_probs)
         result_tokens.append(next_token_id.item())

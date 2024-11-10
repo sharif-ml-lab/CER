@@ -18,6 +18,8 @@ def aggregate_token_probs(probs, scores, mode):
         return ensemble_aggregate(probs, scores)
     elif mode == 'new':
         return my_aggregate(probs, scores)
+    elif mode == 'greedy':
+        return greedy_aggregate(probs, scores)
 
     raise NotImplementedError()
 
