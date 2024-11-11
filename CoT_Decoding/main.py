@@ -3,6 +3,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 from Decoding import get_device, cot_decode
 from datasets import load_dataset
 from tqdm import tqdm
+import pandas as pd
 
 def load_model_and_tokenizer(model_name):
     """
@@ -52,6 +53,7 @@ def evaluate_dataset(model, tokenizer, dataset, k, aggregate, decoding_mode, des
     """
     total_questions = len(dataset)
     correct_answers = 0
+    results = []
 
     with tqdm(total=total_questions, desc=f"Processing {description}", dynamic_ncols=True) as pbar:
         for idx, example in enumerate(dataset):
@@ -73,16 +75,31 @@ def evaluate_dataset(model, tokenizer, dataset, k, aggregate, decoding_mode, des
             try:
                 model_answer = float(final_ans)
                 correct_answer = float(correct_answer)
-                if model_answer == correct_answer:
+                is_correct = model_answer == correct_answer
+                if is_correct:
                     correct_answers += 1
             except ValueError:
                 # If parsing fails, we assume the answer is incorrect
-                pass
+                is_correct = False
+
+            # Save the result
+            results.append({
+                'question': question,
+                'correct_answer': correct_answer,
+                'predicted_answer': result,
+                'predicted_final_answer': final_ans,
+                'confidence_score': confidence,
+                'is_correct': is_correct
+            })
 
             # Update progress bar with running accuracy
             running_accuracy = correct_answers / (idx + 1) * 100
             pbar.set_postfix(idx=idx + 1, running_accuracy=f"{running_accuracy:.2f}%")
             pbar.update(1)
+
+    # Save results to CSV
+    results_df = pd.DataFrame(results)
+    results_df.to_csv(f"{description}_evaluation_results.csv", index=False)
 
     # Calculate final accuracy
     accuracy = correct_answers / total_questions * 100
