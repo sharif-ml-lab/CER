@@ -4,14 +4,20 @@ from Decoding import get_device, cot_decode
 from datasets import load_dataset
 from tqdm import tqdm
 
-# Load the model and tokenizer
-# model_name = "/data/TensorRT-LLM/Meta-Llama-3.1-70B-Instruct"
-model_name = "/data/models/Meta-Llama-3.1-8B-Instruct"
-
-model = AutoModelForCausalLM.from_pretrained(model_name, local_files_only=True, device_map='auto', torch_dtype=torch.bfloat16)
-tokenizer = AutoTokenizer.from_pretrained(model_name)
+def load_model_and_tokenizer(model_name):
+    """
+    Load the model and tokenizer from the specified path.
+    """
+    model = AutoModelForCausalLM.from_pretrained(
+        model_name, local_files_only=True, device_map='auto', torch_dtype=torch.bfloat16
+    )
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    return model, tokenizer
 
 def construct_prompt(question):
+    """
+    Construct a prompt using a given question.
+    """
     base = f"""Q: There are 15 trees in the grove. Grove workers will plant trees in the grove today. After they are done, there will be 21 trees. How many trees did the grove workers plant today?
 A: There are 15 trees originally. Then there were 21 trees after some more were planted. So there must have been 21 - 15 = 6. The answer is 6.
 
@@ -40,31 +46,29 @@ Q: {question}
 A: """
     return base
 
-def multiarith(k, aggregate, decoding_mode):
-    # Load the MultiArith dataset
-    dataset = load_dataset("ChilleD/MultiArith")
-
-    # Get the test set
-    test_set = dataset['test']
-
-    total_questions = len(test_set)
+def evaluate_dataset(model, tokenizer, dataset, k, aggregate, decoding_mode, description):
+    """
+    Evaluate the model on the given dataset.
+    """
+    total_questions = len(dataset)
     correct_answers = 0
 
-    # Iterate through each example in the test set
-    with tqdm(total=total_questions, desc="Processing MultiArith", dynamic_ncols=True) as pbar:
-        for idx, example in enumerate(test_set):
+    with tqdm(total=total_questions, desc=f"Processing {description}", dynamic_ncols=True) as pbar:
+        for idx, example in enumerate(dataset):
             question = example['question']
-            correct_answer = example['final_ans']
-            
+            correct_answer = example['final_ans'] if 'final_ans' in example else example['answer'].split('####')[-1]
+
             # Prepare the message for the model
             messages = [
                 {"role": "user", "content": construct_prompt(question)}
             ]
-            
+
             # Generate the response using CoT decoding
-            result, confidence, final_ans = cot_decode(model, tokenizer, messages, aggregate_paths=aggregate, max_new_tokens=512, k=k,
-                                                    decoding_mode=decoding_mode)
-            
+            result, confidence, final_ans = cot_decode(
+                model, tokenizer, messages, aggregate_paths=aggregate, max_new_tokens=512, k=k,
+                decoding_mode=decoding_mode
+            )
+
             # Compare the model's answer with the correct answer
             try:
                 model_answer = float(final_ans)
@@ -82,76 +86,36 @@ def multiarith(k, aggregate, decoding_mode):
 
     # Calculate final accuracy
     accuracy = correct_answers / total_questions * 100
-    print(f"Final Accuracy: {accuracy:.2f}%")
+    print(f"Final Accuracy for {description}: {accuracy:.2f}%")
     return accuracy
 
-def gsm8k(k, aggregate, decoding_mode):
-    # Load the GSM8K dataset
-    dataset = load_dataset("openai/gsm8k", "main")
-
-    # Get the test set
-    test_set = dataset['test']
-
-     # Define your desired sample size
-    n = 300  # Replace with the number of samples you want to take
-    seed = 11  # Define a specific seed to ensure reproducibility
-
-    # Shuffle the dataset with a specific seed
-    shuffled_dataset = test_set.shuffle(seed=seed)
-
-    # Take the first 'n' samples
-    sampled_dataset = shuffled_dataset.select(range(n))
-
-    total_questions = len(sampled_dataset)
-    correct_answers = 0
-
-    # Iterate through each example in the test set
-    with tqdm(total=total_questions, desc="Processing GSM8K", dynamic_ncols=True) as pbar:
-        for idx, example in enumerate(sampled_dataset):
-            question = example['question']
-            correct_answer = example['answer']
-            correct_answer = correct_answer.split('####')[-1]
-
-            # Prepare the message for the model
-            messages = [
-                {"role": "user", "content": construct_prompt(question)}
-            ]
-            
-            # Generate the response using CoT decoding
-            result, confidence, final_ans = cot_decode(model, tokenizer, messages, aggregate_paths=aggregate, max_new_tokens=512, k=k,
-                                                    decoding_mode=decoding_mode)
-            
-            # Compare the model's answer with the correct answer
-            try:
-                model_answer = float(final_ans)
-                correct_answer = float(correct_answer)
-                if model_answer == correct_answer:
-                    correct_answers += 1
-            except ValueError:
-                # If parsing fails, we assume the answer is incorrect
-                pass
-
-            # Update progress bar with running accuracy
-            running_accuracy = correct_answers / (idx + 1) * 100
-            pbar.set_postfix(idx=idx + 1, running_accuracy=f"{running_accuracy:.2f}%")
-            pbar.update(1)
-
-    # Calculate final accuracy
-    accuracy = correct_answers / total_questions * 100
-    print(f"Final Accuracy: {accuracy:.2f}%")
-    return accuracy
-
+def load_and_sample_dataset(dataset_name, split, sample_size=None, seed=None):
+    """
+    Load a dataset and optionally sample from it.
+    """
+    dataset = load_dataset(dataset_name, split=split)
+    if sample_size is not None and seed is not None:
+        dataset = dataset.shuffle(seed=seed).select(range(sample_size))
+    return dataset
 
 if __name__ == '__main__':
-
+    # Configurations
+    model_name = "/data/models/Meta-Llama-3.1-8B-Instruct"
     K = 10
     AGGREGATE = False
     DECODING_MODE = 'baseline'
+
+    # Load model and tokenizer
+    model, tokenizer = load_model_and_tokenizer(model_name)
 
     print(model_name)
     print(f'Mode: CoT + {DECODING_MODE}')
     print(f'Config: k = {K}, Aggregate = {AGGREGATE}')
 
+    # Evaluate MultiArith dataset
+    multiarith_dataset = load_and_sample_dataset("ChilleD/MultiArith", "test")
+    evaluate_dataset(model, tokenizer, multiarith_dataset, k=K, aggregate=AGGREGATE, decoding_mode=DECODING_MODE, description="MultiArith")
 
-    multiarith(k=K, aggregate=AGGREGATE, decoding_mode=DECODING_MODE)
-    gsm8k(k=K, aggregate=AGGREGATE, decoding_mode=DECODING_MODE)
+    # Evaluate GSM8K dataset (with sampling)
+    gsm8k_dataset = load_and_sample_dataset("openai/gsm8k", "test", sample_size=300, seed=11)
+    evaluate_dataset(model, tokenizer, gsm8k_dataset, k=K, aggregate=AGGREGATE, decoding_mode=DECODING_MODE, description="GSM8K")
