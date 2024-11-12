@@ -120,7 +120,7 @@ if __name__ == '__main__':
     model_name = "/data/models/Meta-Llama-3.1-8B-Instruct"
     K = 10
     AGGREGATE = False
-    DECODING_MODE = 'baseline'
+    DECODING_MODE = 'new'
 
     # Load model and tokenizer
     model, tokenizer = load_model_and_tokenizer(model_name)
