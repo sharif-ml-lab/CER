@@ -63,6 +63,11 @@ async def calculate_accuracy(sampled_dataset, faiss_retriever, dense_retriever, 
         # Retrieve the top 10 most similar documents using FaissRetriever
         similar_docs, scores = faiss_retriever.retrieve(query_embedding, top_n=10)
 
+        DOC_BASE = True
+        if DOC_BASE:
+            # similar_docs = ["\n\n".join(similar_docs)]
+            similar_docs = [similar_docs[0]]
+
         # Construct messages for each retrieved document
         messages = [construct_prompt(question, doc, choices, client) for doc in similar_docs]
 
@@ -91,7 +96,7 @@ async def generate_response(client, messages, scores, max_token=32):
             tasks = [client.next_prob(input_ids, prob_mode=True) for input_ids in input_ids_list]
             responses = await asyncio.gather(*tasks)
 
-        final_probs = aggregate_token_probs(probs=responses, scores=scores, mode='new')
+        final_probs = aggregate_token_probs(probs=responses, scores=scores, mode='greedy')
 
         next_token_id = client.next_token_id(final_probs)
         result_tokens.append(next_token_id.item())
