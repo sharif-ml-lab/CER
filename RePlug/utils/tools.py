@@ -10,7 +10,15 @@ def ensemble_aggregate(probs, scores):
 
 
 def my_aggregate(probs, scores):
-    pass
+    weights = scores.squeeze(0)
+    # Broadcasting weights to match each tensor in probs and summing them
+    weighted_sum = np.sum([np.log(weight * prob) for weight, prob in zip(weights, probs)], axis=0)
+
+    return weighted_sum
+
+
+def greedy_aggregate(probs, scores):
+    return probs[0]
 
 
 def aggregate_token_probs(probs, scores, mode):
