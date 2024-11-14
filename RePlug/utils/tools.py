@@ -74,9 +74,9 @@ Knowledge: The mitochondria are known as the powerhouses of the cell. They gener
 
 Question: What is the main function of mitochondria in the cell?
 
-A. Protein synthesis  B. Energy production  C. DNA replication  D. Waste disposal
+A. Protein synthesis  B. Waste disposal  C. DNA replication  D. Energy production
 
-Answer: B
+Answer: D
 
 Example 4:
 Knowledge: The capital of France is Paris, which is also the most populous city in the country.
@@ -130,6 +130,11 @@ def mmlu_pred_checker(final_result_text, answer):
 def prediction_is_correct(final_result_text, answer, mode):
     if mode == 'mmlu':
         return mmlu_pred_checker(final_result_text, answer)
+
+
+def calculate_doc_scores(raw_distances):
+    softmax_scores = np.exp(raw_distances) / np.sum(np.exp(raw_distances))
+    return softmax_scores
 
 
 def calculate_perplexity(log_probs):

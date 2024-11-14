@@ -15,7 +15,8 @@ class HuggingFaceClient():
         """
         self.model_name = model_name
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self.model = AutoModelForCausalLM.from_pretrained(model_name, device_map='auto')
+        self.model = AutoModelForCausalLM.from_pretrained(model_name, device_map='auto', torch_dtype=torch.bfloat16)
+        self.model.eval()
         self.device = torch.device("cpu")
         if torch.cuda.is_available():
             self.device = torch.device("cuda")
@@ -40,7 +41,7 @@ class HuggingFaceClient():
                 # Calculate probabilities using softmax for the last token
                 probabilities = torch.nn.functional.softmax(logits[:, -1, :], dim=-1)
 
-            return probabilities.detach().cpu().numpy()
+            return probabilities.detach().cpu().float().numpy()
 
         else:
             with torch.no_grad():

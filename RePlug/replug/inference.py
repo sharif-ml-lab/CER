@@ -2,7 +2,7 @@ from datasets import load_from_disk
 from RePlug.retriever.faiss_index import FaissRetriever
 from RePlug.retriever.retriever import DenseRetriever
 from RePlug.replug.llm_client import HuggingFaceClient
-from RePlug.utils.tools import aggregate_token_probs, construct_prompt, prediction_is_correct
+from RePlug.utils.tools import aggregate_token_probs, construct_prompt, prediction_is_correct, calculate_doc_scores
 import asyncio
 import aiohttp
 import torch
@@ -49,6 +49,7 @@ def initialize_retrievers_and_client(index_path, chunks_path, model_name):
 async def calculate_accuracy(sampled_dataset, faiss_retriever, dense_retriever, client, question_col, choices_col,
                              answer_col):
     acc = 0
+    faulty_res = 0
     progress_bar = tqdm(total=len(sampled_dataset), desc='Calculating Accuracy', position=0, leave=True)
 
     # Iterate over records in the dataset
@@ -61,12 +62,14 @@ async def calculate_accuracy(sampled_dataset, faiss_retriever, dense_retriever, 
         query_embedding = dense_retriever.get_embedding(question)
 
         # Retrieve the top 10 most similar documents using FaissRetriever
-        similar_docs, scores = faiss_retriever.retrieve(query_embedding, top_n=10)
+        similar_docs, raw_distances = faiss_retriever.retrieve(query_embedding, top_n=10)
 
-        DOC_BASE = True
+        scores = calculate_doc_scores(raw_distances)
+
+        DOC_BASE = False
         if DOC_BASE:
-            # similar_docs = ["\n\n".join(similar_docs)]
-            similar_docs = [similar_docs[0]]
+            similar_docs = ["\n\n".join(similar_docs)]
+            # similar_docs = [similar_docs[0]]
 
         # Construct messages for each retrieved document
         messages = [construct_prompt(question, doc, choices, client) for doc in similar_docs]
@@ -75,8 +78,11 @@ async def calculate_accuracy(sampled_dataset, faiss_retriever, dense_retriever, 
         final_result_text = await generate_response(client, messages, scores)
 
         # Check if the prediction is correct
-        if prediction_is_correct(final_result_text, answer, 'mmlu'):
-            acc += 1
+        if final_result_text.lower().strip() in ['a', 'b', 'c', 'd']:
+            if prediction_is_correct(final_result_text, answer, 'mmlu'):
+                acc += 1
+        else:
+            faulty_res += 1
 
         # Update the progress bar and display running accuracy
         progress_bar.set_postfix(running_acc=acc / (i + 1))
@@ -96,7 +102,7 @@ async def generate_response(client, messages, scores, max_token=32):
             tasks = [client.next_prob(input_ids, prob_mode=True) for input_ids in input_ids_list]
             responses = await asyncio.gather(*tasks)
 
-        final_probs = aggregate_token_probs(probs=responses, scores=scores, mode='greedy')
+        final_probs = aggregate_token_probs(probs=responses, scores=scores, mode='new')
 
         next_token_id = client.next_token_id(final_probs)
         result_tokens.append(next_token_id.item())
@@ -116,13 +122,13 @@ if __name__ == "__main__":
 
     # Command-line argument parsing
     parser = argparse.ArgumentParser(description="Run document retrieval and question answering.")
-    parser.add_argument('--dataset_path', default='/var/csi/rawfile/Ideas/data/datasets/mmlu.hf', type=str,
+    parser.add_argument('--dataset_path', default='/data/Ideas/data/datasets/mmlu.hf', type=str,
                         help="Path to the dataset.")
-    parser.add_argument('--index_path', default="/var/csi/rawfile/Ideas/data/wiki_embeddings.index", type=str,
+    parser.add_argument('--index_path', default="/data/Ideas/data/wiki_embeddings.index", type=str,
                         help="Path to the FAISS index.")
-    parser.add_argument('--chunks_path', default="/var/csi/rawfile/Ideas/data/wiki_chunk_texts.pkl", type=str,
+    parser.add_argument('--chunks_path', default="/data/Ideas/data/wiki_chunk_texts.pkl", type=str,
                         help="Path to the chunk texts.")
-    parser.add_argument('--model_name', default="/home/dev/llama3.1/Meta-Llama-3.1-8B-Instruct", type=str,
+    parser.add_argument('--model_name', default="/data/TensorRT-LLM/Meta-Llama-3.1-70B-Instruct", type=str,
                         help="Path to the HuggingFace model.")
     parser.add_argument('--n', type=int, default=500, help="Number of samples to process.")
     parser.add_argument('--seed', type=int, default=11, help="Seed for shuffling the dataset.")
