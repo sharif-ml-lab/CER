@@ -84,13 +84,13 @@ def plot_difference_in_predictions(data, description):
 
 if __name__ == '__main__':
     # Load MultiArith results
-    multiarith_data = load_evaluation_results('results/MultiArith_Baseline_llama3-1-8b_k10_AggFalse_evaluation_results.csv')
+    multiarith_data = load_evaluation_results('results/MultiArith_new_llama3-1-8b_k10_AggFalse_evaluation_results.csv')
     plot_confidence_histograms(multiarith_data, 'MultiArith')
     plot_confidence_comparison(multiarith_data, 'MultiArith')
     plot_difference_in_predictions(multiarith_data, 'MultiArith')
 
     # Load GSM8K results
-    gsm8k_data = load_evaluation_results('results/GSM8K_Baseline_llama3-1-8b_k10_AggFalse_evaluation_results.csv')
+    gsm8k_data = load_evaluation_results('results/GSM8K_new_llama3-1-8b_k10_AggFalse_evaluation_results.csv')
     plot_confidence_histograms(gsm8k_data, 'GSM8K')
     plot_confidence_comparison(gsm8k_data, 'GSM8K')
     plot_difference_in_predictions(gsm8k_data, 'GSM8K')
