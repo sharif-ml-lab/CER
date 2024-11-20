@@ -25,7 +25,7 @@ class AdvancedSelfConsistency:
         self.num_samples = num_samples
         self.similarity_threshold = similarity_threshold
 
-    def generate_responses(self, message: str) -> List[str]:
+    def generate_responses(self, message: str):
         input_ids = self.tokenizer.encode(message, return_tensors="pt").to(self.device)
         attention_mask = torch.ones_like(input_ids).to(self.device)
 
@@ -52,10 +52,10 @@ class AdvancedSelfConsistency:
             generated_sequence = output.sequences[0]
             answer_ids = generated_sequence[len(input_ids[0]):]
             answer_text = self.tokenizer.decode(answer_ids, skip_special_tokens=True)
-            probs.append(output)
+            probs.append(output.scores)
 
             responses.append(answer_text)
-        return responses
+        return responses, probs
 
     def calculate_similarity(self, a: str, b: str) -> float:
         return SequenceMatcher(None, a, b).ratio()
@@ -93,16 +93,27 @@ class AdvancedSelfConsistency:
             "num_unique_clusters": len(clusters)
         }
 
-    def evaluate(self, prompt: str, mode: str) -> Dict[str, any]:
-        responses = self.generate_responses(prompt)
+    def evaluate(self, prompt: str, mode: str):
+        responses, probs = self.generate_responses(prompt)
 
         if mode == "baseline":
-            aggregated_result = self.aggregate_results(responses)
+            unique_final_answer = dict()
+            for response in responses:
+                final_answer = extract_last_numerical_value(response)
+                if final_answer not in unique_final_answer:
+                    unique_final_answer[final_answer] = 1
+                else:
+                    unique_final_answer[final_answer] += 1
 
-            return {
-                "individual_responses": responses,
-                "aggregated_result": aggregated_result
-            }
+            best_final_answer = max(unique_final_answer, key=unique_final_answer.get)
+
+            return [None, None, best_final_answer]
+            # aggregated_result = self.aggregate_results(responses)
+            #
+            # return {
+            #     "individual_responses": responses,
+            #     "aggregated_result": aggregated_result
+            # }
 
         # elif decoding_mode == "new":
         #     # Extract all numerical values
@@ -222,8 +233,7 @@ def self_consistency_decode(
         messages: List[Dict[str, str]],
         k: int = 10,
         aggregate_paths=False,
-        decoding_mode: str = "baseline",
-) -> Tuple[str, float, str]:
+        decoding_mode: str = "baseline"):
     """
     Implement CoT-decoding for a given chat input.
 
