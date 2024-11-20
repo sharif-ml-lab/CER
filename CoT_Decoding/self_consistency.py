@@ -115,45 +115,6 @@ class AdvancedSelfConsistency:
             #     "aggregated_result": aggregated_result
             # }
 
-        # elif decoding_mode == "new":
-        #     # Extract all numerical values
-        #     all_numerical_values = extract_all_numerical_values(answer_text)
-        #     if all_numerical_values:
-        #         confidence_sum = 0.0
-        #         total_valid_values = 0
-        #         for num_value in all_numerical_values:
-        #             num_value_ids = tokenizer.encode(num_value, add_special_tokens=False)
-        #
-        #             # Find the start index of the final occurrence of the numerical value in the answer_ids
-        #             answer_ids_list = answer_ids.tolist()
-        #             num_value_ids_list = num_value_ids
-        #
-        #             num_value_start_idx = -1
-        #             for i in range(len(answer_ids_list) - len(num_value_ids_list) + 1):
-        #                 if answer_ids_list[i:i + len(num_value_ids_list)] == num_value_ids_list:
-        #                     num_value_start_idx = i - 1  # because the first generated token's score is not presented in output.scores
-        #
-        #             if num_value_start_idx == -1:
-        #                 continue
-        #
-        #             num_value_scores = output.scores[num_value_start_idx: num_value_start_idx + len(num_value_ids)]
-        #
-        #             # Calculate confidence score (Δ) for this numerical value
-        #             confidence_sum += calculate_confidence_for_final_answer(num_value_scores,
-        #                                                                     torch.tensor(num_value_ids, device=device))
-        #             total_valid_values += 1
-        #
-        #         if total_valid_values > 0:
-        #             confidence = confidence_sum / total_valid_values
-        #             final_answer = all_numerical_values[
-        #                 -1]  # Consider the last numerical value as the final answer for consistency
-        #             paths.append((answer_text, confidence, final_answer))
-        #
-        # if aggregate_paths:
-        #     return aggregate_paths_based_on_scores(paths)
-        # else:
-        #     return max(paths, key=lambda x: x[1])
-
 
 def extract_last_numerical_value(text: str) -> Optional[str]:
     """

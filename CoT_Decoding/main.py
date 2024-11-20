@@ -73,7 +73,7 @@ def evaluate_dataset(model, tokenizer, dataset, k, aggregate, decoding_mode, des
                 # Generate the response using CoT decoding
                 result, confidence, final_ans = cot_decode(
                     model, tokenizer, messages, aggregate_paths=aggregate, max_new_tokens=512, k=k,
-                    decoding_mode=decoding_mode
+                    decoding_mode=decoding_mode, sampling_mode="temp"
                 )
             else:
                 result, confidence, final_ans = self_consistency_decode(
