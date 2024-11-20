@@ -15,7 +15,7 @@ class HuggingFaceClient():
         """
         self.model_name = model_name
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self.model = AutoModelForCausalLM.from_pretrained(model_name, device_map='auto', torch_dtype=torch.bfloat16)
+        self.model = AutoModelForCausalLM.from_pretrained(model_name, device_map='cuda', torch_dtype=torch.bfloat16)
         self.model.eval()
         self.device = torch.device("cpu")
         if torch.cuda.is_available():

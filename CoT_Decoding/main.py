@@ -1,9 +1,11 @@
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
-from Decoding import get_device, cot_decode
+from Decoding import cot_decode
 from datasets import load_dataset
 from tqdm import tqdm
 import pandas as pd
+from self_consistency import self_consistency_decode
+
 
 def load_model_and_tokenizer(model_name):
     """
@@ -14,6 +16,7 @@ def load_model_and_tokenizer(model_name):
     )
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     return model, tokenizer
+
 
 def construct_prompt(question):
     """
@@ -47,7 +50,8 @@ Q: {question}
 A: """
     return base
 
-def evaluate_dataset(model, tokenizer, dataset, k, aggregate, decoding_mode, description):
+
+def evaluate_dataset(model, tokenizer, dataset, k, aggregate, decoding_mode, description, COT=False):
     """
     Evaluate the model on the given dataset.
     """
@@ -65,11 +69,17 @@ def evaluate_dataset(model, tokenizer, dataset, k, aggregate, decoding_mode, des
                 {"role": "user", "content": construct_prompt(question)}
             ]
 
-            # Generate the response using CoT decoding
-            result, confidence, final_ans = cot_decode(
-                model, tokenizer, messages, aggregate_paths=aggregate, max_new_tokens=512, k=k,
-                decoding_mode=decoding_mode
-            )
+            if COT:
+                # Generate the response using CoT decoding
+                result, confidence, final_ans = cot_decode(
+                    model, tokenizer, messages, aggregate_paths=aggregate, max_new_tokens=512, k=k,
+                    decoding_mode=decoding_mode
+                )
+            else:
+                result, confidence, final_ans = self_consistency_decode(
+                    model, tokenizer, messages, aggregate_paths=aggregate, k=k,
+                    decoding_mode=decoding_mode
+                )
 
             # Compare the model's answer with the correct answer
             try:
@@ -106,6 +116,7 @@ def evaluate_dataset(model, tokenizer, dataset, k, aggregate, decoding_mode, des
     print(f"Final Accuracy for {description}: {accuracy:.2f}%")
     return accuracy
 
+
 def load_and_sample_dataset(dataset_name, split, sample_size=None, seed=None):
     """
     Load a dataset and optionally sample from it.
@@ -115,12 +126,14 @@ def load_and_sample_dataset(dataset_name, split, sample_size=None, seed=None):
         dataset = dataset.shuffle(seed=seed).select(range(sample_size))
     return dataset
 
+
 if __name__ == '__main__':
     # Configurations
     model_name = "/data/models/Meta-Llama-3.1-8B-Instruct"
     K = 10
     AGGREGATE = False
     DECODING_MODE = 'new'
+    BASELINE_COT = False
 
     # Load model and tokenizer
     model, tokenizer = load_model_and_tokenizer(model_name)
@@ -131,8 +144,10 @@ if __name__ == '__main__':
 
     # Evaluate MultiArith dataset
     multiarith_dataset = load_and_sample_dataset("ChilleD/MultiArith", "test")
-    evaluate_dataset(model, tokenizer, multiarith_dataset, k=K, aggregate=AGGREGATE, decoding_mode=DECODING_MODE, description="MultiArith")
+    evaluate_dataset(model, tokenizer, multiarith_dataset, k=K, aggregate=AGGREGATE, decoding_mode=DECODING_MODE,
+                     description="MultiArith", COT=BASELINE_COT)
 
     # Evaluate GSM8K dataset (with sampling)
     gsm8k_dataset = load_and_sample_dataset("openai/gsm8k", "test", sample_size=300, seed=11)
-    evaluate_dataset(model, tokenizer, gsm8k_dataset, k=K, aggregate=AGGREGATE, decoding_mode=DECODING_MODE, description="GSM8K")
+    evaluate_dataset(model, tokenizer, gsm8k_dataset, k=K, aggregate=AGGREGATE, decoding_mode=DECODING_MODE,
+                     description="GSM8K", COT=BASELINE_COT)
