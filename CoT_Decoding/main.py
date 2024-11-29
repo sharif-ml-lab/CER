@@ -73,7 +73,7 @@ def evaluate_dataset(model, tokenizer, dataset, k, aggregate, decoding_mode, des
                 # Generate the response using CoT decoding
                 result, confidence, final_ans = cot_decode(
                     model, tokenizer, messages, aggregate_paths=aggregate, max_new_tokens=512, k=k,
-                    decoding_mode=decoding_mode, sampling_mode="temp"
+                    decoding_mode=decoding_mode, sampling_mode="cot"
                 )
             else:
                 result, confidence, final_ans = self_consistency_decode(
@@ -132,8 +132,8 @@ if __name__ == '__main__':
     model_name = "/data/models/Meta-Llama-3.1-8B-Instruct"
     K = 10
     AGGREGATE = False
-    DECODING_MODE = 'baseline'
-    BASELINE_COT = False
+    DECODING_MODE = 'new'
+    BASELINE_COT = True
 
     # Load model and tokenizer
     model, tokenizer = load_model_and_tokenizer(model_name)

@@ -1,0 +1,730 @@
+question,correct_answer,predicted_answer,predicted_final_answer,confidence_score,is_correct
+" Paige had 11 songs on her mp3 player. If she deleted 9 old songs from it and then added 8 new songs, how many songs does she have on her mp3 player? ",10.0,"To solve this problem, we need to follow the order of operations: delete old songs, then add new songs.
+
+Paige started with 11 songs. She deleted 9 old songs. So she had 11 - 9 = 2 songs left. Then she added 8 new songs. So now she has 2 + 8 = 10 songs.
+
+The answer is 10.",10,-2.0587858589107842e-05,True
+" There were 39 girls and 4 boys trying out for the schools basketball team. If only 26 of them got called back, how many students didn't make the cut? ",17.0,"To find out how many students didn't make the cut, we need to find the total number of students and subtract the number of students who got called back.
+
+There are 39 girls and 4 boys, so the total number of students is 39 + 4 = 43.
+
+Since 26 students got called back, the number of students who didn't make the cut is 43 - 26 = 17.
+
+The answer is 17.",17,-3.0315668564971187e-05,True
+" Faye had 34 coloring books. If she gave away 3 of them, but then bought 48 more, how many would she have total? ",79.0,"Originally, Faye had 34 coloring books. After giving away 3, she had 34 - 3 = 31. Then she bought 48 more coloring books. So, the total number of coloring books she has now is 31 + 48 = 79. The answer is 79.",79,-0.000823438544518924,True
+" The school cafeteria had 23 apples. If they used 20 to make lunch for the students and then bought 6 more, how many apples would they have? ",9.0,"Originally, the cafeteria had 23 apples. Then they used 20 for lunch, so they were left with 23 - 20 = 3 apples. After buying 6 more, they would have 3 + 6 = 9 apples. The answer is 9.",9,-7.866064762992684e-05,True
+" In a video game, each enemy defeated gives you 9 points. If a level has 11 enemies total and you destroy all but 3 of them, how many points would you earn? ",72.0,"To find the number of points earned, you first need to find the total number of enemies defeated. There are 11 enemies in total, and you destroyed all but 3, so the number of enemies defeated is 11 - 3 = 8.
+
+Since each enemy defeated gives 9 points, the total points earned would be 8 * 9 = 72 points.
+
+The answer is 72.",72,-0.0006987063682431617,True
+" Megan earned 8 points for each bag of cans she recycled. If she had 14 bags, but didn't recycle 5 of them, how many points would she have earned? ",72.0,"Megan started with 14 bags. If she didn't recycle 5 bags, she recycled 14 - 5 = 9 bags. Since she earns 8 points for each bag, she has 9 * 8 = 72 points. The answer is 72.",72,-0.01996680816152211,True
+" April's discount flowers was having a sale where each rose was 4 dollars. If April started with 13 roses and had 4 roses left, how much money did she earn? ",36.0,"April started with 13 roses. If she had 4 roses left, she must have sold 13 - 4 = 9 roses. 
+
+Each rose costs 4 dollars. To find the total amount she earned, multiply the number of roses sold (9) by the cost per rose (4): 9 * 4 = 36. 
+
+So, April earned 36 dollars.",36,-0.00032809532311979967,True
+" Ned had to wash 9 short sleeve shirts and 21 long sleeve shirts before school. If he had only washed 29 of them by the time school started, how many did he not wash? ",1.0,"Q: To find the number of shirts Ned did not wash, we need to find out the total number of shirts he had to wash, then subtract the number he did wash. 
+
+The total number of shirts Ned had to wash was 9 (short sleeve) + 21 (long sleeve) = 30 shirts.
+
+Since Ned washed 29 shirts, the number of shirts he did not wash is 30 - 29 = 1. The answer is 1.",1,-0.0003833616404041152,True
+" A company invited 47 people to a luncheon, but 7 of them didn't show up. If the tables they had held 5 people each, how many tables do they need? ",8.0,"Since 7 people didn't show up, the number of guests who came is 47 - 7 = 40. Each table can seat 5 people, so the number of tables needed is 40 / 5 = 8.
+
+The answer is 8.",8,-8.414856374778162e-05,True
+" Tom had 5 books. If he sold 4 of them and used the money he earned to buy 38 new books, how many books would Tom have? ",39.0,"To find the number of books Tom has, we need to follow the steps he took: 
+
+1. He started with 5 books.
+2. He sold 4 books, so he was left with 5 - 4 = 1 book.
+3. He bought 38 new books, so now he has 1 + 38 = 39 books.
+
+The answer is 39.",39,-0.0037380471075447097,True
+" For a birthday party Jerry bought 41 regular sodas and 22 diet sodas. If his fridge would only hold 9 on each shelf, how many shelves would he fill up? ",7.0,"For this problem, let's first determine the total number of sodas. 41 (regular) + 22 (diet) = 63 sodas. 
+
+Since the fridge can hold 9 sodas per shelf, we can divide the total number of sodas by 9 to find the number of shelves. 63 ÷ 9 is 7.",7,-0.010078186333546237,True
+" For Halloween Debby and her sister combined the candy they received. Debby had 32 pieces of candy while her sister had 42. If they ate 35 pieces the first night, how many pieces do they have left? ",39.0,"Since the problem is similar to the earlier problem of Leah's chocolates, the solution will be similar. 
+
+Originally, Debby had 32 pieces of candy and her sister had 42. So in total they had 32 + 42 = 74 pieces of candy. After eating 35 pieces, they had 74 - 35 = 39 pieces left. The answer is 39.",39,-7.346076272605123e-05,True
+ Emily was planting vegetables in her garden. She started with 41 seeds and planted 29 of them in the big garden and in each of her small gardens put 4 seeds each. How many small gardens did Emily have? ,3.0,"First, let's figure out how many seeds Emily didn't put in the big garden. Since she planted 29 seeds in the big garden, 41 - 29 = 12 seeds were left. Since she put 4 seeds in each small garden, the number of seeds left must be a multiple of 4. Also, it's the same as the number of small gardens she has.
+
+The only number that multiplies by 4 and results in 12 is 3. Therefore, the number of small gardens must be 3.
+
+The answer is 3.",3,-0.0013031195109843305,True
+" For Halloween Emily received 5 pieces of candy from neighbors and 13 pieces from her older sister. If she only ate 9 pieces a day, how long would the candy last her? ",2.0,"This question is not asking for the number of trees planted, the number of cars in the parking lot, the number of chocolates left, the number of lollipops Jason gave Denny, the number of toys Shawn has now, the number of computers in the server room, the number of golf balls Michael had left, or the amount of money Olivia has left. 
+
+However, it is asking how long the candy would last Emily if she ate 9 pieces a day. To find this out, we first need to know the total number of pieces of candy Emily has. 
+
+Emily received 5 pieces from her neighbors and 13 pieces from her sister. In total, she has 5 + 13 = 18 pieces of candy. 
+
+If she eats 9 pieces a day, the candy will last her 18 / 9 = 2 days.
+
+The answer is 2.",2,-0.0003060945365373977,True
+" Mike is at the library helping put away books. There are 82 book to put away total but a librarian takes 10 of them and leaves Mike with the rest. If he can fit 9 books on a shelf, how many shelves will he need? ",8.0,"The librarian took 10 books, so Mike is left with 82 - 10 = 72 books. To find out how many shelves Mike will need, we divide the total number of books by the number of books he can fit on a shelf. 72 / 9 = 8. The answer is 8.",8,-0.0009546052748907745,True
+" While on vacation, Nancy took 49 pictures at the zoo and 8 at the museum. If she later deleted 38 of the pictures, how many pictures from her vacation did she still have? ",19.0,"The total number of pictures Nancy took is 49 + 8 = 57. After deleting 38 pictures, she has 57 - 38 pictures left. This equals 19. The answer is 19.",19,-2.6457511410430552e-05,True
+" A new building needed 14 windows. The builder had already installed 8 of them. If it takes 8 hours to install each window, how long will it take him to install the rest? ",48.0,"It will take 6 hours to install the rest of the windows.
+
+There are 14 windows in total and 8 windows already installed. So there are 14 - 8 = 6 windows left to install. Each window takes 8 hours to install, so 6 windows will take 6 x 8 = 48 hours.",48,-0.007695459080553428,True
+ A store had 40 oranges in a bin. If they threw away 25 of the old ones and put 21 new ones in the bin how many would be in the bin? ,36.0,"A: There are 40 oranges initially in the bin. They threw away 25 oranges. So there are now 40 - 25 = 15 oranges left. Then, they added 21 new oranges. So now, there are 15 + 21 = 36 oranges in the bin. The answer is 36.",36,-0.0001152904526272115,True
+" At lunch a waiter had 7 customers and 5 of them didn't leave a tip. If he got $3 each from the ones who did tip, how much money did he earn? ",6.0,"Since 5 customers didn't leave a tip, the waiter got tips from 7 - 5 = 2 customers. Each of the 2 customers gave $3. So the total amount the waiter earned from tips is 2 x 3 = 6 dollars. The answer is 6.",6,-0.016997125378237422,True
+ For Halloween Faye scored 47 pieces of candy. She ate 25 pieces the first night and then her sister gave her 40 more pieces. How many pieces of candy does Faye have now? ,62.0,"Initially, Faye had 47 pieces of candy. She ate 25 pieces the first night, so she was left with 47 - 25 = 22 pieces.
+
+Then, her sister gave her 40 more pieces. So now, Faye has 22 + 40 = 62 pieces of candy.
+
+The answer is 62.",62,-5.461246874855673e-05,True
+ A group of 4 friends went into a restaurant. The chef already had 9 chicken wings cooked but cooked 7 more for the group. If they each got the same amount how many would each person get? ,4.0,"To determine how many wings each person would get, we need to first find out the total number of wings cooked by adding the wings that the chef already had to the ones he cooked for the group. 
+
+The chef already had 9 wings and cooked 7 more, so the total number of wings is 9 + 7 = 16.
+
+The group has 4 friends. To find out how many wings each person gets, we need to divide the total number of wings by the number of friends: 16 / 4 = 4.
+
+The answer is 4.",4,-5.0261280292717996e-05,True
+" John earned 8 dollars for each lawn he mowed. If he had 15 lawns to mow, but forgot to mow 7 of them, how much money did he actually earn? ",64.0,"Let's calculate the amount John earned.
+
+If John forgot to mow 7 lawns, he mowed 15 - 7 = 8 lawns.
+
+Since John earns $8 for each lawn, he earned 8 * 8 = 64 dollars.
+
+The answer is 64.",64,-6.727224850437673e-05,True
+" A pet shelter had 5 puppies when another 35 were brought in. If 8 puppies a day are adopted, how long would it take for all of them to be adopted? ",5.0,"There are currently 5 + 35 = 40 puppies in the shelter. They are adopting 8 puppies per day. To find the number of days needed to adopt all the puppies, we need to divide the total number of puppies by the number of puppies adopted per day: 40 / 8 = 5 days. The answer is 5.",5,-9.585536208371481e-05,True
+" A new building needed 9 windows. The builder had already installed 6 of them. If it takes 6 hours to install each window, how long will it take him to install the rest? ",18.0,"Since the builder already installed 6 windows, he needs to install 9 - 6 = 3 more windows. Each window takes 6 hours to install, so it will take 3 x 6 = 18 hours to install the remaining 3 windows. The answer is 18.",18,-0.0004672809351003868,True
+" A teacher had 34 worksheets to grade. If she graded 7, but then another 36 were turned in, how many worksheets would she have to grade? ",63.0,"Initially, the teacher had 34 worksheets to grade. She graded 7 worksheets, so she had 34 - 7 = 27 worksheets left. Then, 36 more worksheets were turned in, so now she has 27 + 36 = 63 worksheets to grade. The answer is 63.",63,-0.000716136938427873,True
+" While playing at the arcade, Frank won 33 tickets playing 'whack a mole' and 9 tickets playing 'skee ball'. If he was trying to buy candy that cost 6 tickets a piece, how many could he buy? ",7.0,"The total number of tickets Frank won is 33 + 9 = 42. The candy costs 6 tickets each, so he can buy 42 / 6 = 7 pieces of candy. The answer is 7.",7,-0.00010149279424299961,True
+" At a restaurant each adult meal costs $7 and kids eat free. If a group of 13 people came in and 9 were kids, how much would it cost for the group to eat? ",28.0,Adult meals cost $7 each. There are 13 people in total and 9 of them are kids. So the number of adults is 13 - 9 = 4. The total cost will be $7 * 4 = $28. The answer is $28.,28,-0.00023512069263073392,True
+" Paige had 43 math problems and 12 science problems for homework. If she finished 44 of the problems at school, how many problems did she have to do for homework? ",11.0,"To find out how many problems Paige has left for homework, we need to first find the total number of problems she had. She had 43 math problems and 12 science problems. So, 43 + 12 = 55 problems originally.
+
+Paige finished 44 problems. To find out how many are left, we subtract 44 from the total number of problems. 55 - 44 = 11. The answer is 11.",11,-0.0006265648461879351,True
+" Rachel was playing a video game where she scores 9 points for each treasure she finds. If she found 5 treasures on the first level and 2 on the second, what would her score be? ",63.0,"First, we need to calculate the points Rachel earned from each level. 
+
+On the first level, she found 5 treasures and got 9 points for each, so she got 5 x 9 = 45 points.
+
+On the second level, she found 2 treasures and got 9 points for each, so she got 2 x 9 = 18 points.
+
+To find her total score, we need to add the points from both levels: 45 + 18 = 63.
+
+The answer is 63.",63,-0.00011533866187674381,True
+" A waiter at 'The Greasy Spoon' restaurant had 26 customers to wait on. During the lunch rush he added another 27 customers. If 27 of the customers didn't leave him a tip, how many customers did leave a tip? ",26.0,"A: The waiter had 26 customers initially. Then 27 more customers arrived, making a total of 26 + 27 = 53 customers. If 27 customers didn't leave a tip, then the remaining customers who left a tip would be 53 - 27 = 26. The answer is 26.",26,-5.407735362668168e-05,True
+ A toy store had 17 giant stuffed bears in stock when they got another shipment with 10 bears in it. The put the bears onto shelves with 9 on each shelf. How many shelves did they use? ,3.0,"To determine how many shelves they used, first, you need to calculate the total number of bears after the shipment arrived. The store initially had 17 giant stuffed bears. After receiving a new shipment with 10 bears, they had 17 + 10 = 27 bears.
+
+Since they put 9 bears on each shelf, you need to divide the total number of bears by the number of bears per shelf to find the total number of shelves:
+
+27 bears / 9 bears per shelf = 3 shelves
+
+The answer is 3.",3,-0.0033618508956528665,True
+" Gwen was organizing her book case making sure each of the shelves had exactly 4 books on it. If she had 5 shelves of mystery books and 3 shelves of picture books, how many books did she have total? ",32.0,"Since Gwen had 5 shelves of mystery books and 3 shelves of picture books, and each shelf had exactly 4 books on it, we can calculate the total number of books as follows:
+
+Mystery books: 5 shelves * 4 books per shelf = 20 books
+Picture books: 3 shelves * 4 books per shelf = 12 books
+Total books: 20 + 12 = 32 books
+The answer is 32.",32,-4.428802934356862e-05,True
+ Wendy uploaded 79 pictures to Facebook. She put 44 pics into one album and put the rest into 5 different albums. How many pictures were in each album? ,7.0,"Since Wendy put 44 pictures into one album, the rest of the pictures go into the other albums. There were originally 79 pictures. She put 44 into one album, so 79 - 44 = 35 pictures left. 35 pictures are put into 5 albums, so 35 / 5 = 7. The answer is 7.",7,-0.0007430488586018768,True
+ The schools debate team had 5 boys and 40 girls on it. If they were split into groups of 9 how many groups could they make? ,5.0,"First, we need to find the total number of students on the debate team. There are 5 boys and 40 girls. 5 + 40 = 45 students.
+
+To find out how many groups they can make, we need to divide the total number of students by the group size.
+
+Number of groups = Total number of students / Group size
+= 45 / 9
+= 5
+
+The answer is 5.",5,-8.196925865436999e-05,True
+" April's discount flowers was having a sale where each rose was 7 dollars. If April started with 9 roses and had 4 roses left, how much money did she earn? ",35.0,"Since April started with 9 roses at $7 each, she initially had 9 x 7 = $63. After selling some roses, she had 4 left. This means she sold 9 - 4 = 5 roses. 
+
+Since each rose was sold for $7, she earned 5 x 7 = $35. The answer is 35.",35,-0.013383350807458297,True
+" A trivia team had 11 members total, but during a game 6 members didn't show up. If each member that did show up scored 9 points, how many points were scored total? ",45.0,"6 members didn't show up, so 11 - 6 = 5 members showed up. 5 members scored 9 points each, so total points scored would be 5 * 9 = 45. The answer is 45.",45,-0.0029518378525871117,True
+ A pet store had 13 siamese cats and 5 house cats. During a sale they sold 10 cats. How many cats do they have left? ,8.0,"First, we need to find the total number of cats the pet store had originally. There were 13 siamese cats and 5 house cats. So, in total, they had 13 + 5 = 18 cats. After selling 10 cats, they had 18 - 10 = 8 cats left. The answer is 8.",8,-1.9836661935694043e-05,True
+ Victor was working as a sacker at a grocery store where he made 6 dollars an hour. On Monday he worked 5 hours and on Tuesday he worked 5 hours. How much money did Victor make in those two days? ,60.0,"On Monday, Victor made 6 * 5 = 30 dollars. On Tuesday, he made 6 * 5 = 30 dollars. To find the total amount he made, add the money he made on both days: 30 + 30 = 60. The answer is 60.",60,-3.610987183358921e-05,True
+" Megan baked 71 cupcakes for her school's bake sale. If her brother, Todd, ate 43 of them how many packages could she make if she put 7 cupcake in each package? ",4.0,"Q: Megan originally had 71 cupcakes. Todd ate 43, so she had 71 - 43 = 28 cupcakes left. Since each package contains 7 cupcakes, you divide the number of cupcakes by the number of cupcakes per package. 28 ÷ 7 = 4. The answer is 4.
+
+Note: The answer is the number of packages of cupcakes she can make from the remaining 28 cupcakes.",28,-0.00014525687261427925,False
+" There were 2 friends playing a video game online when 2 more players joined the game. If each player had 6 lives, how many lives did they have total? ",24.0,"2 friends were already playing, and 2 more joined. So, the total number of players is 2 + 2 = 4.
+
+Each player had 6 lives. To find the total number of lives, multiply the number of players by the number of lives each player has: 4 * 6 = 24.
+
+The answer is 24.",24,-0.00034460608943738487,True
+" Sam had 10 socks. If he threw away 3 old ones that didn't fit and bought 36 new ones, how many socks would he have? ",43.0,"If Sam threw away 3 old socks and bought 36 new ones, we need to find out how many socks he has left. 
+
+First, we subtract 3 from 10: 10 - 3 = 7. This is how many socks were left after throwing away the old ones.
+
+Then, we add 36 new socks: 7 + 36 = 43. 
+
+The answer is 43.",43,-0.0002956622638001718,True
+" Wendy picked 103 flowers for her friend’s wedding. She was making bouquets with 8 flowers in each one. If 47 of the flowers wilted before the wedding, how many bouquets could she still make? ",7.0,"Wendy started with 103 flowers but 47 wilted, so she has 103 - 47 = 56 flowers. Since each bouquet has 8 flowers, she can make 56 / 8 = 7 bouquets.",7,-0.00023973227420608393,True
+" Adam had 48 books. If he sold 19 of them and used the money he earned to buy 38 new books, how many books would Adam have? ",67.0,"Initially, Adam had 48 books. He sold 19 books, so he was left with 48 - 19 = 29 books. Then, he bought 38 new books, so now he has 29 + 38 = 67 books.",67,-0.0003091393474447437,True
+" Nancy's class is going on a field trip to the zoo. If each van can hold 5 people and there are 12 students and 3 adults going, how many vans will they need? ",3.0,"Nancy's class has 12 students and 3 adults. To find the total number of people going, we add 12 + 3 = 15. Each van can hold 5 people. To find the number of vans needed, we divide 15 by 5, which equals 3. The answer is 3.",3,-7.031286075053948e-05,True
+" For a birthday party Tom bought 4 regular sodas and 52 diet sodas. If his fridge would only hold 7 on each shelf, how many shelves would he fill up? ",8.0,"To find out how many shelves Tom will fill up with sodas, we need to determine the total number of sodas and divide it by 7 (since each shelf can hold 7 sodas). 
+
+Tom has 4 regular sodas and 52 diet sodas, so the total number of sodas is 4 + 52 = 56.
+
+Now, let's divide 56 by 7 to find the number of shelves: 56 ÷ 7 = 8.",8,-0.00036413342246278046,True
+" The school cafeteria had 38 apples. If they used 20 to make lunch for the students and then bought 28 more, how many apples would they have? ",46.0,"The school had 38 apples originally. They used 20 apples to make lunch, so they had 38 - 20 = 18 apples left. Then, they bought 28 more apples, so now they have 18 + 28 = 46 apples. The answer is 46.",46,-0.00010491803700259257,True
+" Luke was helping the cafeteria workers pick up lunch trays, but he could only carry 4 trays at a time. If he had to pick up 20 trays from one table and 16 trays from another, how many trips will he make? ",9.0,"Let's calculate the number of trips Luke will make. He needs to pick up 20 trays and 16 trays.
+
+In each trip, he can carry 4 trays. So, he will need to make as many trips as the total number of trays he needs to pick up, divided by the number of trays he can carry per trip. Let's first find the total trays: 20 + 16 = 36.
+
+To find the number of trips, we'll divide the total trays by the number he can carry per trip: 36 / 4 = 9.
+
+So Luke will make 9 trips to pick up all the trays. The answer is 9.",9,-0.00010171295006210366,True
+" The cafeteria had 96 apples. For lunch they handed out 42 to students and decided to use the rest to make pies. If each pie takes 6 apples, how many pies could they make? ",9.0,"The cafeteria started with 96 apples. They handed out 42 to students, so they have 96 - 42 = 54 apples left. Since each pie takes 6 apples, they can make 54 / 6 = 9 pies. The answer is 9.",9,-5.178741329891967e-05,True
+" Henry had 3 action figures, but needed 8 total for a complete collection. If each one costs $6, how much money would he need to finish his collection? ",30.0,"There are 8 action figures in total for a complete collection, and Henry already has 3. So he needs 8 - 3 = 5 more action figures. Each action figure costs $6. To find the total amount, multiply the number of action figures needed by the cost of each: 5 * 6 = 30.",30,-0.00016571243618112625,True
+" Frank had saved up 3 dollars. If he received another 37 dollars for his allowance, how many 8 dollar toys could he buy? ",5.0,"There are 3 steps to find the answer. You need to find how much money Frank has in total, then divide it by the cost of the toys.
+
+Step 1: Find the total amount of money Frank has: 
+Frank had 3 dollars. He received 37 dollars for his allowance. So he now has 3 + 37 = 40 dollars.
+
+Step 2: Determine how many toys Frank can buy with the money he has:
+Each toy costs 8 dollars. To find out how many toys Frank can buy, divide the total amount of money by the cost of each toy: 40 / 8 = 5.
+
+The answer is 5.",5,-0.000662042950459377,True
+" Vanessa and her mom were picking carrots from their garden. Vanessa picked 17 and her mother picked 14. If only 24 of the carrots were good, how many bad carrots did they have? ",7.0,"Since they picked 17 carrots from Vanessa and 14 from her mom, the total number of carrots they picked is 17 + 14 = 31. However, only 24 of the carrots were good, which means the rest were bad. So, they had 31 - 24 = 7 bad carrots. The answer is 7.",7,-0.00023883186646805036,True
+ At a company picnic 23 managers and 7 employees decided to start a game of volleyball. If they split into 6 teams how many people would be on each team? ,5.0,"A: The total number of participants in the volleyball game is 23 managers + 7 employees = 30 people. They split into 6 teams. To find the number of people on each team, you divide the total number of participants by the number of teams: 30 / 6 = 5. 
+
+So there would be 5 people on each team.",5,-0.00023962159313509933,True
+" Tiffany baked 8 brownies, but needed 17 total for her party. If she used 8 cups of flour on each one, how much cups of flour does she still need? ",72.0,"First, we need to find out how many more brownies Tiffany needs to bake to reach 17. Since she already has 8, we need to subtract 8 from the total to find out how many more she needs:
+
+17 (total) - 8 (already baked) = 9
+
+Since she uses 8 cups of flour for each brownie, we need to multiply the number of brownies she still needs by 8:
+
+9 (more brownies) * 8 (cups of flour per brownie) = 72",72,-0.007858825236453787,True
+" Carol and her mom were picking carrots from their garden. Carol picked 29 and her mother picked 16. If only 38 of the carrots were good, how many bad carrots did they have? ",7.0,"The total number of carrots picked by Carol and her mom is 29 + 16 = 45.
+
+If only 38 of the carrots were good, the number of bad carrots is 45 - 38 = 7.
+
+The answer is 7.",7,-3.837897151277061e-05,True
+" A worksheet had 7 problems on it. If a teacher had 17 worksheets to grade and had already graded 8 of them, how many more problems does she have to grade? ",63.0,"Since the teacher already graded 8 worksheets, which have 7 problems each, she has graded 8 * 7 = 56 problems. Since there are a total of 17 worksheets and she's already graded 8, there are 17 - 8 = 9 worksheets left. Now, these 9 worksheets each have 7 problems, so there are a total of 9 * 7 = 63 problems left. The answer is 63.",63,-0.0006587733594581106,True
+" There were 8 friends playing a video game online when 2 more players joined the game. If each player had 6 lives, how many lives did they have total? ",60.0,"8 friends were originally playing, and each had 6 lives. So they had 8 x 6 = 48 lives. After 2 more players joined, there were 10 players in total. Each still had 6 lives, so there are 10 x 6 = 60 lives in total. The answer is 60.",60,-0.0003678135499644601,True
+" At the arcade Cody won 49 tickets. If he spent 25 tickets on a beanie and later won 6 more tickets, how many would he have? ",30.0,"Cody started with 49 tickets. He spent 25 tickets on a beanie, so he had 49 - 25 = 24. Then, he won 6 more tickets, so he now has 24 + 6 = 30 tickets. The answer is 30.",30,-1.86803741814158e-05,True
+ For Halloween Bianca received 78 pieces of candy. She ate 30 pieces then placed the rest into piles with 8 in each pile. How many piles could she make? ,6.0,"To find the number of piles Bianca can make, we need to first determine how many pieces of candy she has left after eating 30. 
+
+She started with 78 pieces of candy. After eating 30, she had 78 - 30 = 48 pieces. 
+
+Since each pile has 8 pieces, to find the number of piles, we divide the total number of pieces by the number of pieces per pile. 
+
+So 48 / 8 = 6. 
+
+The answer is 6.",6,-0.00012308862118698917,True
+" There were 5 friends playing a video game online when 2 more players joined the game. If each player had 8 lives, how many lives did they have total? ",56.0,"First, we need to determine the total number of players after the 2 new players joined. There were originally 5 players, and 2 more players joined. 5 + 2 = 7. Then we multiply the total number of players by the number of lives each player has. 7 * 8 = 56. The answer is 56.",56,-0.0019181161481416037,True
+" At a restaurant each adult meal costs $8 and kids eat free. If a group of 11 people came in and 2 were kids, how much would it cost for the group to eat? ",72.0,"Since kids eat for free, only the adults need to pay. There are 11 people in total and 2 of them are kids, so 11 - 2 = 9 adults. Each adult meal costs 8 dollars, so 9 * 8 = 72. The answer is 72.",72,-0.010343788568869111,True
+" Roger had 25 books. If he sold 21 of them and used the money he earned to buy 30 new books, how many books would Roger have? ",34.0,"Since Roger sold 21 books and then bought 30 new books, they canceled each other out. He started with 25 books and ended up with 25. The answer is 25.",25,-6.282538163535949e-05,False
+" Wendy was playing a video game and had 10 lives. In a hard part of the game she lost 6 lives. If she got 37 more lives in the next level, how many lives would she have? ",41.0,"Let's solve it step by step:
+
+Wendy originally had 10 lives. She lost 6 lives, so she had 10 - 6 = 4 lives left. Then she got 37 more lives, so she now has 4 + 37 = 41 lives.
+
+The answer is 41.",41,-0.00024268683024269134,True
+" Frank made 19 dollars mowing lawns over the summer. If he spent 11 dollars buying new mower blades, how many 2 dollar games could he buy with the money he had left? ",4.0,"Frank started with 19 dollars. After spending 11 dollars on mower blades, he had 19 - 11 = 8 dollars left. Since each game costs 2 dollars, the number of games he could buy is 8 / 2 = 4.",4,-2.9975264384153486e-05,True
+" There school's baseball team had 48 new players and 6 returning players. If the coach put them into groups with 6 players in each group, how many groups would there be? ",9.0,"Total players = New players + Returning players
+Total players = 48 + 6
+Total players = 54
+
+Since there are 6 players in each group, we need to divide the total number of players by 6.
+Number of groups = Total players / Players per group
+Number of groups = 54 / 6
+Number of groups = 9",9,-5.7971324627133894e-05,True
+ Nancy had 80 files on her computer. She deleted 31 of them and put the rest into folders with 7 files in each one. How many folders did Nancy end up with? ,7.0,"If she deleted 31 files out of 80, that means she was left with 80 - 31 = 49 files. These 49 files are then divided into folders with 7 files in each one. To find out how many folders she has, you divide the remaining files by the number of files per folder: 49 ÷ 7 = 7.",7,-0.0001777356263392926,True
+ Luke was selling his old games. He started out with 39 but sold 19 of them. He packed the rest up putting 4 games into each box. How many boxes did he have to use? ,5.0,"A: To find out how many boxes Luke had to use, we first need to find out how many games he had left after selling 19. He started with 39 games and sold 19, so he had 39 - 19 = 20 games left. Then, since he put 4 games into each box, the number of boxes he had to use is 20 / 4 = 5. The answer is 5.",5,-1.4830854994861204e-05,True
+" There are 65 students trying out for the school's trivia teams. If 17 of them didn't get picked for the team and the rest were put into 8 groups, how many students would be in each group? ",6.0,"Let's solve for the number of students in each group:
+
+There are 65 students trying out for the team, but 17 didn't get picked. So, we subtract 17 from 65 to get the number of students who got picked:
+
+65 - 17 = 48
+
+Now, we need to divide the number of students who got picked (48) by the number of groups (8):
+
+48 ÷ 8 = 6
+
+So, there will be 6 students in each group.",6,-6.743978195262883e-05,True
+ Isabel uploaded 25 pictures to Facebook. She put 10 pics into one album and put the rest into 5 different albums. How many pictures were in each album? ,3.0,"It seems like there's a question in the middle. I'll answer the given questions and tackle the last one below.
+
+1. To find out how many pictures Isabel put in the 5 different albums, we need to subtract the pictures she put in one album from the total number of pictures.
+
+She put 10 pictures in 1 album and the rest into 5 albums. To find the rest, we subtract 10 from 25: 25 - 10 = 15.
+
+Since the 15 pictures were put in 5 different albums, we need to divide 15 by 5 to find out how many pictures were in each album: 15 / 5 = 3.
+
+So, the answer is 3.",3,-0.0004400991721062734,True
+" Mike made 14 dollars mowing lawns and 26 dollars weed eating. If he only spent 5 dollar a week, how long would the money last him? ",8.0,"First, calculate the total amount of money Mike made: 14 + 26 = 40 dollars.
+
+Mike spends 5 dollars per week. To find out how many weeks the money will last, divide the total amount he made by his weekly spending: 40 / 5 = 8.
+
+So, the money Mike made will last him 8 weeks.",8,-0.00019821722951908661,True
+" Vanessa had 16 music files and 48 video files on her flash drive. If she deleted 30 of the files, how many files were still on her flash drive? ",34.0,"The total number of files Vanessa originally had is 16 + 48 = 64. If she deleted 30 files, then she has 64 - 30 = 34 files left. The answer is 34.",34,-5.4153138137959535e-05,True
+" Dave had to wash 9 short sleeve shirts and 27 long sleeve shirts before school. If he had only washed 20 of them by the time school started, how many did he not wash? ",16.0,"To find the answer, we need to determine the total number of shirts Dave had to wash and subtract the number he already washed.
+
+Dave had to wash 9 short sleeve shirts and 27 long sleeve shirts. To find the total number of shirts, we add them together: 9 + 27 = 36.
+
+Dave already washed 20 shirts. To find the number of shirts he did not wash, we subtract 20 from 36: 36 - 20 = 16.
+
+The answer is 16.",16,-8.786666076507008e-05,True
+" A chef needs to cook 9 potatoes. He has already cooked 7. If each potato takes 3 minutes to cook, how long will it take him to cook the rest? ",6.0,"Since the chef already cooked 7 potatoes, he has 9 - 7 = 2 potatoes left to cook. Each potato takes 3 minutes to cook, so 2 * 3 = 6 minutes to cook the remaining potatoes.
+
+The answer is 6.",6,-0.001791767804138746,True
+" While on vacation, Gwen took 41 pictures at the zoo and 29 at the museum. If she later deleted 15 of the pictures, how many pictures from her vacation did she still have? ",55.0,"Gwen took 41 pictures at the zoo and 29 at the museum. So, the total number of pictures she took is 41 + 29 = 70. Then she deleted 15 pictures. So, the number of pictures she still has is 70 - 15 = 55. The answer is 55.",55,-1.238596032840737e-05,True
+" A pet shelter had 2 puppies when another 34 were brought in. If 4 puppies a day are adopted, how long would it take for all of them to be adopted? ",9.0,"A: To find out how long it would take for all the puppies to be adopted, you need to know how many puppies are in total and how many puppies are adopted each day.
+
+The total number of puppies is the initial number of puppies plus the number brought in: 2 + 34 = 36 puppies.
+
+Each day, 4 puppies are adopted. To find out how many days it would take to adopt all 36 puppies, you can divide the total number of puppies by the number of puppies adopted per day: 36 ÷ 4 = 9.
+
+The answer is 9.",9,-0.0002974444874462923,True
+" Will had 59 pieces of clothing to wash. He put 32 of them in one load, but decided to split the rest into 9 equal loads. How many pieces of clothing could go in each of the small loads? ",3.0,"Will had 59 pieces of clothing. He put 32 in one load, so he had 59 - 32 = 27 left. He wanted to split this into 9 equal loads, so he needs to divide 27 by 9. 27 ÷ 9 is 3. The answer is 3.",3,-0.0010683370045803796,True
+" Adam bought 2 boxes of chocolate candy and 5 boxes of caramel candy. If each box has 4 pieces inside it, how much candy did he have total? ",28.0,"Let's break down Adam's purchase. He bought 2 boxes of chocolate candy and 5 boxes of caramel candy. 
+
+For the chocolate candy, there are 2 boxes with 4 pieces each, so he has 2 * 4 = 8 pieces of chocolate candy.
+
+For the caramel candy, there are 5 boxes with 4 pieces each, so he has 5 * 4 = 20 pieces of caramel candy.
+
+In total, Adam has 8 + 20 = 28 pieces of candy.
+
+The answer is 28.",28,-0.00021333313866888525,True
+" April's discount flowers was having a sale where each flower was 6 dollars. If Katie bought 5 roses and 5 daisies, how much did she spend? ",60.0,"Since Katie bought 5 roses and 5 daisies at 6 dollars each, the total cost can be calculated by multiplying the number of items by their individual cost.
+
+5 roses = 5 x 6 = 30 dollars
+5 daisies = 5 x 6 = 30 dollars
+
+To find the total amount spent, add the cost of roses to the cost of daisies.
+
+Total spent = 30 + 30 = 60 dollars.
+
+So she spent 60 dollars in total.",60,-5.3096383093091254e-05,True
+" At the schools book fair Victor bought 32 adventure books and 37 mystery books. If 16 of the books were used, how many new books did he buy? ",53.0,"At the school book fair, Victor bought 32 adventure books and 37 mystery books. In total, he bought 32 + 37 = 69 books. After 16 were used, Victor had 69 - 16 = 53 new books. The answer is 53.",53,-0.00027584986255135445,True
+" Maria picked 48 carrots from her garden. If she threw out 11 of them and then picked 15 more the next day, how many carrots would she have total? ",52.0,"After throwing out 11 carrots, Maria had 48 - 11 = 37 carrots left. 
+
+Then, she picked 15 more carrots, so she now has 37 + 15 = 52 carrots in total.
+
+The answer is 52.",52,-5.0745484509051216e-05,True
+" A florist had 50 roses. If she sold 15 of them and then later picked 21 more, how many roses would she have? ",56.0,"First, the florist had 50 roses originally. She sold 15 of them. So, she had 50 - 15 = 35 roses left.
+
+Then, she picked 21 more roses. So now she has 35 + 21 = 56 roses.
+
+The answer is 56.",56,-3.8959114849869975e-05,True
+" Isabel had 2 pages of math homework and 4 pages of reading homework. If each page had 5 problems on it, how many problems did she have to complete total? ",30.0,"To find the total problems, we first need to find the total number of pages. Then we can multiply the total number of pages by the problems per page.
+
+Isabel had 2 pages of math homework and 4 pages of reading homework. So, the total number of pages is 2 + 4 = 6.
+
+Each page had 5 problems. So, to find the total problems, we multiply the total number of pages by the problems per page: 6 pages * 5 problems/page = 30 problems.
+
+The answer is 30.",30,-0.00011824536751112542,True
+" There were 4 friends playing a video game online when 5 more players joined the game. If each player had 3 lives, how many lives did they have total? ",27.0,"Let's break it down:
+
+There were 4 friends already playing the game. Then 5 more players joined. So, the total number of players is 4 + 5 = 9.
+
+Each player had 3 lives. To find the total number of lives, we multiply the total number of players by the number of lives each player has: 9 * 3 = 27.
+
+The answer is 27.",27,-2.3043776875437217e-05,True
+" Kaleb had 12 dollars. If he spent 8 bucks on a new game, how many 2 dollar toys could he buy with the money he had left? ",2.0,"After Kaleb spent 8 dollars on the game, he had 12 - 8 = 4 dollars left. We need to find how many toys he can buy with 4 dollars. Each toy costs 2 dollars, so we divide 4 by 2 = 2 toys. The answer is 2 toys.",2,-2.8808031928130535e-05,True
+" Katie had 7 pages of math homework and 3 pages of reading homework. If each page had 9 problems on it, how many problems did she have to complete total? ",90.0,"Katie had 7 pages of math homework and 3 pages of reading homework. Each page had 9 problems. To find the total number of problems, we need to multiply the number of pages by the number of problems per page. 
+
+7 pages of math homework: 7 x 9 = 63 problems
+3 pages of reading homework: 3 x 9 = 27 problems
+
+To find the total number of problems, we add the problems from math and reading homework: 63 + 27 = 90. The answer is 90.",90,-0.00011236132416145011,True
+" While shopping for music online, Janet bought 6 country albums and 2 pop albums. Each album came with a lyric sheet and had 9 songs. How many songs did Janet buy total? ",72.0,"First, let's calculate the number of albums Janet bought. 
+She bought 6 country albums and 2 pop albums. So in total, she bought 6 + 2 = 8 albums.
+
+Each album had 9 songs. To find the total number of songs, we multiply the number of albums by the number of songs per album: 8 * 9 = 72.
+
+The answer is 72.",72,-0.00023775405681040421,True
+" Jerry made 14 dollars mowing lawns and 31 dollars weed eating. If he only spent 5 dollar a week, how long would the money last him? ",9.0,"Let's break it down:
+
+Jerry made a total of 14 + 31 = 45 dollars. He spends 5 dollars per week. 
+
+To find out how long the money will last, we need to divide the total amount of money by the amount he spends per week: 45 / 5 = 9.
+
+The answer is 9 weeks.",9,-0.0001994363161094649,True
+" Adam had 33 books. If he sold 11 of them and used the money he earned to buy 23 new books, how many books would Adam have? ",45.0,"After selling 11 books, Adam would have 33 - 11 = 22 books left. He then bought 23 new books. So he would have 22 + 23 = 45 books. The answer is 45.",45,-4.114223539726902e-05,True
+" Kaleb was collecting cans for recycling. On Saturday he filled 5 bags up and on Sunday he filled 5 more bags. If each bag had 4 cans in it, how many cans did he pick up total? ",40.0,"To find the total number of cans, you need to find the number of cans in the bags he filled on Saturday and Sunday, then add them together.
+
+He filled 5 bags on Saturday and 5 bags on Sunday, and each bag has 4 cans. 
+
+On Saturday, he filled 5 bags. So, 5 * 4 = 20 cans.
+On Sunday, he filled 5 bags. So, 5 * 4 = 20 cans. 
+
+Total number of cans are 20 + 20 = 40. 
+
+The answer is 40.",40,-3.48892642400583e-05,True
+" Nancy was organizing her book case making sure each of the shelves had exactly 6 books on it. If she had 2 shelves of mystery books and 6 shelves of picture books, how many books did she have total? ",48.0,"Since Nancy had 2 shelves of mystery books and 6 shelves of picture books, to find the total number of books, we need to multiply the number of shelves by the number of books on each shelf. 
+
+2 shelves of mystery books with 6 books on each shelf will be 2 * 6 = 12 books.
+6 shelves of picture books with 6 books on each shelf will be 6 * 6 = 36 books.
+In total, Nancy will have 12 + 36 = 48 books. The answer is 48.",48,-0.00016706680310897863,True
+" Paul had saved up 3 dollars. If he received another 7 dollars for his allowance, how many 5 dollar toys could he buy? ",2.0,"First, we need to find the total amount of money Paul has. He started with $3 and received $7 for his allowance. So, he has 3 + 7 = 10 dollars.
+
+Now, we want to know how many 5-dollar toys he can buy. To do this, we divide the total amount of money he has by 5.
+
+10 / 5 = 2
+
+The answer is 2, so Paul can buy 2 toys that are 5 dollars each.",5,-0.0005550330065595339,False
+" Wendy was playing a video game and had 43 lives. In a hard part of the game she lost 8 lives. If she got 39 more lives in the next level, how many lives would she have? ",74.0,"Let's solve the last problem.
+
+Initially, Wendy had 43 lives. She lost 8 lives, so she had 43 - 8 = 35 lives left. 
+
+Then she got 39 more lives, so now she has 35 + 39 = 74 lives. The answer is 74.",74,-3.935232932189493e-05,True
+ Katie had 85 files on her computer. She deleted 40 of them and put the rest into folders with 5 files in each one. How many folders did Katie end up with? ,9.0,"Let's break it down:
+
+Katie started with 85 files. After deleting 40 files, she has 85 - 40 = 45 files left. 
+
+She then put the remaining 45 files into folders with 5 files in each. 
+
+To find out how many folders she has, we divide the total number of files by the number of files per folder:
+
+45 / 5 = 9
+
+The answer is 9.",9,-0.00029823863591325927,True
+ Will was working as a sacker at a grocery store where he made 8 dollars an hour. On Monday he worked 8 hours and on Tuesday he worked 2 hours. How much money did Will make in those two days? ,80.0,"To find out how much money Will made in those two days, we need to add the amount he made on Monday and Tuesday. 
+
+On Monday, Will worked 8 hours at $8 per hour. 8 hours * 8 dollars per hour = 64 dollars.
+
+On Tuesday, Will worked 2 hours at $8 per hour. 2 hours * 8 dollars per hour = 16 dollars.
+
+Total money made by Will in those two days = 64 + 16 = 80 dollars.
+
+The answer is 80.",80,-9.030201390014638e-05,True
+" For the school bake sale Carol made 19 cupcakes. If she sold 6 of them and then made 27 more, how many cupcakes would she have? ",40.0,"To find out how many cupcakes Carol would have, we need to first calculate how many cupcakes she had after selling 6 of them. 
+
+She started with 19 cupcakes. She sold 6, so she had 19 - 6 = 13 cupcakes left. Then she made 27 more. To find the total, we add 13 and 27: 13 + 27 = 40. The answer is 40.",40,-6.537037815215367e-05,True
+" A trivia team had 14 members total, but during a game 7 members didn't show up. If each member that did show up scored 5 points, how many points were scored total? ",35.0,"To find the total points scored, we first need to find out how many members showed up to the game. There were 14 members in total, but 7 didn't show up. So the number of members who showed up is 14 - 7 = 7.
+
+Since each of the members who showed up scored 5 points, we can find the total points scored by multiplying the number of members who showed up by the points each member scored: 7 * 5 = 35.
+
+The answer is 35.",35,-0.0037561461603531307,True
+" A trivia team had 5 members total, but during a game 2 members didn't show up. If each member that did show up scored 6 points, how many points were scored total? ",18.0,"To find the total points scored, we need to know how many members showed up. There were 5 members originally, but 2 didn't show up, so 5 - 2 = 3 members showed up. If each member scored 6 points, then 3 x 6 is 18. The answer is 18.",18,-0.01262488105930023,True
+" Oliver is at the library helping put away books. There are 46 book to put away total but a librarian takes 10 of them and leaves Oliver with the rest. If he can fit 4 books on a shelf, how many shelves will he need? ",9.0,"Since the librarian took 10 books, Oliver has 46 - 10 = 36 books left.
+
+Oliver can fit 4 books on each shelf. To find the number of shelves needed, divide the total number of books by the number of books that can fit on each shelf: 36 ÷ 4 = 9.
+
+The answer is 9.",9,-3.408179435364651e-05,True
+" Luke was putting his spare change into piles. He had 5 piles of quarters and 5 piles of dimes. If each pile had 3 coins in it, how many coins did he have total? ",30.0,"To find the total number of coins, we need to calculate the number of quarters and the number of dimes and then add them together.
+
+Number of quarters: There are 5 piles of quarters and each pile has 3 coins, so the total number of quarters is 5 x 3 = 15.
+
+Number of dimes: There are 5 piles of dimes and each pile has 3 coins, so the total number of dimes is 5 x 3 = 15.
+
+Total number of coins = Number of quarters + Number of dimes = 15 + 15 = 30. The answer is 30.",30,-1.551438764366766e-05,True
+" Gwen and her friends were recycling paper for their class. For every 3 pounds they recycled they earned one point. If Gwen recycled 5 pounds and her friends recycled 13 pounds, how many points did they earn? ",6.0,"Q: Gwen recycled 5 pounds, and her friends recycled 13 pounds. To find the total number of pounds recycled, add 5 + 13 = 18 pounds. Since they earned 1 point for every 3 pounds, divide 18 by 3. 18 / 3 = 6. The answer is 6 points.",6,-0.000980166268091131,True
+ Haley's favorite band was holding a concert where tickets were 4 dollars each. Haley bought 3 tickets for herself and her friends and 5 extra tickets in case anyone else wanted to go. How much did she spend? ,32.0,"Let's break it down:
+
+Haley bought 3 tickets for herself and her friends, so that's 3 tickets at 4 dollars each. 3 x 4 = 12 dollars. 
+
+She also bought 5 extra tickets, which is another 5 x 4 = 20 dollars. 
+
+In total, Haley spent 12 + 20 = 32 dollars.
+
+The answer is 32.",32,-0.0034720116110856986,True
+ George had 30 dollars. For his birthday he got 16 more dollars but spent 38 on a new game. How much money does he have now? ,8.0,"George started with 30 dollars. He got 16 more dollars for his birthday, so he had 30 + 16 = 46 dollars. However, he spent 38 dollars on a game. So he is left with 46 - 38 = 8 dollars. The answer is 8.",8,-9.21356030694711e-05,True
+" A pet store has 4 bird cages. If each cage has 8 parrots and 2 parakeets in it, how many birds does the pet store have total? ",40.0,"Let's break this down: 
+
+There are 4 bird cages. Each cage has 8 parrots, so the total number of parrots is 4 x 8 = 32.
+Each cage also has 2 parakeets, so the total number of parakeets is 4 x 2 = 8.
+To find the total number of birds, we add the number of parrots and parakeets together: 32 (parrots) + 8 (parakeets) = 40.
+
+The answer is 40.",40,-5.357375402315544e-05,True
+" Kaleb bought 14 boxes of chocolate candy and gave 5 to his little brother. If each box has 6 pieces inside it, how many pieces did Kaleb still have? ",54.0,"Initially, Kaleb bought 14 boxes and gave 5 to his brother. This means he still has 14 - 5 = 9 boxes of chocolates. Since each box has 6 pieces, we can multiply 9 (boxes) by 6 (pieces per box) to find the total number of pieces Kaleb still has: 9 * 6 = 54. The answer is 54.",54,-0.0001052252508515461,True
+" Robin uploaded 31 pictures from her phone and 5 from her camera to facebook. If she sorted the pics into 9 different albums with the same amount of pics in each album, how many pictures were in each of the albums? ",4.0,"To find the number of pictures in each album, you need to divide the total number of pictures by the number of albums. 
+
+Total pictures = 31 (from phone) + 5 (from camera) = 36 pictures.
+Number of albums = 9
+
+Pictures in each album = Total pictures / Number of albums = 36 / 9 = 4.
+
+The answer is 4.",4,-0.0013676129100421211,True
+" Mike made 69 dollars mowing lawns over the summer. If he spent 24 dollars buying new mower blades, how many 5 dollar games could he buy with the money he had left? ",9.0,"To find out how many 5-dollar games Mike can buy, we first need to calculate how much money he has left after spending 24 dollars on mower blades.
+
+Mike started with 69 dollars. After spending 24 dollars, he had 69 - 24 = 45 dollars left.
+
+To find out how many 5-dollar games Mike can buy, we need to divide the amount of money he has left (45 dollars) by the cost of each game (5 dollars):
+
+45 ÷ 5 = 9
+
+The answer is 9.",9,-5.9415325783845796e-05,True
+" Maria bought 2 new chairs and 2 new tables for her house. If she spent 8 minutes on each piece furniture putting it together, how many minutes did it take her to finish? ",32.0,"It took Maria 2 hours and 8 minutes to put the furniture together. Since this is not the format you requested, let's find out how many minutes she spent putting the furniture together using only minutes. 
+
+She put 4 pieces of furniture together, 2 chairs and 2 tables. She spent 8 minutes on each piece. So 4 pieces for 8 minutes each is 4 * 8 = 32 minutes. The answer is 32.",32,-0.022462118939082332,True
+" While on vacation, Rachel took 6 pictures at the zoo and 9 at the museum. If she later deleted 11 of the pictures, how many pictures from her vacation did she still have? ",4.0,"The total number of pictures Rachel took is 6 (at the zoo) + 9 (at the museum) = 15. After deleting 11, she had 15 - 11 = 4 pictures left. The answer is 4.",4,-1.7941188072886254e-05,True
+" Maria was making baggies of cookies with 8 cookies in each bag. If she had 5 chocolate chip cookies and 19 oatmeal cookies, how many baggies could she make? ",3.0,"To find the total number of cookies, we add the number of chocolate chip cookies and oatmeal cookies: 5 + 19 = 24 cookies. Since each baggie can hold 8 cookies, we need to divide the total number of cookies by 8 to find out how many baggies Maria can make: 24 ÷ 8 = 3. The answer is 3.",3,-0.00015451239781160458,True
+" April's discount flowers was having a sale where each flower was 3 dollars. If Zoe bought 8 roses and 2 daisies, how much did she spend? ",30.0,8 roses at 3 dollars each will be 8 * 3 = 24 dollars. 2 daisies at 3 dollars each will be 2 * 3 = 6 dollars. The total amount Zoe spent is 24 + 6 = 30 dollars. The answer is 30.,30,-0.00016027788582694428,True
+" Bianca was organizing her book case making sure each of the shelves had exactly 8 books on it. If she had 5 shelves of mystery books and 4 shelves of picture books, how many books did she have total? ",72.0,"Let's solve the problem.
+
+Bianca had 5 shelves of mystery books and 4 shelves of picture books. To find the total number of books, we multiply the number of shelves by the number of books per shelf.
+
+For mystery books: 5 shelves * 8 books/shelf = 40
+For picture books: 4 shelves * 8 books/shelf = 32
+
+To find the total number of books, we add the number of books from both types of shelves: 40 + 32 = 72.
+
+The answer is 72.",72,-0.0001235251755677052,True
+" John was organizing his baseball cards in a binder with 3 on each page. If he had 8 new cards and 16 old cards to put in the binder, how many pages would he use? ",8.0,"Each page can hold 3 cards. John has 8 new cards and 16 old cards, so he has a total of 8 + 16 = 24 cards to organize. To find out how many pages he'll need, divide the total number of cards by the number of cards per page: 24 / 3 = 8. The answer is 8.",8,-6.380609306006002e-05,True
+" Isabel baked 3 brownies, but needed 5 total for her party. If she used 5 cups of flour on each one, how much cups of flour does she still need? ",10.0,"The problem states Isabel baked 3 brownies, but needed 5. So she needs 5 - 3 = 2 more brownies. Since she used 5 cups of flour on each brownie, she needs 2 * 5 cups of flour for the remaining brownies. 2 * 5 is 10. The answer is 10.",10,-0.0016063074424941786,True
+" For the school bake sale Maria made 19 cupcakes. If she sold 5 of them and then made 10 more, how many cupcakes would she have? ",24.0,"Originally, Maria had 19 cupcakes. She sold 5 cupcakes, so she was left with 19 - 5 = 14. She then made 10 more cupcakes. So in total, she has 14 + 10 = 24. The answer is 24.",24,-5.400553279349541e-05,True
+" Tom bought 40 tickets at the state fair. He spent 28 tickets at the 'dunk a clown' booth and decided to use the rest on rides. If each ride cost 4 tickets, how many rides could he go on? ",3.0,"Since Tom spent 28 tickets at the 'dunk a clown' booth, he has 40 - 28 = 12 tickets left. Since each ride costs 4 tickets, the number of rides he can go on is 12 / 4 = 3. The answer is 3.",3,-4.529452415091918e-05,True
+ In fourth grade there were 31 students at the start of the year. During the year 5 students left and 11 new students came to school. How many students were in fourth grade at the end? ,37.0,"To find out how many students are in fourth grade now, we need to subtract the students that left and add the students that came. 
+
+Originally, there were 31 students. 5 students left, so we have 31 - 5 = 26. Then, 11 new students came, so we have 26 + 11 = 37. The answer is 37.",37,-4.955709257752367e-05,True
+" While shopping, Maria bought 35 green towels and 21 white towels. If she gave her mother 34 of them, how many towels did Maria end up with? ",22.0,"To solve this problem, first, you need to find out how many towels Maria had in total. She bought 35 green towels and 21 white towels. So in total, she has 35 + 21 = 56 towels. 
+
+Then she gave her mother 34 towels. So she has 56 - 34 = 22 towels left. The answer is 22.",22,-7.796787009564814e-05,True
+" While playing a trivia game, Adam answered 8 questions correct in the first half and 2 questions correct in the second half. If each question was worth 8 points, what was his final score? ",80.0,"To find Adam's final score, first, find the total points from the first half and the second half. 
+
+First half: 8 questions correct * 8 points per question = 64 points.
+Second half: 2 questions correct * 8 points per question = 16 points.
+
+Now, add the points from both halves: 64 + 16 = 80 points. 
+
+The answer is 80.",80,-9.217053262260237e-05,True
+" Paul was collecting cans for recycling. On Saturday he filled 6 bags up and on Sunday he filled 3 more bags. If each bag had 8 cans in it, how many cans did he pick up total? ",72.0,"On Saturday, Paul collected 6 bags of cans. Since each bag has 8 cans, he collected 6 * 8 = 48 cans on Saturday. On Sunday, he collected 3 more bags of cans, which is 3 * 8 = 24 cans. Total cans collected is 48 + 24 = 72. The answer is 72.",72,-0.00047116814811026315,True
+" Bianca and her friends were recycling paper for their class. For every 3 pounds they recycled they earned one point. If Bianca recycled 24 pounds and her friends recycled 3 pounds, how many points did they earn? ",9.0,"In order to find the total number of points they earned, they need to earn points for both Bianca's and her friends' recycling. Bianca recycled 24 pounds, and for every 3 pounds they earn 1 point. So, Bianca earned 24 / 3 = 8 points. Her friends recycled 3 pounds. 3 / 3 = 1 point for her friends. In total, they earned 8 + 1 = 9 points. The answer is 9.",9,-0.0006574067895202036,True
+ A group of 3 friends went into a restaurant. The chef already had 8 chicken wings cooked but cooked 10 more for the group. If they each got the same amount how many would each person get? ,6.0,"In this case, we need to find out the total number of chicken wings and then divide it by the number of people to determine how many chicken wings each person will get. 
+
+First, let's find the total number of chicken wings: 8 (pre-cooked) + 10 (newly cooked) = 18 chicken wings.
+
+Since there are 3 friends and they will get the same amount, we divide 18 by 3: 18 ÷ 3 = 6. 
+
+The answer is 6 chicken wings per person.",6,-0.001019781497698333,True
+" John had 33 socks. If he threw away 19 old ones that didn't fit and bought 13 new ones, how many socks would he have? ",27.0,"Originally, John had 33 socks. He threw away 19 old ones, so he had 33 - 19 = 14 left. Then he bought 13 new ones. So now he has 14 + 13 = 27 socks. The answer is 27.",27,-9.088231397259582e-05,True
+" There school's baseball team had 2 new players and 6 returning players. If the coach put them into groups with 4 players in each group, how many groups would there be? ",2.0,"There are 2 new players and 6 returning players. So, in total, there are 2 + 6 = 8 players. Each group has 4 players. To find out how many groups, divide the total number of players by the number of players per group: 8 / 4 = 2. The answer is 2.",2,-3.2152558671503976e-05,True
+" A painter needed to paint 6 rooms in a building. Each room takes 5 hours to paint. If he already painted 2 rooms, how much longer will he take to paint the rest? ",20.0,"First, we need to find the total time needed to paint all 6 rooms. Each room takes 5 hours, so the total time is 6 * 5 = 30 hours.
+
+The painter has already painted 2 rooms, so the time spent so far is 2 * 5 = 10 hours.
+
+To find the remaining time, subtract the time already spent from the total time: 30 - 10 = 20 hours.
+
+The answer is 20.",20,-0.01120085896305035,True
+" A waiter had 22 customers in his section. If 14 of them left and the rest of his tables had 4 people at each table, how many tables did he have? ",2.0,"A: There were originally 22 customers. 14 left, so there were 22 - 14 = 8 customers left. Since there are 4 customers per table, we need to find how many tables can be made with 8 customers. To do this, we need to get how many groups of 4 are in 8. This is 8 / 4 = 2. The answer is 2 tables.",2,-0.00033189033778146116,True
+" Roger had 120 pieces of clothing to wash. He put 48 of them in one load, but decided to split the rest into 9 equal loads. How many pieces of clothing could go in each of the small loads? ",8.0,"Let's break it down step by step. 
+
+Roger had 120 pieces of clothing. He put 48 in one load. To find out how many are left, we subtract 48 from 120: 120 - 48 = 72.
+
+These 72 remaining pieces are to be divided into 9 equal loads. To find the number of pieces in each load, we need to divide 72 by 9. 
+
+So, 72 ÷ 9 = 8.
+
+The answer is 8.",8,-0.0003672229312499799,True
+ In fourth grade there were 10 students at the start of the year. During the year 4 students left and 42 new students came to school. How many students were in fourth grade at the end? ,48.0,"To find the number of students in the fourth grade at the end of the year:
+
+There were 10 students at the start of the year. 4 students left, so there were 10 - 4 = 6 students left. Then, 42 new students came, so the total number of students is 6 + 42 = 48. The answer is 48.",48,-6.795520620549072e-05,True
+" Roger is at the library helping put away books. There are 14 book to put away total but a librarian takes 2 of them and leaves Roger with the rest. If he can fit 3 books on a shelf, how many shelves will he need? ",4.0,"A: Roger has 14 books but the librarian took 2. So he has 14 - 2 = 12 books. He can fit 3 books on a shelf. To find the number of shelves Roger will need, we divide the number of books by the number that can fit on a shelf: 12 / 3 = 4. Roger needs 4 shelves.",4,-0.00028891245809442714,True
+" Bianca picked 39 tulips and 49 roses to make flower bouquets. If she only used 81 of the flowers though, how many extra flowers did Bianca pick? ",7.0,Total flowers picked: 39 tulips + 49 roses = 88 flowers. Bianca used 81 flowers. So the extra flowers she picked is 88 - 81 = 7. The answer is 7.,7,-0.00013616094153399668,True
+" Emily bought 4 new chairs and 2 new tables for her house. If she spent 8 minutes on each piece furniture putting it together, how many minutes did it take her to finish? ",48.0,"Q: There are 15 trees in the grove. Grove workers will plant trees in the grove today. After they are done, there will be 21 trees. How many trees did the grove workers plant today?
+A: There are 15 trees originally. Then there were 21 trees after some more were planted. So there must have been 21 - 15 = 6. The answer is 6.
+
+Q: If there are 3 cars in the parking lot and 2 more cars arrive, how many cars are in the parking lot?
+A: There are originally 3 cars. 2 more cars arrive. 3 + 2 = 5. The answer is 5.
+
+Q: Leah had 32 chocolates and her sister had 42. If they ate 35, how many pieces do they have left in total?
+A: Originally, Leah had 32 chocolates. Her sister had 42. So in total they had 32 + 42 = 74. After eating 35, they had 74 - 35 = 39. The answer is 39.
+
+Q: Jason had 20 lollipops. He gave Denny some lollipops. Now Jason has 12 lollipops. How many lollipops did Jason give to Denny?
+A: Jason started with 20 lollipops. Then he had 12 after giving some to Denny. So he gave Denny 20 - 12 = 8. The answer is 8.
+
+Q: Shawn has five toys. For Christmas, he got two toys each from his mom and dad. How many toys does he have now?
+A: Shawn started with 5 toys. If he got 2 toys each from his mom and dad, then that is 4 more toys. 5 + 4 = 9. The answer is 9.
+
+Q: There were nine computers in the server room. Five more computers were installed each day, from monday to thursday. How many computers are now in the server room?
+A: There were originally 9 computers. For each of 4 days, 5 more computers were added. So 5 * 4 = 20 computers were added. 9 + 20 is 29. The answer is 29.
+
+Q: Michael had 58 golf balls. On tuesday, he lost 23 golf balls. On wednesday, he lost 2 more. How many golf balls did he have at",2,-5.673487305867357e-05,False
+" A pet store has 6 bird cages. If each cage has 2 parrots and 7 parakeets in it, how many birds does the pet store have total? ",54.0,"Let's start with the number of cages, which is 6. Each cage has 2 parrots and 7 parakeets. To find the total number of parrots, we multiply 6 by 2, and to find the total number of parakeets, we multiply 6 by 7.
+
+Total number of parrots = 6 x 2 = 12
+Total number of parakeets = 6 x 7 = 42
+
+To find the total number of birds, we add the total number of parrots and parakeets.
+
+Total number of birds = 12 (parrots) + 42 (parakeets)
+Total number of birds = 54
+
+The answer is 54.",54,-2.7068195807515614e-05,True
+" Dave had to wash 9 short sleeve shirts and 27 long sleeve shirts before school. If he had only washed 20 of them by the time school started, how many did he not wash? ",16.0,"Since Dave had to wash 9 short sleeve shirts and 27 long sleeve shirts in total, and he washed 20 in total. To find out how many he didn't wash, we subtract the total number of shirts washed from the total number of shirts.
+
+Total shirts to wash = 9 short sleeve + 27 long sleeve = 36 shirts
+Shirts washed = 20
+
+Unwashed shirts = 36 - 20 = 16 shirts
+
+The answer is 16.",16,-0.0012161085792675558,True
+" While on vacation, Haley took 50 pictures at the zoo and 8 at the museum. If she later deleted 38 of the pictures, how many pictures from her vacation did she still have? ",20.0,"The total number of pictures Haley took is 50 (at the zoo) + 8 (at the museum) = 58. After deleting 38, she is left with 58 - 38 = 20 pictures. The answer is 20.",20,-5.941517972987238e-05,True
+" A florist had 5 roses. If she sold 3 of them and then later picked 34 more, how many roses would she have? ",36.0,"Let's solve the problem step by step:
+
+The florist originally had 5 roses. She sold 3 of them, so she had 5 - 3 = 2 roses left. Then she picked 34 more roses. So, now the total number of roses is 2 (that she already had) + 34 (that she picked) = 36. The answer is 36.",36,-0.00016467763586991137,True
+" For a birthday party Cody bought 4 regular sodas and 44 diet sodas. If his fridge would only hold 6 on each shelf, how many shelves would he fill up? ",8.0,"Let's calculate the total number of sodas Cody bought. He bought 4 regular sodas and 44 diet sodas, so in total, he bought 4 + 44 = 48 sodas.
+
+Since his fridge can hold 6 sodas on each shelf, we can divide the total number of sodas by 6 to find the number of shelves he needs. 
+
+48 ÷ 6 = 8
+
+So, Cody needs 8 shelves to hold all his sodas. The answer is 8.",8,-0.002708247126781657,True
+ The schools debate team had 26 boys and 46 girls on it. If they were split into groups of 9 how many groups could they make? ,8.0,"First, let's add the total number of students in the debate team: 26 (boys) + 46 (girls) = 72. 
+
+The total number of groups they can make is found by dividing the total number of students by the number of students per group (9): 72 / 9 = 8.
+
+The answer is 8.",8,-0.0003783489668536579,True
+" The school cafeteria ordered 6 red apples and 15 green apples for students lunches. But, if only 5 students wanted fruit, how many extra did the cafeteria end up with? ",16.0,"First, we need to find out the total number of apples ordered by the cafeteria. They ordered 6 red apples and 15 green apples. The total is 6 + 15 = 21. Since only 5 students wanted fruit, the cafeteria delivered 5 apples. So they ended up with 21 - 5 = 16 extra apples. The answer is 16.",16,-0.00019259562939911184,True
+ At a company picnic 9 managers and 15 employees decided to start a game of volleyball. If they split into 8 teams how many people would be on each team? ,3.0,"To find out how many people would be on each team, you need to divide the total number of people by the number of teams.
+
+Total number of people = 9 (managers) + 15 (employees) = 24
+
+Number of teams = 8
+
+People per team = Total number of people / Number of teams
+= 24 / 8
+= 3
+
+The answer is 3.",3,-0.00016001798053683696,True
+" A book store had 4 books in the bargin bin. If they sold 3 books, but then put 10 more in the bin, how many books would be in the bin? ",11.0,"If the bookstore sold 3 books and then added 10 more, you need to subtract the 3 books they sold from the initial number, then add the 10 new books. 
+
+They started with 4 books. After selling 3, they had 4 - 3 = 1 book. Then they put 10 more in the bin, so now they have 1 + 10 = 11 books.
+
+The answer is 11.",11,-0.0001365751509005727,True
+" Mike made 42 dollars mowing lawns over the summer. If he spent 10 dollars buying new mower blades, how many 8 dollar games could he buy with the money he had left? ",4.0,"Since Mike made 42 dollars and spent 10 dollars, he has 42 - 10 = 32 dollars left. If he can buy 8 dollar games with the money he has left, the number of games he can buy is 32 / 8 = 4.",4,-6.397961058871051e-05,True
+" A chef needs to cook 13 potatoes. He has already cooked 5. If each potato takes 6 minutes to cook, how long will it take him to cook the rest? ",48.0,"Q: A chef needs to cook 13 potatoes. He has already cooked 5. To find out how many are left, subtract 5 from 13: 13 - 5 = 8. Since each potato takes 6 minutes to cook, multiply the number of remaining potatoes by 6: 8 * 6 = 48. The answer is 48.",48,-0.0005819631629057755,True
+" Paige had 43 math problems and 12 science problems for homework. If she finished 44 of the problems at school, how many problems did she have to do for homework? ",11.0,"Initially, Paige had a total of 43 + 12 = 55 problems for homework. She completed 44 problems at school. Therefore, she has 55 - 44 = 11 problems left to do for homework. The answer is 11.",11,-0.0006691916602777578,True
+" April's discount flowers was having a sale where each flower was 8 dollars. If Vanessa bought 3 roses and 3 daisies, how much did she spend? ",48.0,"There are four types of flowers in the question, but the question only asks about roses and daisies. Since there is no information provided about the cost of any type of flower except roses being $8, we'll assume both roses and daisies are $8 each.
+
+Vanessa bought 3 roses and 3 daisies. The cost of the roses will be 3 x 8 = 24 dollars. The cost of the daisies will be 3 x 8 = 24 dollars. The total cost is 24 + 24 = 48. The answer is 48.",48,-8.848681316349806e-05,True
+" Olivia uploaded 5 pictures from her phone and 35 from her camera to facebook. If she sorted the pics into 8 different albums with the same amount of pics in each album, how many pictures were in each of the albums? ",5.0,"To solve this problem, we need to find the total number of pictures Olivia uploaded first, and then divide by the number of albums.
+
+Olivia uploaded a total of 5 (from her phone) + 35 (from her camera) = 40 pictures.
+
+She sorted the pictures into 8 different albums with the same amount in each. To find out how many pictures were in each album, we divide the total number of pictures (40) by the number of albums (8):
+
+40 / 8 = 5
+
+The answer is 5.",5,-0.00028109494747322516,True
+" Robin was making baggies of cookies with 6 cookies in each bag. If she had 23 chocolate chip cookies and 25 oatmeal cookies, how many baggies could she make? ",8.0,"Let's calculate the total number of cookies first. 
+
+Total number of cookies = Chocolate chip cookies + Oatmeal cookies
+Total number of cookies = 23 + 25
+Total number of cookies = 48
+
+Since each bag has 6 cookies, divide the total number of cookies by 6 to find out the number of baggies she can make.
+
+Total number of baggies = Total number of cookies / 6
+Total number of baggies = 48 / 6
+Total number of baggies = 8
+
+The answer is 8.",8,-6.615302164959478e-05,True
+ Cody had 45 dollars. For his birthday he got 9 more dollars but spent 19 on a new game. How much money does he have now? ,35.0,"Initially, Cody had 45 dollars. He got 9 more dollars for his birthday, so he now has 45 + 9 = 54 dollars. Then, he spent 19 dollars on a new game, leaving him with 54 - 19 = 35 dollars. The answer is 35.",35,-1.6868387252995e-05,True
+" Wendy uploaded 22 pictures from her phone and 2 from her camera to facebook. If she sorted the pics into 4 different albums with the same amount of pics in each album, how many pictures were in each of the albums? ",6.0,"First, let's find the total number of pictures Wendy uploaded: 22 pictures from her phone and 2 from her camera, so 22 + 2 = 24 pictures in total. 
+
+To find out how many pictures were in each album, we divide the total number of pictures by the number of albums: 24 / 4 = 6 pictures in each album. The answer is 6.",6,-0.0005640271711373683,True
+" For Halloween Katie and her sister combined the candy they received. Katie had 8 pieces of candy while her sister had 23. If they ate 8 pieces the first night, how many pieces do they have left? ",23.0,"Initially, Katie had 8 pieces of candy and her sister had 23. In total, they had 8 + 23 = 31 pieces of candy. After eating 8 pieces the first night, they have 31 - 8 = 23 pieces of candy left. Therefore, the answer is 23.",23,-1.8561117852897326e-05,True
+ A pet store had 88 puppies. In one day they sold 34 of them and put the rest into cages with 6 in each cage. How many cages did they use? ,9.0,"The pet store had 88 puppies. They sold 34 puppies, so they had 88 - 34 = 54 puppies left. Since each cage had 6 puppies, the number of cages used is 54 / 6 = 9. The answer is 9.",9,-3.788597107542506e-05,True
+" Jerry was helping the cafeteria workers pick up lunch trays, but he could only carry 8 trays at a time. If he had to pick up 9 trays from one table and 7 trays from another, how many trips will he make? ",2.0,"To find the total number of trips Jerry will make, first, find the total number of trays: 9 trays + 7 trays = 16 trays. Since Jerry can carry 8 trays at a time, divide the total trays by 8: 16 ÷ 8 = 2 with a remainder of 0. The remainder means he can finish all the trays with no leftover trays, so he makes 2 full trips. The answer is 2.",2,-6.962333485711661e-05,True
+" Faye was playing a video game where she scores 7 points for each treasure she finds. If she found 2 treasures on the first level and 6 on the second, what would her score be? ",56.0,"Let's calculate the points Faye earned from finding treasures:
+
+On the first level, she found 2 treasures and scored 7 points for each, so she earned 2 x 7 = 14 points.
+
+On the second level, she found 6 treasures and scored 7 points for each, so she earned 6 x 7 = 42 points.
+
+To get her total score, we add the points from both levels: 14 + 42 = 56.
+
+The answer is 56.",56,-0.0006534834384999001,True
+" Megan picked 19 carrots from her garden. If she threw out 4 of them and then picked 46 more the next day, how many carrots would she have total? ",61.0,"To find the total number of carrots Megan has, we need to add the carrots she picked initially to the ones she picked later, and then subtract the ones she threw out.
+
+Megan initially picked 19 carrots. 
+She then threw out 4, so she had 19 - 4 = 15 carrots left.
+The next day, she picked 46 more, so now she has 15 + 46 = 61 carrots.
+
+The answer is 61.",61,-0.00028395486574259903,True
+ Wendy had 82 files on her computer. She deleted 37 of them and put the rest into folders with 5 files in each one. How many folders did Wendy end up with? ,9.0,"Originally, Wendy had 82 files. She deleted 37, so she was left with 82 - 37 = 45 files. Then she put them into folders of 5 files each. To find the number of folders, divide 45 by 5, which equals 9. 
+
+The answer is 9.",9,-0.00014391454378972097,True
+" There school's baseball team had 12 new players and 44 returning players. If the coach put them into groups with 8 players in each group, how many groups would there be? ",7.0,"First, we need to find the total number of players on the team. There are 12 new players and 44 returning players. 
+
+Total players = 12 + 44 = 56
+
+Since each group has 8 players, to find the number of groups, we need to divide the total number of players by 8.
+
+Number of groups = 56 / 8 = 7
+
+The answer is 7.",7,-0.0017872757973311443,True
+" Will made 104 dollars mowing lawns over the summer. If he spent 41 dollars buying new mower blades, how many 9 dollar games could he buy with the money he had left? ",7.0,"The amount Will spent on mower blades is 41 dollars. To find the amount of money left, we need to subtract 41 from 104: 
+104 - 41 = 63
+
+To find out how many 9-dollar games Will can buy with 63 dollars, we need to divide 63 by 9: 
+63 / 9 = 7
+
+So Will can buy 7 9-dollar games. The answer is 7.",7,-0.00046543784809096483,True
+" Nancy picked 12 carrots from her garden. If she threw out 2 of them and then picked 21 more the next day, how many carrots would she have total? ",31.0,"Let's break down Nancy's situation:
+
+Initially, Nancy picked 12 carrots from her garden.
+Then, she threw out 2 carrots, so she has 12 - 2 = 10 carrots left.
+Next, she picked 21 more carrots the next day.
+So, the total number of carrots Nancy would have now is 10 + 21 = 31 carrots.
+
+The answer is 31.",31,-2.99105402494755e-05,True
+ Roger had 16 dollars. For his birthday he got 28 more dollars but spent 25 on a new game. How much money does he have now? ,19.0,"Originally, Roger had 16 dollars. For his birthday, he got 28 dollars, so he now has 16 + 28 = 44 dollars. Then he spent 25 dollars on a new game, so he has 44 - 25 = 19 dollars left. The answer is 19.",19,-3.856622125897867e-05,True
+" Sam was collecting cans for recycling. On Saturday he filled 3 bags up and on Sunday he filled 4 more bags. If each bag had 9 cans in it, how many cans did he pick up total? ",63.0,"To find the total number of cans Sam picked up, we need to calculate the number of cans in each type of bag and then add them together. 
+
+On Saturday, Sam filled 3 bags with 9 cans in each bag. So, the number of cans on Saturday is 3 x 9 = 27. 
+
+On Sunday, Sam filled 4 bags with 9 cans in each bag. So, the number of cans on Sunday is 4 x 9 = 36.
+
+To find the total number of cans, we add the cans from Saturday and Sunday: 27 + 36 = 63.",63,-8.090172718797e-05,True
+" A worksheet had 4 problems on it. If a teacher had 16 worksheets to grade and had already graded 8 of them, how many more problems does she have to grade? ",32.0,"Let's calculate the number of problems the teacher still has to grade.
+
+There are 16 worksheets with 4 problems each, so the total number of problems is 16 x 4 = 64.
+
+The teacher has already graded 8 worksheets, which means she has graded 8 x 4 = 32 problems.
+
+To find out how many more problems she has to grade, subtract the number of problems she has already graded from the total number of problems: 64 - 32 = 32.
+
+Therefore, the teacher has 32 more problems to grade.",32,-0.0019913135193542863,True
+ Paige was unboxing some of her old winter clothes. She found 6 boxes of clothing and inside each box there were 5 scarves and 5 mittens. How many pieces of winter clothing did Paige have total? ,60.0,"Let's calculate the number of winter clothing items Paige had:
+
+There are 6 boxes, and each box contains 5 scarves and 5 mittens. To find the total number of scarves, multiply the number of scarves per box by the number of boxes: 5 scarves/box * 6 boxes = 30 scarves.
+To find the total number of mittens, multiply the number of mittens per box by the number of boxes: 5 mittens/box * 6 boxes = 30 mittens.
+The total winter clothing items Paige has is the sum of the scarves and mittens: 30 + 30 = 60. The answer is 60.",60,-9.417486457113736e-05,True
+" A chef needs to cook 12 potatoes. He has already cooked 6. If each potato takes 6 minutes to cook, how long will it take him to cook the rest? ",36.0,"First, find out how many potatoes are left to cook. The chef started with 12 potatoes and has already cooked 6. So 12 - 6 = 6 potatoes are left to cook. Each potato takes 6 minutes to cook. Multiply the number of potatoes left by the cooking time: 6 * 6 = 36 minutes. The answer is 36.",36,-0.00010508473554164522,True
+ Luke was selling his old games. He started out with 57 but sold 39 of them. He packed the rest up putting 2 games into each box. How many boxes did he have to use? ,9.0,"Since Luke sold 39 games, he is left with 57 - 39 = 18 games. If he packed 2 games in each box, then the number of boxes needed is 18 / 2 = 9. The answer is 9.",9,-4.3086554620817345e-05,True
+" April's discount flowers was having a sale where each flower was 3 dollars. If Emily bought 2 roses and 2 daisies, how much did she spend? ",12.0,"First, find out the cost of the roses and daisies separately. Two roses at 3 dollars each will be 2 x 3 = 6 dollars. Two daisies at 3 dollars each will be 2 x 3 = 6 dollars. So, the total cost is 6 + 6 = 12 dollars. The answer is 12.",12,-8.450643121520805e-05,True
+ A pet store had 13 puppies. In one day they sold 7 of them and put the rest into cages with 2 in each cage. How many cages did they use? ,3.0,"If the pet store sold 7 puppies, then they had 13 - 7 = 6 puppies left. They put the remaining 6 puppies into cages with 2 puppies in each cage. To find the number of cages used, we divide the remaining puppies by 2: 6 ÷ 2 = 3. The answer is 3.",3,-3.841975138306608e-05,True
+" Faye and her mom were picking carrots from their garden. Faye picked 23 and her mother picked 5. If only 12 of the carrots were good, how many bad carrots did they have? ",16.0,"Let's calculate the total number of carrots: Faye picked 23 carrots and her mom picked 5. The total number of carrots is 23 + 5 = 28. If only 12 of them were good, then the number of bad carrots is 28 - 12 = 16. The answer is 16.",16,-1.4615210922684022e-05,True
+" Isabel picked 66 flowers for her friend’s wedding. She was making bouquets with 8 flowers in each one. If 10 of the flowers wilted before the wedding, how many bouquets could she still make? ",7.0,"Isabel originally had 66 flowers. 10 of the flowers wilted, so she has 66 - 10 = 56 flowers left. Since each bouquet needs 8 flowers, the number of bouquets she can make is 56 / 8 = 7. The answer is 7.",7,-0.000145772366051968,True
+" At the town carnival Oliver rode the ferris wheel 5 times and the bumper cars 4 times. If each ride cost 7 tickets, how many tickets did he use? ",63.0,"First, let's calculate the total tickets used for the ferris wheel. Oliver rode it 5 times. Since each ride costs 7 tickets, he used 5 * 7 = 35 tickets for the ferris wheel.
+
+Next, let's calculate the total tickets used for the bumper cars. Oliver rode them 4 times, and since each ride costs 7 tickets, he used 4 * 7 = 28 tickets for the bumper cars.
+
+To get the total tickets used, we need to add the tickets used for the ferris wheel and the bumper cars: 35 + 28 = 63. 
+
+The answer is 63.",63,-0.0004611049533491257,True
+" Wendy bought 4 new chairs and 4 new tables for her house. If she spent 6 minutes on each piece furniture putting it together, how many minutes did it take her to finish? ",48.0,"Let's break it down:
+
+Wendy bought 4 new chairs and 4 new tables, which means she bought a total of 8 pieces of furniture.
+
+It took her 6 minutes to assemble each piece, so to find the total amount of time it took, we multiply the number of pieces by the time it took to assemble each piece: 8 x 6 = 48 minutes.
+
+The answer is 48.",48,-0.0002087117409717925,True
+" Ned was trying to expand his game collection. He bought 50 games from a friend and bought 27 more at a garage sale. If 74 of the games didn't work, how many good games did he end up with? ",3.0,"First, calculate the total number of games Ned bought. He bought 50 from a friend and 27 at a garage sale, so he had 50 + 27 = 77 games in total. If 74 didn't work, then the number of good games he has is 77 - 74 = 3. The answer is 3.",3,-9.474213549306692e-05,True
+ A pet store had 38 siamese cats and 25 house cats. During a sale they sold 45 cats. How many cats do they have left? ,18.0,"The total number of cats in the store originally is 38 (siamese) + 25 (house) = 63. They sold 45 cats, so they have 63 - 45 = 18 cats left. The answer is 18.",18,-0.00010945318944231226,True
+ Carol was playing a trivia game. In the first round she scored 17 points and in the second round she scored 6 points. In the last round she lost 16 points. How many points did she have at the end of the game? ,7.0,"Carol scored 17 points in the first round and 6 in the second round. So in total, she scored 17 + 6 = 23 points. In the last round, she lost 16 points. So she had 23 - 16 = 7 points left at the end of the game. The answer is 7.",7,-3.099515402128781e-05,True
+" Dave bought 12 boxes of chocolate candy and gave 5 to his little brother. If each box has 3 pieces inside it, how many pieces did Dave still have? ",21.0,"The question asks for the total number of pieces Dave still has. To find this, we first need to find the total number of pieces he had originally. Since he bought 12 boxes with 3 pieces in each box, the total number of pieces he had is 12 x 3 = 36. 
+
+After giving 5 boxes to his little brother, we need to find out how many pieces were given away. Since each box has 3 pieces, 5 boxes will have 5 x 3 = 15 pieces. 
+
+To find out how many pieces Dave still has, we subtract the number of pieces given away from the total. 36 - 15 = 21. The answer is 21.",21,-0.0016815441622460715,True
+" A waiter at 'The Greasy Spoon' restaurant had 39 customers to wait on. During the lunch rush he added another 12 customers. If 49 of the customers didn't leave him a tip, how many customers did leave a tip? ",2.0,"To find the number of customers who left a tip, first, we need to find the total number of customers the waiter had. The waiter had 39 initial customers and then added 12 more. So, 39 + 12 = 51 customers. If 49 customers didn't leave a tip, we can find the number of customers who did leave a tip by subtracting 49 from 51. So, 51 - 49 = 2. 
+
+The answer is 2.",2,-0.0007025540668941778,True
+" The cafeteria had 50 apples. For lunch they handed out 5 to students and decided to use the rest to make pies. If each pie takes 5 apples, how many pies could they make? ",9.0,"After handing out 5 apples, the cafeteria has 50 - 5 = 45 apples left. Each pie requires 5 apples, so the number of pies that can be made is 45 / 5 = 9. The answer is 9.",9,-0.00011913175157678797,True
+" Oliver had 33 dollars in January. By March he had spent 4 dollars. If he got another 32 dollars from his mom, how much money would he have? ",61.0,"Oliver had 33 dollars initially. He spent 4 dollars, so he had 33 - 4 = 29 dollars left. Then, he got 32 dollars from his mom, so he has 29 + 32 = 61 dollars. The answer is 61.",61,-4.677998787255846e-05,True
+" The school cafeteria had 14 apples. If they used 13 to make lunch for the students and then bought 49 more, how many apples would they have? ",50.0,"First, let's calculate the number of apples left after making lunch. The cafeteria had 14 apples and used 13, so they had 14 - 13 = 1 apple left. Then, they bought 49 more. To find the total number of apples, we add the remaining apples to the newly bought ones: 1 + 49 = 50. The answer is 50.",50,-0.0005476440004459451,True
+" While playing a trivia game, Frank answered 3 questions correct in the first half and 2 questions correct in the second half. If each question was worth 3 points, what was his final score? ",15.0,"For the final question:
+
+First, find the total points from the first half: 3 questions * 3 points = 9 points.
+Then, find the total points from the second half: 2 questions * 3 points = 6 points.
+Finally, add the points from both halves to get the final score: 9 + 6 = 15.
+The answer is 15.",15,-9.411639250307236e-06,True
+ Zoe was unboxing some of her old winter clothes. She found 8 boxes of clothing and inside each box there were 4 scarves and 6 mittens. How many pieces of winter clothing did Zoe have total? ,80.0,"First, let's calculate the total number of scarves: 8 boxes * 4 scarves per box = 32 scarves.
+
+Next, let's calculate the total number of mittens: 8 boxes * 6 mittens per box = 48 mittens.
+
+To find the total number of winter clothing pieces, add the number of scarves and mittens: 32 scarves + 48 mittens = 80 pieces of winter clothing.
+
+The answer is 80.",80,-5.8910616326458114e-05,True
+ Frank and his friend were buying trick decks from the magic shop for 7 dollars each. How much did they spend if Frank bought 3 decks and his friend bought 2 decks? ,35.0,"Since Frank bought 3 decks at $7 each and his friend bought 2 decks at $7 each, we need to calculate the cost for each of them separately. 
+
+For Frank, 3 decks at $7 each will be 3 * 7 = 21 dollars.
+For his friend, 2 decks at $7 each will be 2 * 7 = 14 dollars.
+In total, they spent 21 + 14 = 35 dollars. 
+The answer is 35.",35,-8.9528722682262e-05,True
+" Sam had to wash 40 short sleeve shirts and 23 long sleeve shirts before school. If he had only washed 29 of them by the time school started, how many did he not wash? ",34.0,"Total shirts to be washed is 40 + 23 = 63. Sam washed 29 shirts. So, the number of shirts he did not wash is 63 - 29 = 34. The answer is 34.",34,-0.00010893186804360957,True
+" A waiter had 47 customers to wait on. If 41 customers left and he got another 20 customers, how many customers would he have? ",26.0,"A: The waiter started with 47 customers. 41 of them left, so he had 47 - 41 = 6 customers. Then 20 more customers arrived, so he has 6 + 20 = 26 customers now. The answer is 26.",26,-0.00017798933586212718,True
