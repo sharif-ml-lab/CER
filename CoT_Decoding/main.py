@@ -5,20 +5,24 @@ from datasets import load_dataset
 from tqdm import tqdm
 import pandas as pd
 from self_consistency import self_consistency_decode
+from typing import List
 
 
-def load_model_and_tokenizer(model_name):
+def load_model_and_tokenizer(model_name: str):
     """
     Load the model and tokenizer from the specified path.
     """
     model = AutoModelForCausalLM.from_pretrained(
-        model_name, local_files_only=True, device_map='cuda', torch_dtype=torch.bfloat16
+        model_name,
+        local_files_only=True,
+        device_map='cuda',
+        torch_dtype=torch.bfloat16
     )
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     return model, tokenizer
 
 
-def construct_prompt(question):
+def construct_prompt(question: str) -> str:
     """
     Construct a prompt using a given question.
     """
@@ -51,7 +55,73 @@ A: """
     return base
 
 
-def evaluate_dataset(model, tokenizer, dataset, k, aggregate, decoding_mode, description, scoring_mode, COT=False):
+def evaluate_single_example(
+        model,
+        tokenizer,
+        question: str,
+        correct_answer_str: str,
+        k: int,
+        aggregate: bool,
+        decoding_mode: str,
+        scoring_mode: str,
+        COT: bool
+) -> dict:
+    """
+    Evaluate the model on a single example.
+    """
+    messages = [{"role": "user", "content": construct_prompt(question)}]
+
+    if COT:
+        result, confidence, final_ans = cot_decode(
+            model,
+            tokenizer,
+            messages,
+            aggregate_paths=aggregate,
+            max_new_tokens=512,
+            k=k,
+            decoding_mode=decoding_mode,
+            sampling_mode="temp",
+            scoring_mode=scoring_mode
+        )
+    else:
+        result, confidence, final_ans = self_consistency_decode(
+            model,
+            tokenizer,
+            messages,
+            aggregate_paths=aggregate,
+            k=k,
+            decoding_mode=decoding_mode
+        )
+
+    # Check correctness
+    try:
+        model_answer = float(final_ans)
+        correct_answer = float(correct_answer_str)
+        is_correct = (model_answer == correct_answer)
+    except ValueError:
+        is_correct = False
+
+    return {
+        'question': question,
+        'correct_answer': correct_answer_str,
+        'predicted_answer': result,
+        'predicted_final_answer': final_ans,
+        'confidence_score': confidence,
+        'is_correct': is_correct
+    }
+
+
+def evaluate_dataset(
+        model,
+        tokenizer,
+        dataset,
+        k: int,
+        aggregate: bool,
+        decoding_mode: str,
+        description: str,
+        scoring_mode: str,
+        COT: bool = False
+) -> float:
     """
     Evaluate the model on the given dataset.
     """
@@ -62,62 +132,46 @@ def evaluate_dataset(model, tokenizer, dataset, k, aggregate, decoding_mode, des
     with tqdm(total=total_questions, desc=f"Processing {description}", dynamic_ncols=True) as pbar:
         for idx, example in enumerate(dataset):
             question = example['question']
-            correct_answer = example['final_ans'] if 'final_ans' in example else example['answer'].split('####')[-1]
-
-            # Prepare the message for the model
-            messages = [
-                {"role": "user", "content": construct_prompt(question)}
-            ]
-
-            if COT:
-                # Generate the response using CoT decoding
-                result, confidence, final_ans = cot_decode(
-                    model, tokenizer, messages, aggregate_paths=aggregate, max_new_tokens=512, k=k,
-                    decoding_mode=decoding_mode, sampling_mode="temp", scoring_mode=scoring_mode
-                )
+            if 'final_ans' in example:
+                correct_answer = example['final_ans']
             else:
-                result, confidence, final_ans = self_consistency_decode(
-                    model, tokenizer, messages, aggregate_paths=aggregate, k=k,
-                    decoding_mode=decoding_mode
-                )
+                correct_answer = example['answer'].split('####')[-1]
 
-            # Compare the model's answer with the correct answer
-            try:
-                model_answer = float(final_ans)
-                correct_answer = float(correct_answer)
-                is_correct = model_answer == correct_answer
-                if is_correct:
-                    correct_answers += 1
-            except ValueError:
-                # If parsing fails, we assume the answer is incorrect
-                is_correct = False
+            result_dict = evaluate_single_example(
+                model, tokenizer, question, correct_answer,
+                k, aggregate, decoding_mode, scoring_mode, COT
+            )
+            results.append(result_dict)
 
-            # Save the result
-            results.append({
-                'question': question,
-                'correct_answer': correct_answer,
-                'predicted_answer': result,
-                'predicted_final_answer': final_ans,
-                'confidence_score': confidence,
-                'is_correct': is_correct
-            })
+            if result_dict['is_correct']:
+                correct_answers += 1
 
-            # Update progress bar with running accuracy
-            running_accuracy = correct_answers / (idx + 1) * 100
+            running_accuracy = (correct_answers / (idx + 1)) * 100
             pbar.set_postfix(idx=idx + 1, running_accuracy=f"{running_accuracy:.2f}%")
             pbar.update(1)
 
-    # Save results to CSV
-    results_df = pd.DataFrame(results)
-    results_df.to_csv(f"{description}_evaluation_results.csv", index=False)
-
-    # Calculate final accuracy
-    accuracy = correct_answers / total_questions * 100
-    print(f"Final Accuracy for {description}: {accuracy:.2f}%")
+    save_results_to_csv(results, f"{description}_evaluation_results.csv")
+    accuracy = (correct_answers / total_questions) * 100
+    print_final_accuracy(description, accuracy)
     return accuracy
 
 
-def load_and_sample_dataset(dataset_name, split, sample_size=None, seed=None):
+def save_results_to_csv(results: List[dict], filename: str):
+    """
+    Save evaluation results to a CSV file.
+    """
+    results_df = pd.DataFrame(results)
+    results_df.to_csv(filename, index=False)
+
+
+def print_final_accuracy(description: str, accuracy: float):
+    """
+    Print the final accuracy of the evaluation.
+    """
+    print(f"Final Accuracy for {description}: {accuracy:.2f}%")
+
+
+def load_and_sample_dataset(dataset_name: str, split: str, sample_size: int = None, seed: int = None):
     """
     Load a dataset and optionally sample from it.
     """
@@ -131,13 +185,11 @@ if __name__ == '__main__':
     # Configurations
     model_name = "/data/models/Meta-Llama-3.1-8B-Instruct"
     K = 10
-    AGGREGATE = False
+    AGGREGATE = True
     DECODING_MODE = 'new'
     BASELINE_COT = True
-    # scoring_mode = 'min'
-    # scoring_mode = 'log'
-    # scoring_mode = 'h_mean'
-    scoring_mode = 'max'
+    scoring_mode = 'h_mean'
+
     # Load model and tokenizer
     model, tokenizer = load_model_and_tokenizer(model_name)
 
@@ -147,10 +199,24 @@ if __name__ == '__main__':
 
     # Evaluate MultiArith dataset
     multiarith_dataset = load_and_sample_dataset("ChilleD/MultiArith", "test")
-    evaluate_dataset(model, tokenizer, multiarith_dataset, k=K, aggregate=AGGREGATE, decoding_mode=DECODING_MODE,
-                     description="MultiArith", scoring_mode=scoring_mode, COT=BASELINE_COT)
+    evaluate_dataset(
+        model, tokenizer, multiarith_dataset,
+        k=K,
+        aggregate=AGGREGATE,
+        decoding_mode=DECODING_MODE,
+        description="MultiArith",
+        scoring_mode=scoring_mode,
+        COT=BASELINE_COT
+    )
 
-    # Evaluate GSM8K dataset (with sampling)
+    # Evaluate GSM8K dataset (sample of 300)
     gsm8k_dataset = load_and_sample_dataset("openai/gsm8k", "test", sample_size=300, seed=11)
-    evaluate_dataset(model, tokenizer, gsm8k_dataset, k=K, aggregate=AGGREGATE, decoding_mode=DECODING_MODE,
-                     description="GSM8K", scoring_mode=scoring_mode, COT=BASELINE_COT)
+    evaluate_dataset(
+        model, tokenizer, gsm8k_dataset,
+        k=K,
+        aggregate=AGGREGATE,
+        decoding_mode=DECODING_MODE,
+        description="GSM8K",
+        scoring_mode=scoring_mode,
+        COT=BASELINE_COT
+    )
