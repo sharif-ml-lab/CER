@@ -12,7 +12,7 @@ def load_model_and_tokenizer(model_name):
     Load the model and tokenizer from the specified path.
     """
     model = AutoModelForCausalLM.from_pretrained(
-        model_name, local_files_only=True, device_map='auto', torch_dtype=torch.bfloat16
+        model_name, local_files_only=True, device_map='cuda', torch_dtype=torch.bfloat16
     )
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     return model, tokenizer
@@ -51,7 +51,7 @@ A: """
     return base
 
 
-def evaluate_dataset(model, tokenizer, dataset, k, aggregate, decoding_mode, description, COT=False):
+def evaluate_dataset(model, tokenizer, dataset, k, aggregate, decoding_mode, description, scoring_mode, COT=False):
     """
     Evaluate the model on the given dataset.
     """
@@ -73,7 +73,7 @@ def evaluate_dataset(model, tokenizer, dataset, k, aggregate, decoding_mode, des
                 # Generate the response using CoT decoding
                 result, confidence, final_ans = cot_decode(
                     model, tokenizer, messages, aggregate_paths=aggregate, max_new_tokens=512, k=k,
-                    decoding_mode=decoding_mode, sampling_mode="cot"
+                    decoding_mode=decoding_mode, sampling_mode="temp", scoring_mode=scoring_mode
                 )
             else:
                 result, confidence, final_ans = self_consistency_decode(
@@ -134,20 +134,23 @@ if __name__ == '__main__':
     AGGREGATE = False
     DECODING_MODE = 'new'
     BASELINE_COT = True
-
+    # scoring_mode = 'min'
+    # scoring_mode = 'log'
+    # scoring_mode = 'h_mean'
+    scoring_mode = 'max'
     # Load model and tokenizer
     model, tokenizer = load_model_and_tokenizer(model_name)
 
     print(model_name)
     print(f'Mode: CoT + {DECODING_MODE}')
-    print(f'Config: k = {K}, Aggregate = {AGGREGATE}')
+    print(f'Config: k = {K}, Aggregate = {AGGREGATE}, scoring_mode = {scoring_mode}')
 
     # Evaluate MultiArith dataset
     multiarith_dataset = load_and_sample_dataset("ChilleD/MultiArith", "test")
     evaluate_dataset(model, tokenizer, multiarith_dataset, k=K, aggregate=AGGREGATE, decoding_mode=DECODING_MODE,
-                     description="MultiArith", COT=BASELINE_COT)
+                     description="MultiArith", scoring_mode=scoring_mode, COT=BASELINE_COT)
 
     # Evaluate GSM8K dataset (with sampling)
     gsm8k_dataset = load_and_sample_dataset("openai/gsm8k", "test", sample_size=300, seed=11)
     evaluate_dataset(model, tokenizer, gsm8k_dataset, k=K, aggregate=AGGREGATE, decoding_mode=DECODING_MODE,
-                     description="GSM8K", COT=BASELINE_COT)
+                     description="GSM8K", scoring_mode=scoring_mode, COT=BASELINE_COT)

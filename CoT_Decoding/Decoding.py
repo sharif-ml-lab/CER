@@ -89,6 +89,7 @@ def cot_decode(
         tokenizer: PreTrainedTokenizer,
         messages: List[Dict[str, str]],
         sampling_mode="cot",
+        scoring_mode="min",  # log, h_mean
         k: int = 10,
         num_beams: int = 1,
         max_new_tokens: int = 512,
@@ -290,6 +291,8 @@ def cot_decode(
                 all_numerical_values = extract_all_numerical_values(answer_text)
                 if all_numerical_values:
                     confidence_sum = 0.0
+                    min_conf = 10
+                    max_conf = -1
                     total_valid_values = 0
                     seen_dict = dict()
                     for num_value in all_numerical_values:
@@ -316,14 +319,53 @@ def cot_decode(
 
                         num_value_scores = output.scores[num_value_start_idx: num_value_start_idx + len(num_value_ids)]
 
-                        # Calculate confidence score (Δ) for this numerical value
-                        confidence_sum += np.log(1 + calculate_confidence_for_final_answer(num_value_scores,
-                                                                                           torch.tensor(num_value_ids,
-                                                                                                        device=device)))
+                        if scoring_mode == 'log':
+                            # Calculate confidence score (Δ) for this numerical value
+                            confidence_sum += np.log(1 + calculate_confidence_for_final_answer(num_value_scores,
+                                                                                               torch.tensor(
+                                                                                                   num_value_ids,
+                                                                                                   device=device)))
+                        elif scoring_mode == 'min':
+                            current_conf = np.log(1 + calculate_confidence_for_final_answer(num_value_scores,
+                                                                                            torch.tensor(
+                                                                                                num_value_ids,
+                                                                                                device=device)))
+                            if current_conf < min_conf:
+                                min_conf = current_conf
+                                confidence_sum = current_conf
+
+
+                        elif scoring_mode == 'max':
+                            current_conf = np.log(1 + calculate_confidence_for_final_answer(num_value_scores,
+                                                                                            torch.tensor(
+                                                                                                num_value_ids,
+                                                                                                device=device)))
+                            if current_conf > max_conf:
+                                max_conf = current_conf
+                                confidence_sum = current_conf
+
+                        elif scoring_mode == 'h_mean':
+                            # Calculate confidence score (Δ) for this numerical value
+                            confidence_sum += 1 / (
+                                    1e-11 + np.log(1 + calculate_confidence_for_final_answer(num_value_scores,
+                                                                                             torch.tensor(
+                                                                                                 num_value_ids,
+                                                                                                 device=device))))
+
                         total_valid_values += 1
 
                     if total_valid_values > 0:
-                        confidence = confidence_sum.item() / total_valid_values
+                        if scoring_mode == 'log':
+                            confidence = confidence_sum.item() / total_valid_values
+                        elif scoring_mode == 'min':
+                            confidence = confidence_sum
+                        elif scoring_mode == 'max':
+                            confidence = confidence_sum
+                        elif scoring_mode == 'h_mean':
+                            confidence = total_valid_values / confidence_sum.item()
+                        else:
+                            raise NotImplementedError
+
                         final_answer = all_numerical_values[
                             -1]  # Consider the last numerical value as the final answer for consistency
                         paths.append((answer_text, confidence, final_answer))
