@@ -45,7 +45,8 @@ def calculate_confidence_for_final_answer(
         if probs.size(-1) > 1:
             top_2_probs, _ = torch.topk(probs, min(2, probs.size(-1)))
             if top_2_probs.size(-1) > 1:
-                confidence_sum += (top_2_probs[-1][0] - top_2_probs[-1][1]).item() * ans_token_prob.item()
+                # confidence_sum += (top_2_probs[-1][0] - top_2_probs[-1][1]).item() * ans_token_prob.item()
+                confidence_sum += ans_token_prob.item()
             else:
                 confidence_sum += 1.0  # Only one token probability
         else:

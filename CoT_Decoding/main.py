@@ -194,7 +194,7 @@ if __name__ == '__main__':
     model, tokenizer = load_model_and_tokenizer(model_name)
 
     print(model_name)
-    print("Conf = P(Token) * (P(max1) - P(max2))")
+    print("Conf = P(Token)")
     print(f'Mode: CoT + {DECODING_MODE}')
     print(f'Config: k = {K}, Aggregate = {AGGREGATE}, scoring_mode = {scoring_mode}')
 
