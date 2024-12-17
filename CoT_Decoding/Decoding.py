@@ -106,7 +106,6 @@ def _compute_confidence_for_value(
     if value_start_idx == -1:
         return None
 
-    # The first generated token's score is at output_scores[0], so shift by -1
     value_start_idx -= 1
     if value_start_idx < 0 or value_start_idx + len(value_ids) > len(output_scores):
         return None
@@ -162,7 +161,7 @@ def _handle_new_decoding_cot_mode(
     """
     Handle 'new' decoding mode for CoT:
     - Extract all numerical values.
-    - Compute average log confidence for them.
+    - Compute average log confidence.
     """
     all_numerical_values = extract_all_numerical_values(answer_text)
     if not all_numerical_values:
@@ -216,7 +215,6 @@ def _handle_new_decoding_temp_mode(
         num_value_ids = tokenizer.encode(num_value, add_special_tokens=False)
         occurrence_count = seen_dict[num_value]
 
-        # Find the Nth occurrence
         value_start_idx = _find_subsequence_indices(answer_ids_list, num_value_ids, occurrence_count)
         if value_start_idx == -1:
             continue
@@ -283,6 +281,7 @@ def _sample_cot_paths(
 ) -> List[Tuple[str, float, str]]:
     """
     Generate paths using CoT sampling mode.
+    We first pick the top-k next tokens and then generate one path per token.
     """
     paths = []
     with torch.no_grad():
@@ -349,6 +348,7 @@ def _sample_temp_paths(
 ) -> List[Tuple[str, float, str]]:
     """
     Generate paths using temperature-based sampling mode.
+    We call model.generate k times, each time generating a single path.
     """
     paths = []
     for _ in range(k):
@@ -404,11 +404,10 @@ def cot_decode(
     decoding_mode: str = "baseline",
 ) -> Tuple[str, float, str]:
     """
-    Implement CoT-decoding for a given chat input.
+    CoT-decoding as originally implemented.
     """
     device = get_device()
 
-    # Use the chat template if available
     if hasattr(tokenizer, 'chat_template') and tokenizer.chat_template:
         input_text = tokenizer.apply_chat_template(
             messages,
@@ -443,10 +442,99 @@ def cot_decode(
         raise ValueError("Unsupported sampling_mode")
 
     if not paths:
-        # No valid paths found, return a default tuple
+        # No valid paths
         return "", 0.0, ""
 
     if aggregate_paths:
         return aggregate_paths_based_on_scores(paths)
     else:
+        return max(paths, key=lambda x: x[1])
+
+
+def self_consistency_decode(
+    model: PreTrainedModel,
+    tokenizer: PreTrainedTokenizer,
+    messages: List[Dict[str, str]],
+    k: int = 10,
+    aggregate_paths: bool = True,
+    decoding_mode: str = "new"
+) -> Tuple[str, float, str]:
+    """
+    Self-consistency decoding:
+    This is similar to CoT 'temp' sampling, but we just sample k independent solutions
+    and then choose the final answer by majority vote (self-consistency).
+
+    We assume:
+    - Use temperature sampling mode ('temp').
+    - If aggregate_paths=True, we aggregate by the final answers' frequency.
+    """
+    device = get_device()
+
+    if hasattr(tokenizer, 'chat_template') and tokenizer.chat_template:
+        input_text = tokenizer.apply_chat_template(
+            messages,
+            tokenize=False,
+            add_generation_prompt=True
+        )
+    else:
+        input_text = "\n".join([f"{msg['role']}: {msg['content']}" for msg in messages])
+        input_text += "\nassistant:"
+
+    input_ids = tokenizer.encode(input_text, return_tensors="pt").to(device)
+    attention_mask = torch.ones_like(input_ids).to(device)
+
+    if tokenizer.pad_token_id is None:
+        tokenizer.pad_token_id = tokenizer.eos_token_id
+
+    # For self-consistency, we just do temp sampling k times and then pick the most common final answer
+    paths = []
+    for _ in range(k):
+        output = model.generate(
+            input_ids,
+            attention_mask=attention_mask,
+            max_new_tokens=512,
+            num_beams=1,
+            temperature=1.0,
+            top_p=1.0,
+            repetition_penalty=1.0,
+            length_penalty=1.0,
+            no_repeat_ngram_size=0,
+            early_stopping=False,
+            pad_token_id=tokenizer.pad_token_id,
+            eos_token_id=tokenizer.eos_token_id,
+            output_scores=True,
+            return_dict_in_generate=True,
+        )
+
+        generated_sequence = output.sequences[0]
+        answer_ids = generated_sequence[len(input_ids[0]):]
+        answer_text = tokenizer.decode(answer_ids, skip_special_tokens=True)
+        output_scores = output.scores
+
+        # decoding_mode from 'new' suggests we use _handle_new_decoding_temp_mode with default scoring_mode='log'
+        scoring_mode = 'log'  # Typically self-consistency doesn't rely heavily on scoring modes, but original code used something like this.
+        if decoding_mode == "baseline":
+            result = _handle_baseline_decoding(tokenizer, device, answer_text, output_scores, answer_ids)
+        else:
+            result = _handle_new_decoding_temp_mode(tokenizer, device, answer_text, output_scores, answer_ids, scoring_mode)
+
+        if result is not None:
+            paths.append(result)
+
+    if not paths:
+        return "", 0.0, ""
+
+    if aggregate_paths:
+        # Majority vote over final_answers
+        final_counts = {}
+        for _, _, final_ans in paths:
+            final_counts[final_ans] = final_counts.get(final_ans, 0) + 1
+        best_final_answer = max(final_counts, key=final_counts.get)
+
+        # Pick one path with that final answer that has the highest confidence
+        candidates = [p for p in paths if p[2] == best_final_answer]
+        best = max(candidates, key=lambda x: x[1])
+        return best[0], best[1], best[2]
+    else:
+        # Just pick the best by confidence
         return max(paths, key=lambda x: x[1])

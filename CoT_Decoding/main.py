@@ -16,7 +16,7 @@ def load_model_and_tokenizer(model_name: str):
         model_name,
         local_files_only=True,
         device_map='cuda',
-        torch_dtype=torch.bfloat16
+        torch_dtype=torch.float16
     )
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     return model, tokenizer
