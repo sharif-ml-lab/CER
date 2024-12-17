@@ -28,23 +28,24 @@ def extract_all_numerical_values(text: str) -> List[str]:
 
 
 def calculate_confidence_for_final_answer(
-    logits: List[torch.Tensor],
-    answer_ids: torch.Tensor
+        logits: List[torch.Tensor],
+        answer_ids: torch.Tensor
 ) -> float:
     """
     Calculate the confidence score (Δ) for the final answer tokens.
     """
     confidence_sum = 0.0
     valid_tokens = 0
-    for t, _ in enumerate(answer_ids):
+    for t, token_id in enumerate(answer_ids):
         if t >= len(logits):
             break
         token_logits = logits[t]
         probs = torch.softmax(token_logits, dim=-1)
+        ans_token_prob = probs[-1][token_id]
         if probs.size(-1) > 1:
             top_2_probs, _ = torch.topk(probs, min(2, probs.size(-1)))
             if top_2_probs.size(-1) > 1:
-                confidence_sum += (top_2_probs[-1][0] - top_2_probs[-1][1]).item()
+                confidence_sum += (top_2_probs[-1][0] - top_2_probs[-1][1]).item() * ans_token_prob.item()
             else:
                 confidence_sum += 1.0  # Only one token probability
         else:
@@ -55,7 +56,7 @@ def calculate_confidence_for_final_answer(
 
 
 def aggregate_paths_based_on_scores(
-    paths: List[Tuple[str, float, str]]
+        paths: List[Tuple[str, float, str]]
 ) -> Tuple[str, float, str]:
     """
     Aggregate multiple paths based on their confidence scores.
@@ -73,9 +74,9 @@ def aggregate_paths_based_on_scores(
 
 
 def _find_subsequence_indices(
-    sequence: List[int],
-    subsequence: List[int],
-    occurrence_count: int = 1
+        sequence: List[int],
+        subsequence: List[int],
+        occurrence_count: int = 1
 ) -> int:
     """
     Find the start index of the Nth occurrence (occurrence_count) of subsequence in sequence.
@@ -94,10 +95,10 @@ def _find_subsequence_indices(
 
 
 def _compute_confidence_for_value(
-    output_scores: List[torch.Tensor],
-    answer_ids: List[int],
-    value_ids: List[int],
-    device: torch.device
+        output_scores: List[torch.Tensor],
+        answer_ids: List[int],
+        value_ids: List[int],
+        device: torch.device
 ) -> Optional[float]:
     """
     Compute the confidence for a single numerical value occurrence in the generated answer.
@@ -115,11 +116,11 @@ def _compute_confidence_for_value(
 
 
 def _handle_baseline_decoding(
-    tokenizer: PreTrainedTokenizer,
-    device: torch.device,
-    answer_text: str,
-    output_scores: List[torch.Tensor],
-    answer_ids: torch.Tensor
+        tokenizer: PreTrainedTokenizer,
+        device: torch.device,
+        answer_text: str,
+        output_scores: List[torch.Tensor],
+        answer_ids: torch.Tensor
 ) -> Optional[Tuple[str, float, str]]:
     """
     Handle 'baseline' decoding mode:
@@ -142,8 +143,8 @@ def _handle_baseline_decoding(
         return None
 
     final_answer_scores = output_scores[
-        final_answer_start_idx: final_answer_start_idx + len(final_answer_ids)
-    ]
+                          final_answer_start_idx: final_answer_start_idx + len(final_answer_ids)
+                          ]
     confidence = calculate_confidence_for_final_answer(
         final_answer_scores,
         torch.tensor(final_answer_ids, device=device)
@@ -152,11 +153,11 @@ def _handle_baseline_decoding(
 
 
 def _handle_new_decoding_cot_mode(
-    tokenizer: PreTrainedTokenizer,
-    device: torch.device,
-    answer_text: str,
-    output_scores: List[torch.Tensor],
-    answer_ids: torch.Tensor
+        tokenizer: PreTrainedTokenizer,
+        device: torch.device,
+        answer_text: str,
+        output_scores: List[torch.Tensor],
+        answer_ids: torch.Tensor
 ) -> Optional[Tuple[str, float, str]]:
     """
     Handle 'new' decoding mode for CoT:
@@ -187,12 +188,12 @@ def _handle_new_decoding_cot_mode(
 
 
 def _handle_new_decoding_temp_mode(
-    tokenizer: PreTrainedTokenizer,
-    device: torch.device,
-    answer_text: str,
-    output_scores: List[torch.Tensor],
-    answer_ids: torch.Tensor,
-    scoring_mode: str
+        tokenizer: PreTrainedTokenizer,
+        device: torch.device,
+        answer_text: str,
+        output_scores: List[torch.Tensor],
+        answer_ids: torch.Tensor,
+        scoring_mode: str
 ) -> Optional[Tuple[str, float, str]]:
     """
     Handle 'new' decoding mode for temp sampling:
@@ -219,7 +220,6 @@ def _handle_new_decoding_temp_mode(
         if value_start_idx == -1:
             continue
 
-        value_start_idx -= 1
         if value_start_idx < 0 or value_start_idx + len(num_value_ids) > len(output_scores):
             continue
 
@@ -263,21 +263,21 @@ def _handle_new_decoding_temp_mode(
 
 
 def _sample_cot_paths(
-    model: PreTrainedModel,
-    tokenizer: PreTrainedTokenizer,
-    device: torch.device,
-    input_ids: torch.Tensor,
-    attention_mask: torch.Tensor,
-    k: int,
-    max_new_tokens: int,
-    num_beams: int,
-    temperature: float,
-    top_p: float,
-    repetition_penalty: float,
-    length_penalty: float,
-    no_repeat_ngram_size: int,
-    early_stopping: bool,
-    decoding_mode: str
+        model: PreTrainedModel,
+        tokenizer: PreTrainedTokenizer,
+        device: torch.device,
+        input_ids: torch.Tensor,
+        attention_mask: torch.Tensor,
+        k: int,
+        max_new_tokens: int,
+        num_beams: int,
+        temperature: float,
+        top_p: float,
+        repetition_penalty: float,
+        length_penalty: float,
+        no_repeat_ngram_size: int,
+        early_stopping: bool,
+        decoding_mode: str
 ) -> List[Tuple[str, float, str]]:
     """
     Generate paths using CoT sampling mode.
@@ -329,22 +329,22 @@ def _sample_cot_paths(
 
 
 def _sample_temp_paths(
-    model: PreTrainedModel,
-    tokenizer: PreTrainedTokenizer,
-    device: torch.device,
-    input_ids: torch.Tensor,
-    attention_mask: torch.Tensor,
-    k: int,
-    max_new_tokens: int,
-    num_beams: int,
-    temperature: float,
-    top_p: float,
-    repetition_penalty: float,
-    length_penalty: float,
-    no_repeat_ngram_size: int,
-    early_stopping: bool,
-    decoding_mode: str,
-    scoring_mode: str
+        model: PreTrainedModel,
+        tokenizer: PreTrainedTokenizer,
+        device: torch.device,
+        input_ids: torch.Tensor,
+        attention_mask: torch.Tensor,
+        k: int,
+        max_new_tokens: int,
+        num_beams: int,
+        temperature: float,
+        top_p: float,
+        repetition_penalty: float,
+        length_penalty: float,
+        no_repeat_ngram_size: int,
+        early_stopping: bool,
+        decoding_mode: str,
+        scoring_mode: str
 ) -> List[Tuple[str, float, str]]:
     """
     Generate paths using temperature-based sampling mode.
@@ -377,7 +377,8 @@ def _sample_temp_paths(
         if decoding_mode == "baseline":
             result = _handle_baseline_decoding(tokenizer, device, answer_text, output_scores, answer_ids)
         else:
-            result = _handle_new_decoding_temp_mode(tokenizer, device, answer_text, output_scores, answer_ids, scoring_mode)
+            result = _handle_new_decoding_temp_mode(tokenizer, device, answer_text, output_scores, answer_ids,
+                                                    scoring_mode)
 
         if result is not None:
             paths.append(result)
@@ -386,22 +387,22 @@ def _sample_temp_paths(
 
 
 def cot_decode(
-    model: PreTrainedModel,
-    tokenizer: PreTrainedTokenizer,
-    messages: List[Dict[str, str]],
-    sampling_mode: str = "cot",
-    scoring_mode: str = "min",
-    k: int = 10,
-    num_beams: int = 1,
-    max_new_tokens: int = 512,
-    temperature: float = 1.0,
-    top_p: float = 1.0,
-    repetition_penalty: float = 1.0,
-    length_penalty: float = 1.0,
-    no_repeat_ngram_size: int = 0,
-    early_stopping: bool = False,
-    aggregate_paths: bool = False,
-    decoding_mode: str = "baseline",
+        model: PreTrainedModel,
+        tokenizer: PreTrainedTokenizer,
+        messages: List[Dict[str, str]],
+        sampling_mode: str = "cot",
+        scoring_mode: str = "min",
+        k: int = 10,
+        num_beams: int = 1,
+        max_new_tokens: int = 512,
+        temperature: float = 1.0,
+        top_p: float = 1.0,
+        repetition_penalty: float = 1.0,
+        length_penalty: float = 1.0,
+        no_repeat_ngram_size: int = 0,
+        early_stopping: bool = False,
+        aggregate_paths: bool = False,
+        decoding_mode: str = "baseline",
 ) -> Tuple[str, float, str]:
     """
     CoT-decoding as originally implemented.
@@ -448,93 +449,4 @@ def cot_decode(
     if aggregate_paths:
         return aggregate_paths_based_on_scores(paths)
     else:
-        return max(paths, key=lambda x: x[1])
-
-
-def self_consistency_decode(
-    model: PreTrainedModel,
-    tokenizer: PreTrainedTokenizer,
-    messages: List[Dict[str, str]],
-    k: int = 10,
-    aggregate_paths: bool = True,
-    decoding_mode: str = "new"
-) -> Tuple[str, float, str]:
-    """
-    Self-consistency decoding:
-    This is similar to CoT 'temp' sampling, but we just sample k independent solutions
-    and then choose the final answer by majority vote (self-consistency).
-
-    We assume:
-    - Use temperature sampling mode ('temp').
-    - If aggregate_paths=True, we aggregate by the final answers' frequency.
-    """
-    device = get_device()
-
-    if hasattr(tokenizer, 'chat_template') and tokenizer.chat_template:
-        input_text = tokenizer.apply_chat_template(
-            messages,
-            tokenize=False,
-            add_generation_prompt=True
-        )
-    else:
-        input_text = "\n".join([f"{msg['role']}: {msg['content']}" for msg in messages])
-        input_text += "\nassistant:"
-
-    input_ids = tokenizer.encode(input_text, return_tensors="pt").to(device)
-    attention_mask = torch.ones_like(input_ids).to(device)
-
-    if tokenizer.pad_token_id is None:
-        tokenizer.pad_token_id = tokenizer.eos_token_id
-
-    # For self-consistency, we just do temp sampling k times and then pick the most common final answer
-    paths = []
-    for _ in range(k):
-        output = model.generate(
-            input_ids,
-            attention_mask=attention_mask,
-            max_new_tokens=512,
-            num_beams=1,
-            temperature=1.0,
-            top_p=1.0,
-            repetition_penalty=1.0,
-            length_penalty=1.0,
-            no_repeat_ngram_size=0,
-            early_stopping=False,
-            pad_token_id=tokenizer.pad_token_id,
-            eos_token_id=tokenizer.eos_token_id,
-            output_scores=True,
-            return_dict_in_generate=True,
-        )
-
-        generated_sequence = output.sequences[0]
-        answer_ids = generated_sequence[len(input_ids[0]):]
-        answer_text = tokenizer.decode(answer_ids, skip_special_tokens=True)
-        output_scores = output.scores
-
-        # decoding_mode from 'new' suggests we use _handle_new_decoding_temp_mode with default scoring_mode='log'
-        scoring_mode = 'log'  # Typically self-consistency doesn't rely heavily on scoring modes, but original code used something like this.
-        if decoding_mode == "baseline":
-            result = _handle_baseline_decoding(tokenizer, device, answer_text, output_scores, answer_ids)
-        else:
-            result = _handle_new_decoding_temp_mode(tokenizer, device, answer_text, output_scores, answer_ids, scoring_mode)
-
-        if result is not None:
-            paths.append(result)
-
-    if not paths:
-        return "", 0.0, ""
-
-    if aggregate_paths:
-        # Majority vote over final_answers
-        final_counts = {}
-        for _, _, final_ans in paths:
-            final_counts[final_ans] = final_counts.get(final_ans, 0) + 1
-        best_final_answer = max(final_counts, key=final_counts.get)
-
-        # Pick one path with that final answer that has the highest confidence
-        candidates = [p for p in paths if p[2] == best_final_answer]
-        best = max(candidates, key=lambda x: x[1])
-        return best[0], best[1], best[2]
-    else:
-        # Just pick the best by confidence
         return max(paths, key=lambda x: x[1])
