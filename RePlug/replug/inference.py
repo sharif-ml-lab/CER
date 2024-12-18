@@ -66,7 +66,7 @@ async def calculate_accuracy(sampled_dataset, faiss_retriever, dense_retriever, 
 
         scores = calculate_doc_scores(raw_distances)
 
-        DOC_BASE = True
+        DOC_BASE = False
         if DOC_BASE:
             similar_docs = ["\n\n".join(similar_docs)]
             # similar_docs = [similar_docs[0]]
@@ -102,7 +102,7 @@ async def generate_response(client, messages, scores, max_token=32):
             tasks = [client.next_prob(input_ids, prob_mode=True) for input_ids in input_ids_list]
             responses = await asyncio.gather(*tasks)
 
-        final_probs = aggregate_token_probs(probs=responses, scores=scores, mode='greedy')
+        final_probs = aggregate_token_probs(probs=responses, scores=scores, mode='ensemble')
 
         next_token_id = client.next_token_id(final_probs)
         result_tokens.append(next_token_id.item())

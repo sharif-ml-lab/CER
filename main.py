@@ -12,7 +12,7 @@ if __name__ == "__main__":
                         help="Path to the FAISS index.")
     parser.add_argument('--chunks_path', default="/data/Ideas/data/wiki_chunk_texts.pkl", type=str,
                         help="Path to the chunk texts.")
-    parser.add_argument('--model_name', default="/data/models/gemma-2-27b-it", type=str,
+    parser.add_argument('--model_name', default="/data/models/Meta-Llama-3.1-8B-Instruct", type=str,
                         help="Path to the HuggingFace model.")
     parser.add_argument('--n', type=int, default=500, help="Number of samples to process.")
     parser.add_argument('--seed', type=int, default=11, help="Seed for shuffling the dataset.")

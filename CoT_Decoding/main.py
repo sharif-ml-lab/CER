@@ -188,13 +188,13 @@ if __name__ == '__main__':
     AGGREGATE = True
     DECODING_MODE = 'new'
     BASELINE_COT = True
-    scoring_mode = 'h_mean'
+    scoring_mode = 'log'
 
     # Load model and tokenizer
     model, tokenizer = load_model_and_tokenizer(model_name)
 
     print(model_name)
-    print("Conf = P(Token)")
+    print("Conf = H(P)")
     print(f'Mode: CoT + {DECODING_MODE}')
     print(f'Config: k = {K}, Aggregate = {AGGREGATE}, scoring_mode = {scoring_mode}')
 
