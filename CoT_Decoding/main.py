@@ -1,6 +1,7 @@
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from Decoding import cot_decode
+from greedy_on_numbers import greedy_number_cot_decode
 from datasets import load_dataset
 from tqdm import tqdm
 import pandas as pd
@@ -64,14 +65,14 @@ def evaluate_single_example(
         aggregate: bool,
         decoding_mode: str,
         scoring_mode: str,
-        COT: bool
+        COT: int
 ) -> dict:
     """
     Evaluate the model on a single example.
     """
     messages = [{"role": "user", "content": construct_prompt(question)}]
 
-    if COT:
+    if COT == 0:
         result, confidence, final_ans = cot_decode(
             model,
             tokenizer,
@@ -80,6 +81,17 @@ def evaluate_single_example(
             max_new_tokens=512,
             k=k,
             decoding_mode=decoding_mode,
+            sampling_mode="temp",
+            scoring_mode=scoring_mode
+        )
+    elif COT == 1:
+        result, confidence, final_ans = greedy_number_cot_decode(
+            model,
+            tokenizer,
+            messages,
+            aggregate_paths=aggregate,
+            max_new_tokens=512,
+            k=k,
             sampling_mode="temp",
             scoring_mode=scoring_mode
         )
@@ -120,7 +132,7 @@ def evaluate_dataset(
         decoding_mode: str,
         description: str,
         scoring_mode: str,
-        COT: bool = False
+        COT: int
 ) -> float:
     """
     Evaluate the model on the given dataset.
@@ -171,11 +183,15 @@ def print_final_accuracy(description: str, accuracy: float):
     print(f"Final Accuracy for {description}: {accuracy:.2f}%")
 
 
-def load_and_sample_dataset(dataset_name: str, split: str, sample_size: int = None, seed: int = None):
+def load_and_sample_dataset(dataset_name: str, split: str, subset: str = None, sample_size: int = None,
+                            seed: int = None):
     """
     Load a dataset and optionally sample from it.
     """
-    dataset = load_dataset(dataset_name, split=split)
+    if subset is None:
+        dataset = load_dataset(dataset_name, split=split)
+    else:
+        dataset = load_dataset(dataset_name, split)[subset]
     if sample_size is not None and seed is not None:
         dataset = dataset.shuffle(seed=seed).select(range(sample_size))
     return dataset
@@ -187,14 +203,14 @@ if __name__ == '__main__':
     K = 10
     AGGREGATE = True
     DECODING_MODE = 'new'
-    BASELINE_COT = True
+    BASELINE_COT = 1  # 0 for Cot, 1 for greedy number cot , None for self cons
     scoring_mode = 'log'
 
     # Load model and tokenizer
     model, tokenizer = load_model_and_tokenizer(model_name)
 
     print(model_name)
-    print("Conf = P(Token)  , ***")
+    print("Conf = P(Token)  , +++")
     print(f'Mode: CoT + {DECODING_MODE}')
     print(f'Config: k = {K}, Aggregate = {AGGREGATE}, scoring_mode = {scoring_mode}')
 
@@ -211,7 +227,7 @@ if __name__ == '__main__':
     )
 
     # Evaluate GSM8K dataset (sample of 300)
-    gsm8k_dataset = load_and_sample_dataset("openai/gsm8k", "main", sample_size=300, seed=11)
+    gsm8k_dataset = load_and_sample_dataset("openai/gsm8k", split='main', subset="train", sample_size=300, seed=11)
     evaluate_dataset(
         model, tokenizer, gsm8k_dataset,
         k=K,
