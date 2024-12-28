@@ -1,12 +1,15 @@
-import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
-from Decoding import cot_decode
-from greedy_on_numbers import greedy_number_cot_decode
-from datasets import load_dataset
-from tqdm import tqdm
-import pandas as pd
-from self_consistency import self_consistency_decode
 from typing import List
+from tqdm import tqdm
+
+import torch
+import pandas as pd
+
+from transformers import AutoModelForCausalLM, AutoTokenizer
+from datasets import load_dataset
+
+from CoT_Decoding.self_consistency import self_consistency_decode
+from CoT_Decoding.Decoding import cot_decode
+from CoT_Decoding.greedy_on_numbers import greedy_number_cot_decode
 
 
 def load_model_and_tokenizer(model_name: str):
@@ -15,7 +18,7 @@ def load_model_and_tokenizer(model_name: str):
     """
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
-        local_files_only=True,
+        local_files_only=False,
         device_map='cuda',
         torch_dtype=torch.float16
     )
@@ -84,6 +87,7 @@ def evaluate_single_example(
             sampling_mode="temp",
             scoring_mode=scoring_mode
         )
+
     elif COT == 1:
         result, confidence, final_ans = greedy_number_cot_decode(
             model,
@@ -95,6 +99,7 @@ def evaluate_single_example(
             sampling_mode="temp",
             scoring_mode=scoring_mode
         )
+        
     else:
         result, confidence, final_ans = self_consistency_decode(
             model,
@@ -197,43 +202,41 @@ def load_and_sample_dataset(dataset_name: str, split: str, subset: str = None, s
     return dataset
 
 
-if __name__ == '__main__':
+def main(model_name, dataset_path, decoding_mode, baseline_cot):
     # Configurations
-    model_name = "/home/dev/models/Meta-Llama-3.1-8B-Instruct"
     K = 10
     AGGREGATE = True
-    DECODING_MODE = 'new'
-    BASELINE_COT = 1  # 0 for Cot, 1 for greedy number cot , None for self cons
     scoring_mode = 'log'
 
-    # Load model and tokenizer
     model, tokenizer = load_model_and_tokenizer(model_name)
 
     print(model_name)
     print("Conf = P(Token)  , +++")
-    print(f'Mode: CoT + {DECODING_MODE}')
+    print(f'Mode: CoT + {decoding_mode}')
     print(f'Config: k = {K}, Aggregate = {AGGREGATE}, scoring_mode = {scoring_mode}')
 
     # Evaluate MultiArith dataset
-    multiarith_dataset = load_and_sample_dataset("ChilleD/MultiArith", "test")
-    evaluate_dataset(
-        model, tokenizer, multiarith_dataset,
-        k=K,
-        aggregate=AGGREGATE,
-        decoding_mode=DECODING_MODE,
-        description="MultiArith",
-        scoring_mode=scoring_mode,
-        COT=BASELINE_COT
-    )
+    if dataset_path == "MultiArith":
+        multiarith_dataset = load_and_sample_dataset("ChilleD/MultiArith", "test")
+        evaluate_dataset(
+            model, tokenizer, multiarith_dataset,
+            k=K,
+            aggregate=AGGREGATE,
+            decoding_mode=decoding_mode,
+            description="MultiArith",
+            scoring_mode=scoring_mode,
+            COT=baseline_cot
+        )
 
     # Evaluate GSM8K dataset (sample of 300)
-    gsm8k_dataset = load_and_sample_dataset("openai/gsm8k", split='main', subset="train", sample_size=300, seed=11)
-    evaluate_dataset(
-        model, tokenizer, gsm8k_dataset,
-        k=K,
-        aggregate=AGGREGATE,
-        decoding_mode=DECODING_MODE,
-        description="GSM8K",
-        scoring_mode=scoring_mode,
-        COT=BASELINE_COT
-    )
+    elif dataset_path == "GSM8K":
+        gsm8k_dataset = load_and_sample_dataset("openai/gsm8k", split='main', subset="train", sample_size=300, seed=11)
+        evaluate_dataset(
+            model, tokenizer, gsm8k_dataset,
+            k=K,
+            aggregate=AGGREGATE,
+            decoding_mode=decoding_mode,
+            description="GSM8K",
+            scoring_mode=scoring_mode,
+            COT=baseline_cot
+        )
