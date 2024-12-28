@@ -160,7 +160,8 @@ if __name__ == '__main__':
          "preprocess_function": preprocess_mmlu},
         {"dataset_name": "nvidia/OpenMathInstruct-2", "answer_column": "expected_answer",
          "preprocess_function": preprocess_open_math_instruct},
-        {"dataset_name": "openai/gsm8k", "answer_column": "answer", "preprocess_function": preprocess_gsm8k},
+        {"dataset_name": "openai/gsm8k", "answer_column": "answer", "config_name": "main",
+         "preprocess_function": preprocess_gsm8k},
         {"dataset_name": "ChilleD/MultiArith", "answer_column": "final_ans",
          "preprocess_function": preprocess_multi_arith}
     ]
