@@ -22,10 +22,14 @@ def preprocess_math_qa(df, answer_column):
 
         options_dict = {}
         for option in options.split(','):
-            key, value = option.strip().split(')')
-            key = key.strip().lower()
-            value = value.strip()
-            options_dict[key] = value
+            try:
+                key, value = option.strip().split(')')
+                key = key.strip().lower()
+                value = value.strip()
+                options_dict[key] = value
+            except ValueError:
+                print(f"Skipping option due to split error: {option}")
+                continue
 
         final_answer = options_dict.get(correct, None)
         if final_answer:
@@ -115,7 +119,7 @@ def process_and_save_dataset(dataset_info, save_path):
     preprocess_function = dataset_info["preprocess_function"]
 
     # Load the dataset
-    dataset = load_dataset(dataset_name)
+    dataset = load_dataset(dataset_name, trust_remote_code=True)
 
     # Combine all splits into one
     combined_dataset = concatenate_datasets([ds for split, ds in dataset.items()])
@@ -128,6 +132,9 @@ def process_and_save_dataset(dataset_info, save_path):
 
     # Filter out rows without a numeric final answer
     df = df.dropna(subset=['numeric_final_answer'])
+
+    # Print the number of records before saving
+    print(f"Number of records in {dataset_name} after preprocessing: {len(df)}")
 
     # Save the processed dataset in Parquet format to save disk space
     df.to_parquet(f"{save_path}/{dataset_name.replace('/', '_')}_processed.parquet", index=False)
