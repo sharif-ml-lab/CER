@@ -183,7 +183,7 @@ def load_and_sample_dataset(dataset_name: str, split: str, sample_size: int = No
 
 if __name__ == '__main__':
     # Configurations
-    model_name = "/data/models/Meta-Llama-3.1-8B-Instruct"
+    model_name = "/home/dev/models/Meta-Llama-3.1-8B-Instruct"
     K = 10
     AGGREGATE = True
     DECODING_MODE = 'new'
@@ -194,7 +194,7 @@ if __name__ == '__main__':
     model, tokenizer = load_model_and_tokenizer(model_name)
 
     print(model_name)
-    print("Conf = H(P)")
+    print("Conf = P(Token)  , ***")
     print(f'Mode: CoT + {DECODING_MODE}')
     print(f'Config: k = {K}, Aggregate = {AGGREGATE}, scoring_mode = {scoring_mode}')
 
@@ -211,7 +211,7 @@ if __name__ == '__main__':
     )
 
     # Evaluate GSM8K dataset (sample of 300)
-    gsm8k_dataset = load_and_sample_dataset("openai/gsm8k", "test", sample_size=300, seed=11)
+    gsm8k_dataset = load_and_sample_dataset("openai/gsm8k", "main", sample_size=300, seed=11)
     evaluate_dataset(
         model, tokenizer, gsm8k_dataset,
         k=K,

@@ -46,15 +46,17 @@ def calculate_confidence_for_final_answer(
             top_2_probs, _ = torch.topk(probs, min(2, probs.size(-1)))
             if top_2_probs.size(-1) > 1:
                 # confidence_sum += (top_2_probs[-1][0] - top_2_probs[-1][1]).item() * ans_token_prob.item()
+                confidence_sum += ans_token_prob.item()
+
                 # confidence_sum *= ans_token_prob.item()
 
-                # Add a small epsilon to avoid log(0)
-                probs = torch.clamp(probs, min=1e-12)
-
-                # Compute entropy: H(P) = -sum p_i * log(p_i)
-                # Note: log is natural log by default in PyTorch
-                entropy = - (probs * torch.log(probs)).sum(dim=-1)
-                confidence_sum = 1 - entropy.item()
+                # # Add a small epsilon to avoid log(0)
+                # probs = torch.clamp(probs, min=1e-12)
+                #
+                # # Compute entropy: H(P) = -sum p_i * log(p_i)
+                # # Note: log is natural log by default in PyTorch
+                # entropy = - (probs * torch.log(probs)).sum(dim=-1)
+                # confidence_sum = 1 - entropy.item()
 
             else:
                 confidence_sum += 1.0  # Only one token probability
