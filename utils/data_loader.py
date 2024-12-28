@@ -63,16 +63,15 @@ def preprocess_mmlu(df, answer_column):
 
     def get_numeric_final_answer(row):
         choices = row[choices_column]
-        answer_info = row[answer_column].split()
+        answer_idx = row[answer_column]
 
-        if len(answer_info) == 2:
-            try:
-                answer_index = int(answer_info[0])
-                if 0 <= answer_index < len(choices):
-                    final_answer = choices[answer_index].replace(',', '.')
-                    return is_valid_number(final_answer)
-            except ValueError:
-                return None
+        # Ensure answer_info is a string
+        if not isinstance(answer_idx, int):
+            return None
+
+        final_answer = choices[answer_idx].replace(',', '.')
+        if is_valid_number(final_answer):
+            return final_answer
         return None
 
     df['numeric_final_answer'] = df.apply(get_numeric_final_answer, axis=1)
@@ -121,9 +120,13 @@ def process_and_save_dataset(dataset_info, save_path):
     dataset_name = dataset_info["dataset_name"]
     answer_column = dataset_info["answer_column"]
     preprocess_function = dataset_info["preprocess_function"]
+    config_name = dataset_info.get("config_name", None)  # Get the config name if provided
 
     # Load the dataset
-    dataset = load_dataset(dataset_name, trust_remote_code=True)
+    if config_name:
+        dataset = load_dataset(dataset_name, config_name, trust_remote_code=True)
+    else:
+        dataset = load_dataset(dataset_name, trust_remote_code=True)
 
     # Combine all splits into one
     combined_dataset = concatenate_datasets([ds for split, ds in dataset.items()])
@@ -151,11 +154,12 @@ if __name__ == '__main__':
          "preprocess_function": preprocess_math_qa},
         {"dataset_name": "meta-math/MetaMathQA", "answer_column": "response",
          "preprocess_function": preprocess_meta_math_qa},
-        {"dataset_name": "cais/mmlu", "answer_column": ("choices", "answer"), "preprocess_function": preprocess_mmlu},
-        {"dataset_name": "nvidia/OpenMathInstruct-2", "answer_column": "result",
+        {"dataset_name": "cais/mmlu", "answer_column": ("choices", "answer"), "config_name": "abstract_algebra",
+         "preprocess_function": preprocess_mmlu},
+        {"dataset_name": "nvidia/OpenMathInstruct-2", "answer_column": "expected_answer",
          "preprocess_function": preprocess_open_math_instruct},
         {"dataset_name": "openai/gsm8k", "answer_column": "answer", "preprocess_function": preprocess_gsm8k},
-        {"dataset_name": "ChilleD/MultiArith", "answer_column": "final_answer",
+        {"dataset_name": "ChilleD/MultiArith", "answer_column": "final_ans",
          "preprocess_function": preprocess_multi_arith}
     ]
 
