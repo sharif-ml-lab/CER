@@ -43,12 +43,16 @@ def preprocess_math_qa(df, answer_column):
 
 
 def preprocess_meta_math_qa(df, answer_column):
-    def extractor(text):
-        first, ans = text.split("The answer is:")
-        if is_valid_number(ans.replace(',', '.')):
-            return ans
-        else:
-            return None
+    def extractor(row):
+        text = row[answer_column]
+        try:
+            first, ans = text.split("The answer is:")
+            ans = ans.replace(',', '.').strip()
+            if is_valid_number(ans):
+                return ans
+        except ValueError:
+            print(f"Skipping row due to split error: {text}")
+        return None
 
     df['numeric_final_answer'] = df.apply(extractor, axis=1)
     return df
@@ -145,7 +149,7 @@ if __name__ == '__main__':
     datasets_to_process = [
         {"dataset_name": "allenai/math_qa", "answer_column": ("options", "correct"),
          "preprocess_function": preprocess_math_qa},
-        {"dataset_name": "meta-math/MetaMathQA", "answer_column": "solution",
+        {"dataset_name": "meta-math/MetaMathQA", "answer_column": "response",
          "preprocess_function": preprocess_meta_math_qa},
         {"dataset_name": "cais/mmlu", "answer_column": ("choices", "answer"), "preprocess_function": preprocess_mmlu},
         {"dataset_name": "nvidia/OpenMathInstruct-2", "answer_column": "result",
