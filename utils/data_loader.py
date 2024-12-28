@@ -3,21 +3,23 @@ from datasets import load_dataset, DatasetDict, concatenate_datasets
 import pandas as pd
 
 
-# Function to extract the last numeric value from a string
-def extract_last_numeric_value(text):
-    matches = re.findall(r'\b\d+\.?\d*\b', text)
-    return matches[-1] if matches else None
+# Function to check if a string is a valid number (integer or float)
+def is_valid_number(s):
+    try:
+        float(s.strip())
+        return True
+    except ValueError:
+        return False
 
 
+# Preprocess functions for each dataset
 def preprocess_math_qa(df, answer_column):
     options_column, correct_column = answer_column
 
-    # Function to get the numeric final answer from the options and correct columns
     def get_numeric_final_answer(row):
         options = row[options_column]
         correct = row[correct_column].strip().lower()
 
-        # Parse the options
         options_dict = {}
         for option in options.split(','):
             key, value = option.strip().split(')')
@@ -25,84 +27,85 @@ def preprocess_math_qa(df, answer_column):
             value = value.strip()
             options_dict[key] = value
 
-        # Get the correct answer
         final_answer = options_dict.get(correct, None)
         if final_answer:
-            # Replace comma with dot for float values and check if the answer is numeric
             final_answer = final_answer.replace(',', '.')
-            return extract_last_numeric_value(final_answer)
+            if is_valid_number(final_answer):
+                return final_answer
         return None
 
-    # Apply the function to each row to get the numeric final answer
     df['numeric_final_answer'] = df.apply(get_numeric_final_answer, axis=1)
-
     return df
 
 
 def preprocess_meta_math_qa(df, answer_column):
     def extractor(text):
         first, ans = text.split("The answer is:")
-        if ans.replace(',', '.').isnumeric():
+        if is_valid_number(ans.replace(',', '.')):
             return ans
         else:
             return None
 
-    return df[answer_column].apply(extractor)
+    df['numeric_final_answer'] = df.apply(extractor, axis=1)
+    return df
 
 
 def preprocess_mmlu(df, answer_column):
     choices_column, answer_column = answer_column
 
-    # Function to get the numeric final answer from the choices and answer columns
     def get_numeric_final_answer(row):
         choices = row[choices_column]
         answer_info = row[answer_column].split()
 
         if len(answer_info) == 2:
             try:
-                answer_index = int(answer_info.strip()[0])
+                answer_index = int(answer_info[0])
                 if 0 <= answer_index < len(choices):
                     final_answer = choices[answer_index].replace(',', '.')
-                    return extract_last_numeric_value(final_answer)
+                    return is_valid_number(final_answer)
             except ValueError:
                 return None
         return None
 
-    # Apply the function to each row to get the numeric final answer
     df['numeric_final_answer'] = df.apply(get_numeric_final_answer, axis=1)
-
     return df
 
 
 def preprocess_open_math_instruct(df, answer_column):
-    def extractor(text):
-        if text.isnumeric():
-            return text
-        else:
-            return None
+    result_column = answer_column
 
-    return df[answer_column].apply(extractor)
+    def get_numeric_final_answer(row):
+        result = row[result_column]
+        result = result.replace(',', '.')
+        return is_valid_number(result)
+
+    df['numeric_final_answer'] = df.apply(get_numeric_final_answer, axis=1)
+    return df
 
 
 def preprocess_gsm8k(df, answer_column):
-    def extractor(text):
-        first, ans = text.split('####')
-        if ans.isnumeric():
-            return ans
-        else:
-            return None
+    answer_column = answer_column
 
-    return df[answer_column].apply(extractor)
+    def get_numeric_final_answer(row):
+        answer = row[answer_column]
+        _, answer = answer.split("####")
+        answer = answer.replace(',', '.')
+        return is_valid_number(answer)
+
+    df['numeric_final_answer'] = df.apply(get_numeric_final_answer, axis=1)
+    return df
 
 
 def preprocess_multi_arith(df, answer_column):
-    def extractor(text):
-        if text.isnumeric():
-            return text
-        else:
-            return None
+    final_answer_column = answer_column
 
-    return df[answer_column].apply(extractor)
+    def get_numeric_final_answer(row):
+        final_answer = row[final_answer_column]
+        final_answer = final_answer.replace(',', '.')
+        return is_valid_number(final_answer)
+
+    df['numeric_final_answer'] = df.apply(get_numeric_final_answer, axis=1)
+    return df
 
 
 # Function to process and save a dataset
@@ -121,7 +124,7 @@ def process_and_save_dataset(dataset_info, save_path):
     df = combined_dataset.to_pandas()
 
     # Apply the specific preprocess function to find the numeric final answer
-    df['numeric_final_answer'] = preprocess_function(df, answer_column)
+    df = preprocess_function(df, answer_column)
 
     # Filter out rows without a numeric final answer
     df = df.dropna(subset=['numeric_final_answer'])
@@ -130,18 +133,18 @@ def process_and_save_dataset(dataset_info, save_path):
     df.to_parquet(f"{save_path}/{dataset_name.replace('/', '_')}_processed.parquet", index=False)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     # Dictionary mapping dataset names to their specific preprocess functions and answer columns
     datasets_to_process = [
-        {"dataset_name": "allenai/math_qa", "answer_column": "options, correct",
+        {"dataset_name": "allenai/math_qa", "answer_column": ("options", "correct"),
          "preprocess_function": preprocess_math_qa},
-        {"dataset_name": "meta-math/MetaMathQA", "response": "solution",
+        {"dataset_name": "meta-math/MetaMathQA", "answer_column": "solution",
          "preprocess_function": preprocess_meta_math_qa},
-        {"dataset_name": "cais/mmlu", "answer_column": "choices, answer", "preprocess_function": preprocess_mmlu},
-        {"dataset_name": "nvidia/OpenMathInstruct-2", "expected_answer": "result",
+        {"dataset_name": "cais/mmlu", "answer_column": ("choices", "answer"), "preprocess_function": preprocess_mmlu},
+        {"dataset_name": "nvidia/OpenMathInstruct-2", "answer_column": "result",
          "preprocess_function": preprocess_open_math_instruct},
         {"dataset_name": "openai/gsm8k", "answer_column": "answer", "preprocess_function": preprocess_gsm8k},
-        {"dataset_name": "ChilleD/MultiArith", "answer_column": "final_ans",
+        {"dataset_name": "ChilleD/MultiArith", "answer_column": "final_answer",
          "preprocess_function": preprocess_multi_arith}
     ]
 
