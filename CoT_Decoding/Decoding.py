@@ -41,10 +41,16 @@ def calculate_confidence_for_final_answer(
             probs = torch.clamp(probs, min=1e-12)
             entropy = - (probs * torch.log(probs)).sum(dim=-1)
             confidence_sum = 1 - entropy.item()
-        elif mode == "top_2_diff":
+        elif mode == "top_2_diff_weighted":
             top_2_probs, _ = torch.topk(probs, min(2, probs.size(-1)))
             if top_2_probs.size(-1) > 1:
                 confidence_sum += (top_2_probs[-1][0] - top_2_probs[-1][1]).item() * ans_token_prob.item()
+            else:
+                confidence_sum += 1.0
+        elif mode == "top_2_diff":
+            top_2_probs, _ = torch.topk(probs, min(2, probs.size(-1)))
+            if top_2_probs.size(-1) > 1:
+                confidence_sum += (top_2_probs[-1][0] - top_2_probs[-1][1]).item()
             else:
                 confidence_sum += 1.0
         else:

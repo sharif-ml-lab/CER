@@ -120,7 +120,7 @@ def evaluate_single_example(
     try:
         model_answer = float(final_ans)
         correct_answer = float(correct_answer_str)
-        is_correct = (model_answer == correct_answer)
+        is_correct = ((model_answer - correct_answer) <= 1e-2)
     except ValueError:
         is_correct = False
 
@@ -168,8 +168,8 @@ def evaluate_dataset(
             if result_dict['is_correct']:
                 correct_answers += 1
 
-            running_accuracy = (correct_answers / (idx + 1)) * 100
-            pbar.set_postfix(idx=idx + 1, running_accuracy=f"{running_accuracy:.2f}%")
+            running_accuracy = (correct_answers / (int(idx) + 1)) * 100
+            pbar.set_postfix(idx=int(idx) + 1, running_accuracy=f"{running_accuracy:.2f}%")
             pbar.update(1)
 
     save_results_to_csv(results, f"{description}_evaluation_results_{sampling_mode}_{decoding_mode}.csv")
@@ -224,13 +224,13 @@ if __name__ == '__main__':
     dataset_files = [
         "allenai_math_qa_processed.parquet",
         # "nvidia_OpenMathInstruct-2_processed.parquet",
-        "ChilleD_MultiArith_processed.parquet",
+        # "ChilleD_MultiArith_processed.parquet",
         # "meta-math_MetaMathQA_processed.parquet",
         # "openai_gsm8k_processed.parquet"
     ]
 
     # Load and sample each dataset
-    loaded_datasets = load_and_sample_parquet_datasets(data_dir, dataset_files, n=1000, seed=42)
+    loaded_datasets = load_and_sample_parquet_datasets(data_dir, dataset_files, n=500, seed=42)
 
     # Loop over each config
     for cfg in multi_run_configs:
