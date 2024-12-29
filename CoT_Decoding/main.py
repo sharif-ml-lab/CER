@@ -7,6 +7,7 @@ from tqdm import tqdm
 import pandas as pd
 from self_consistency import self_consistency_decode
 from typing import List
+from config import multi_run_configs  # Import the list of multiple configs
 
 
 def load_model_and_tokenizer(model_name: str):
@@ -65,7 +66,9 @@ def evaluate_single_example(
         aggregate: bool,
         decoding_mode: str,
         scoring_mode: str,
-        COT: int
+        COT: int,
+        sampling_mode: str,
+        confidence_mode: str
 ) -> dict:
     """
     Evaluate the model on a single example.
@@ -77,12 +80,20 @@ def evaluate_single_example(
             model,
             tokenizer,
             messages,
-            aggregate_paths=aggregate,
-            max_new_tokens=512,
+            sampling_mode=sampling_mode,
+            scoring_mode=scoring_mode,
             k=k,
             decoding_mode=decoding_mode,
-            sampling_mode="temp",
-            scoring_mode=scoring_mode
+            num_beams=1,
+            max_new_tokens=512,
+            temperature=1.0,
+            top_p=1.0,
+            repetition_penalty=1.0,
+            length_penalty=1.0,
+            no_repeat_ngram_size=0,
+            early_stopping=False,
+            aggregate_paths=aggregate,
+            confidence_mode=confidence_mode
         )
     elif COT == 1:
         result, confidence, final_ans = greedy_number_cot_decode(
@@ -92,8 +103,9 @@ def evaluate_single_example(
             aggregate_paths=aggregate,
             max_new_tokens=512,
             k=k,
-            sampling_mode="temp",
-            scoring_mode=scoring_mode
+            sampling_mode=sampling_mode,
+            scoring_mode=scoring_mode,
+            confidence_mode=confidence_mode  # ensure your function can handle this if needed
         )
     else:
         result, confidence, final_ans = self_consistency_decode(
@@ -132,7 +144,9 @@ def evaluate_dataset(
         decoding_mode: str,
         description: str,
         scoring_mode: str,
-        COT: int
+        COT: int,
+        sampling_mode: str,
+        confidence_mode: str
 ) -> float:
     """
     Evaluate the model on the given dataset.
@@ -151,7 +165,7 @@ def evaluate_dataset(
 
             result_dict = evaluate_single_example(
                 model, tokenizer, question, correct_answer,
-                k, aggregate, decoding_mode, scoring_mode, COT
+                k, aggregate, decoding_mode, scoring_mode, COT, sampling_mode, confidence_mode
             )
             results.append(result_dict)
 
@@ -162,7 +176,7 @@ def evaluate_dataset(
             pbar.set_postfix(idx=idx + 1, running_accuracy=f"{running_accuracy:.2f}%")
             pbar.update(1)
 
-    save_results_to_csv(results, f"{description}_evaluation_results.csv")
+    save_results_to_csv(results, f"{description}_evaluation_results_{sampling_mode}_{decoding_mode}.csv")
     accuracy = (correct_answers / total_questions) * 100
     print_final_accuracy(description, accuracy)
     return accuracy
@@ -198,42 +212,55 @@ def load_and_sample_dataset(dataset_name: str, split: str, subset: str = None, s
 
 
 if __name__ == '__main__':
-    # Configurations
-    model_name = "/home/dev/models/Meta-Llama-3.1-8B-Instruct"
-    K = 10
-    AGGREGATE = True
-    DECODING_MODE = 'new'
-    BASELINE_COT = 1  # 0 for Cot, 1 for greedy number cot , None for self cons
-    scoring_mode = 'log'
-
-    # Load model and tokenizer
-    model, tokenizer = load_model_and_tokenizer(model_name)
-
-    print(model_name)
-    print("Conf = P(Token)  , +++")
-    print(f'Mode: CoT + {DECODING_MODE}')
-    print(f'Config: k = {K}, Aggregate = {AGGREGATE}, scoring_mode = {scoring_mode}')
-
-    # Evaluate MultiArith dataset
+    # Optionally load a sample dataset(s) once to avoid repeated downloads
     multiarith_dataset = load_and_sample_dataset("ChilleD/MultiArith", "test")
-    evaluate_dataset(
-        model, tokenizer, multiarith_dataset,
-        k=K,
-        aggregate=AGGREGATE,
-        decoding_mode=DECODING_MODE,
-        description="MultiArith",
-        scoring_mode=scoring_mode,
-        COT=BASELINE_COT
-    )
-
-    # Evaluate GSM8K dataset (sample of 300)
     gsm8k_dataset = load_and_sample_dataset("openai/gsm8k", split='main', subset="train", sample_size=300, seed=11)
-    evaluate_dataset(
-        model, tokenizer, gsm8k_dataset,
-        k=K,
-        aggregate=AGGREGATE,
-        decoding_mode=DECODING_MODE,
-        description="GSM8K",
-        scoring_mode=scoring_mode,
-        COT=BASELINE_COT
-    )
+
+    # Loop over each config in multi_run_configs
+    for cfg in multi_run_configs:
+        print("======================================")
+        print(f"Running: {cfg['run_name']}")
+        print("======================================")
+
+        # Load the model and tokenizer for each config
+        model, tokenizer = load_model_and_tokenizer(cfg["model_name"])
+
+        # Print basic info
+        print(f"Model name: {cfg['model_name']}")
+        print(f"Sampling mode: {cfg['sampling_mode']}")
+        print(f"Decoding mode: {cfg['decoding_mode']}")
+
+        # Evaluate on MultiArith
+        print(f"\nEvaluating MultiArith using {cfg['run_name']} ...")
+        evaluate_dataset(
+            model,
+            tokenizer,
+            multiarith_dataset,
+            k=cfg['k'],
+            aggregate=cfg['aggregate'],
+            decoding_mode=cfg['decoding_mode'],
+            description=f"MultiArith_{cfg['run_name']}",
+            scoring_mode=cfg['scoring_mode'],
+            COT=cfg['baseline_cot'],
+            sampling_mode=cfg['sampling_mode'],
+            confidence_mode=cfg['confidence_calculation_mode']
+        )
+
+        # Evaluate on GSM8K
+        print(f"\nEvaluating GSM8K using {cfg['run_name']} ...")
+        evaluate_dataset(
+            model,
+            tokenizer,
+            gsm8k_dataset,
+            k=cfg['k'],
+            aggregate=cfg['aggregate'],
+            decoding_mode=cfg['decoding_mode'],
+            description=f"GSM8K_{cfg['run_name']}",
+            scoring_mode=cfg['scoring_mode'],
+            COT=cfg['baseline_cot'],
+            sampling_mode=cfg['sampling_mode'],
+            confidence_mode=cfg['confidence_calculation_mode']
+        )
+
+        print(f"Finished run: {cfg['run_name']}")
+        print("======================================\n")
