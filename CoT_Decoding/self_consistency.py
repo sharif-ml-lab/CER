@@ -96,24 +96,17 @@ class AdvancedSelfConsistency:
     def evaluate(self, prompt: str, mode: str):
         responses, probs = self.generate_responses(prompt)
 
-        if mode == "baseline":
-            unique_final_answer = dict()
-            for response in responses:
-                final_answer = extract_last_numerical_value(response)
-                if final_answer not in unique_final_answer:
-                    unique_final_answer[final_answer] = 1
-                else:
-                    unique_final_answer[final_answer] += 1
+        unique_final_answer = dict()
+        for response in responses:
+            final_answer = extract_last_numerical_value(response)
+            if final_answer not in unique_final_answer:
+                unique_final_answer[final_answer] = 1
+            else:
+                unique_final_answer[final_answer] += 1
 
-            best_final_answer = max(unique_final_answer, key=unique_final_answer.get)
+        best_final_answer = max(unique_final_answer, key=unique_final_answer.get)
 
-            return [None, None, best_final_answer]
-            # aggregated_result = self.aggregate_results(responses)
-            #
-            # return {
-            #     "individual_responses": responses,
-            #     "aggregated_result": aggregated_result
-            # }
+        return best_final_answer
 
 
 def extract_last_numerical_value(text: str) -> Optional[str]:
@@ -221,7 +214,7 @@ def self_consistency_decode(
     self_consistency = AdvancedSelfConsistency(model, tokenizer, num_samples=k)
     result = self_consistency.evaluate(input_text, mode=decoding_mode)
 
-    return result
+    return None, None, result
 
     # logger.info("Advanced Self-Consistency Results:")
     # logger.info(f"Total responses: {result['aggregated_result']['total_responses']}")

@@ -230,7 +230,7 @@ if __name__ == '__main__':
     ]
 
     # Load and sample each dataset
-    loaded_datasets = load_and_sample_parquet_datasets(data_dir, dataset_files, n=500, seed=42)
+    loaded_datasets = load_and_sample_parquet_datasets(data_dir, dataset_files, n=500, seed=11)
 
     # Loop over each config
     for cfg in multi_run_configs:
