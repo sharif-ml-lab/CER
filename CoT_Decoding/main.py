@@ -9,6 +9,7 @@ from tqdm import tqdm
 from typing import List
 from config import multi_run_configs  # Import the list of multiple configs
 
+
 def load_model_and_tokenizer(model_name: str):
     """
     Load the model and tokenizer from the specified path.
@@ -21,6 +22,7 @@ def load_model_and_tokenizer(model_name: str):
     )
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     return model, tokenizer
+
 
 def construct_prompt(question: str) -> str:
     """
@@ -54,18 +56,19 @@ Q: {question}
 A: """
     return base
 
+
 def evaluate_single_example(
-    model,
-    tokenizer,
-    question: str,
-    correct_answer_str: str,
-    k: int,
-    aggregate: bool,
-    decoding_mode: str,
-    scoring_mode: str,
-    COT: int,
-    sampling_mode: str,
-    confidence_mode: str
+        model,
+        tokenizer,
+        question: str,
+        correct_answer_str: str,
+        k: int,
+        aggregate: bool,
+        decoding_mode: str,
+        scoring_mode: str,
+        COT: int,
+        sampling_mode: str,
+        confidence_mode: str
 ) -> dict:
     """
     Evaluate the model on a single example.
@@ -102,7 +105,6 @@ def evaluate_single_example(
             k=k,
             sampling_mode=sampling_mode,
             scoring_mode=scoring_mode,
-            confidence_mode=confidence_mode  # ensure your function can handle this if needed
         )
     else:
         result, confidence, final_ans = self_consistency_decode(
@@ -131,18 +133,19 @@ def evaluate_single_example(
         'is_correct': is_correct
     }
 
+
 def evaluate_dataset(
-    model,
-    tokenizer,
-    dataset: pd.DataFrame,
-    k: int,
-    aggregate: bool,
-    decoding_mode: str,
-    description: str,
-    scoring_mode: str,
-    COT: int,
-    sampling_mode: str,
-    confidence_mode: str
+        model,
+        tokenizer,
+        dataset: pd.DataFrame,
+        k: int,
+        aggregate: bool,
+        decoding_mode: str,
+        description: str,
+        scoring_mode: str,
+        COT: int,
+        sampling_mode: str,
+        confidence_mode: str
 ) -> float:
     """
     Evaluate the model on the given dataset.
@@ -152,7 +155,7 @@ def evaluate_dataset(
     results = []
 
     with tqdm(total=total_questions, desc=f"Processing {description}", dynamic_ncols=True) as pbar:
-        for idx, example in enumerate(dataset):
+        for idx, example in dataset.iterrows():
             question = example['question']
             correct_answer = str(example['numeric_final_answer'])  # ensure it's a string for parsing downstream
 
@@ -174,6 +177,7 @@ def evaluate_dataset(
     print_final_accuracy(description, accuracy)
     return accuracy
 
+
 def save_results_to_csv(results: List[dict], filename: str):
     """
     Save evaluation results to a CSV file.
@@ -181,11 +185,13 @@ def save_results_to_csv(results: List[dict], filename: str):
     results_df = pd.DataFrame(results)
     results_df.to_csv(filename, index=False)
 
+
 def print_final_accuracy(description: str, accuracy: float):
     """
     Print the final accuracy of the evaluation.
     """
     print(f"Final Accuracy for {description}: {accuracy:.2f}%")
+
 
 def load_and_sample_parquet_datasets(data_dir: str, dataset_files: list, n: int, seed: int):
     """
@@ -209,6 +215,7 @@ def load_and_sample_parquet_datasets(data_dir: str, dataset_files: list, n: int,
             print(f"File not found: {full_path}")
     return loaded_datasets
 
+
 if __name__ == '__main__':
     # Specify the directory with your Parquet files
     data_dir = "/home/dev/Ideas/data"
@@ -216,10 +223,10 @@ if __name__ == '__main__':
     # List of dataset filenames
     dataset_files = [
         "allenai_math_qa_processed.parquet",
-        "nvidia_OpenMathInstruct-2_processed.parquet",
+        # "nvidia_OpenMathInstruct-2_processed.parquet",
         "ChilleD_MultiArith_processed.parquet",
-        "meta-math_MetaMathQA_processed.parquet",
-        "openai_gsm8k_processed.parquet"
+        # "meta-math_MetaMathQA_processed.parquet",
+        # "openai_gsm8k_processed.parquet"
     ]
 
     # Load and sample each dataset

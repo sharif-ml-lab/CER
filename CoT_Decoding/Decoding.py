@@ -104,7 +104,8 @@ def _compute_confidence_for_value(
         return None
 
     value_scores = output_scores[value_start_idx: value_start_idx + len(value_ids)]
-    return calculate_confidence_for_final_answer(value_scores, torch.tensor(value_ids, device=device), mode=confidence_mode)
+    return calculate_confidence_for_final_answer(value_scores, torch.tensor(value_ids, device=device),
+                                                 mode=confidence_mode)
 
 
 def _handle_baseline_decoding(
@@ -295,9 +296,11 @@ def _sample_cot_paths(
         output_scores = output.scores
 
         if decoding_mode == "baseline":
-            result = _handle_baseline_decoding(tokenizer, device, answer_text, output_scores, answer_ids, confidence_mode)
+            result = _handle_baseline_decoding(tokenizer, device, answer_text, output_scores, answer_ids,
+                                               confidence_mode)
         else:
-            result = _handle_new_decoding_cot_mode(tokenizer, device, answer_text, output_scores, answer_ids, confidence_mode)
+            result = _handle_new_decoding_cot_mode(tokenizer, device, answer_text, output_scores, answer_ids,
+                                                   confidence_mode)
 
         if result is not None:
             paths.append(result)
@@ -349,9 +352,11 @@ def _sample_temp_paths(
         output_scores = output.scores
 
         if decoding_mode == "baseline":
-            result = _handle_baseline_decoding(tokenizer, device, answer_text, output_scores, answer_ids, confidence_mode)
+            result = _handle_baseline_decoding(tokenizer, device, answer_text, output_scores, answer_ids,
+                                               confidence_mode)
         else:
-            result = _handle_new_decoding_temp_mode(tokenizer, device, answer_text, output_scores, answer_ids, scoring_mode, confidence_mode)
+            result = _handle_new_decoding_temp_mode(tokenizer, device, answer_text, output_scores, answer_ids,
+                                                    scoring_mode, confidence_mode)
 
         if result is not None:
             paths.append(result)
