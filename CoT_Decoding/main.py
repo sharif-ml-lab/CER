@@ -1,14 +1,13 @@
+import os
 import torch
+import pandas as pd
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from Decoding import cot_decode
 from greedy_on_numbers import greedy_number_cot_decode
-from datasets import load_dataset
-from tqdm import tqdm
-import pandas as pd
 from self_consistency import self_consistency_decode
+from tqdm import tqdm
 from typing import List
 from config import multi_run_configs  # Import the list of multiple configs
-
 
 def load_model_and_tokenizer(model_name: str):
     """
@@ -22,7 +21,6 @@ def load_model_and_tokenizer(model_name: str):
     )
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     return model, tokenizer
-
 
 def construct_prompt(question: str) -> str:
     """
@@ -56,19 +54,18 @@ Q: {question}
 A: """
     return base
 
-
 def evaluate_single_example(
-        model,
-        tokenizer,
-        question: str,
-        correct_answer_str: str,
-        k: int,
-        aggregate: bool,
-        decoding_mode: str,
-        scoring_mode: str,
-        COT: int,
-        sampling_mode: str,
-        confidence_mode: str
+    model,
+    tokenizer,
+    question: str,
+    correct_answer_str: str,
+    k: int,
+    aggregate: bool,
+    decoding_mode: str,
+    scoring_mode: str,
+    COT: int,
+    sampling_mode: str,
+    confidence_mode: str
 ) -> dict:
     """
     Evaluate the model on a single example.
@@ -134,19 +131,18 @@ def evaluate_single_example(
         'is_correct': is_correct
     }
 
-
 def evaluate_dataset(
-        model,
-        tokenizer,
-        dataset,
-        k: int,
-        aggregate: bool,
-        decoding_mode: str,
-        description: str,
-        scoring_mode: str,
-        COT: int,
-        sampling_mode: str,
-        confidence_mode: str
+    model,
+    tokenizer,
+    dataset: pd.DataFrame,
+    k: int,
+    aggregate: bool,
+    decoding_mode: str,
+    description: str,
+    scoring_mode: str,
+    COT: int,
+    sampling_mode: str,
+    confidence_mode: str
 ) -> float:
     """
     Evaluate the model on the given dataset.
@@ -158,10 +154,7 @@ def evaluate_dataset(
     with tqdm(total=total_questions, desc=f"Processing {description}", dynamic_ncols=True) as pbar:
         for idx, example in enumerate(dataset):
             question = example['question']
-            if 'final_ans' in example:
-                correct_answer = example['final_ans']
-            else:
-                correct_answer = example['answer'].split('####')[-1]
+            correct_answer = str(example['numeric_final_answer'])  # ensure it's a string for parsing downstream
 
             result_dict = evaluate_single_example(
                 model, tokenizer, question, correct_answer,
@@ -181,7 +174,6 @@ def evaluate_dataset(
     print_final_accuracy(description, accuracy)
     return accuracy
 
-
 def save_results_to_csv(results: List[dict], filename: str):
     """
     Save evaluation results to a CSV file.
@@ -189,34 +181,51 @@ def save_results_to_csv(results: List[dict], filename: str):
     results_df = pd.DataFrame(results)
     results_df.to_csv(filename, index=False)
 
-
 def print_final_accuracy(description: str, accuracy: float):
     """
     Print the final accuracy of the evaluation.
     """
     print(f"Final Accuracy for {description}: {accuracy:.2f}%")
 
-
-def load_and_sample_dataset(dataset_name: str, split: str, subset: str = None, sample_size: int = None,
-                            seed: int = None):
+def load_and_sample_parquet_datasets(data_dir: str, dataset_files: list, n: int, seed: int):
     """
-    Load a dataset and optionally sample from it.
+    Load multiple Parquet datasets from the given list of filenames, shuffle each dataset
+    based on the given seed, and select up to n records. If a dataset contains fewer than
+    n records, select all.
     """
-    if subset is None:
-        dataset = load_dataset(dataset_name, split=split)
-    else:
-        dataset = load_dataset(dataset_name, split)[subset]
-    if sample_size is not None and seed is not None:
-        dataset = dataset.shuffle(seed=seed).select(range(sample_size))
-    return dataset
-
+    loaded_datasets = {}
+    for filename in dataset_files:
+        full_path = os.path.join(data_dir, filename)
+        if os.path.isfile(full_path):
+            df = pd.read_parquet(full_path)
+            # Shuffle with the given seed
+            df = df.sample(frac=1, random_state=seed).reset_index(drop=True)
+            # Select up to n records
+            if len(df) > n:
+                df = df.head(n)
+            # Keep the loaded DataFrame in a dictionary
+            loaded_datasets[filename] = df
+        else:
+            print(f"File not found: {full_path}")
+    return loaded_datasets
 
 if __name__ == '__main__':
-    # Optionally load a sample dataset(s) once to avoid repeated downloads
-    multiarith_dataset = load_and_sample_dataset("ChilleD/MultiArith", "test")
-    gsm8k_dataset = load_and_sample_dataset("openai/gsm8k", split='main', subset="train", sample_size=300, seed=11)
+    # Specify the directory with your Parquet files
+    data_dir = "/home/dev/Ideas/data"
 
-    # Loop over each config in multi_run_configs
+    # List of dataset filenames
+    dataset_files = [
+        "allenai_math_qa_processed.parquet",
+        "nvidia_OpenMathInstruct-2_processed.parquet",
+        "ChilleD_MultiArith_processed.parquet",
+        "meta-math_MetaMathQA_processed.parquet",
+        "openai_gsm8k_processed.parquet"
+    ]
+
+    # Load and sample each dataset
+    loaded_datasets = load_and_sample_parquet_datasets(data_dir, dataset_files, n=1000, seed=42)
+
+    # Loop over each config
     for cfg in multi_run_configs:
         print("======================================")
         print(f"Running: {cfg['run_name']}")
@@ -230,37 +239,22 @@ if __name__ == '__main__':
         print(f"Sampling mode: {cfg['sampling_mode']}")
         print(f"Decoding mode: {cfg['decoding_mode']}")
 
-        # Evaluate on MultiArith
-        print(f"\nEvaluating MultiArith using {cfg['run_name']} ...")
-        evaluate_dataset(
-            model,
-            tokenizer,
-            multiarith_dataset,
-            k=cfg['k'],
-            aggregate=cfg['aggregate'],
-            decoding_mode=cfg['decoding_mode'],
-            description=f"MultiArith_{cfg['run_name']}",
-            scoring_mode=cfg['scoring_mode'],
-            COT=cfg['baseline_cot'],
-            sampling_mode=cfg['sampling_mode'],
-            confidence_mode=cfg['confidence_calculation_mode']
-        )
-
-        # Evaluate on GSM8K
-        print(f"\nEvaluating GSM8K using {cfg['run_name']} ...")
-        evaluate_dataset(
-            model,
-            tokenizer,
-            gsm8k_dataset,
-            k=cfg['k'],
-            aggregate=cfg['aggregate'],
-            decoding_mode=cfg['decoding_mode'],
-            description=f"GSM8K_{cfg['run_name']}",
-            scoring_mode=cfg['scoring_mode'],
-            COT=cfg['baseline_cot'],
-            sampling_mode=cfg['sampling_mode'],
-            confidence_mode=cfg['confidence_calculation_mode']
-        )
+        # Evaluate on each of the loaded datasets
+        for dataset_name, dataset_df in loaded_datasets.items():
+            print(f"\nEvaluating {dataset_name} using {cfg['run_name']} ...")
+            evaluate_dataset(
+                model,
+                tokenizer,
+                dataset_df,
+                k=cfg['k'],
+                aggregate=cfg['aggregate'],
+                decoding_mode=cfg['decoding_mode'],
+                description=f"{dataset_name}_{cfg['run_name']}",
+                scoring_mode=cfg['scoring_mode'],
+                COT=cfg['baseline_cot'],
+                sampling_mode=cfg['sampling_mode'],
+                confidence_mode=cfg['confidence_calculation_mode']
+            )
 
         print(f"Finished run: {cfg['run_name']}")
         print("======================================\n")
