@@ -130,3 +130,5 @@ class Config:
         # "metamath": "meta-math_MetaMathQA_processed.parquet",
         # "gsm8k": "openai_gsm8k_processed.parquet",
     }
+
+    batch_size = 8
