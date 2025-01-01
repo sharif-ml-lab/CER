@@ -2,6 +2,7 @@ import torch
 
 from src.utils import extract_last_numerical_value
 
+
 class SelfConsistency:
     def __init__(self, model, tokenizer, num_samples):
         self.model = model
@@ -48,7 +49,6 @@ class SelfConsistency:
 
             responses.append(answer_text)
         return responses, probs
-    
 
     def evaluate(self, prompt: str):
         responses, probs = self.generate_responses(prompt)
@@ -62,23 +62,28 @@ class SelfConsistency:
                 voting[final_answer] += 1
 
         best_answer = max(voting, key=voting.get)
-        best_answer_confidenc = voting[best_answer] /  self.num_samples
+        best_answer_confidenc = voting[best_answer] / self.num_samples
         return [None, best_answer_confidenc, best_answer]
-    
+
 
 def self_consistency_decode(
         model,
         tokenizer,
         messages,
-        k,):
+        k, ):
+    batch_results = []
 
-    if tokenizer.chat_template:
-        input_text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-    else:
-        input_text = "\n".join([f"{msg['role']}: {msg['content']}" for msg in messages])
-        input_text += "\nassistant:"
+    for message in messages:
 
-    self_consistency = SelfConsistency(model, tokenizer, num_samples=k)
-    result = self_consistency.evaluate(input_text)
+        if tokenizer.chat_template:
+            input_text = tokenizer.apply_chat_template(message, tokenize=False, add_generation_prompt=True)
+        else:
+            input_text = "\n".join([f"{msg['role']}: {msg['content']}" for msg in message])
+            input_text += "\nassistant:"
 
-    return result
+        self_consistency = SelfConsistency(model, tokenizer, num_samples=k)
+        result = self_consistency.evaluate(input_text)
+
+        batch_results.append(result)
+
+    return batch_results
