@@ -1,7 +1,4 @@
-import re
-from datasets import load_dataset, DatasetDict, concatenate_datasets
-import pandas as pd
-
+from datasets import load_dataset, concatenate_datasets
 
 # Function to check if a string is a valid number (integer or float)
 def is_valid_number(s):
@@ -13,7 +10,7 @@ def is_valid_number(s):
 
 
 # Preprocess functions for each dataset
-def preprocess_math_qa(df, answer_column):
+def preprocess_math_qa(df, answer_column, old_question_column, new_question_column):
     options_column, correct_column = answer_column
 
     def get_numeric_final_answer(row):
@@ -39,10 +36,11 @@ def preprocess_math_qa(df, answer_column):
         return None
 
     df['numeric_final_answer'] = df.apply(get_numeric_final_answer, axis=1)
+    df = df.rename(columns={old_question_column: new_question_column})
     return df
 
 
-def preprocess_meta_math_qa(df, answer_column):
+def preprocess_meta_math_qa(df, answer_column, old_question_column, new_question_column):
     def extractor(row):
         text = row[answer_column]
         try:
@@ -55,10 +53,11 @@ def preprocess_meta_math_qa(df, answer_column):
         return None
 
     df['numeric_final_answer'] = df.apply(extractor, axis=1)
+    df = df.rename(columns={old_question_column: new_question_column})
     return df
 
 
-def preprocess_mmlu(df, answer_column):
+def preprocess_mmlu(df, answer_column, old_question_column, new_question_column):
     choices_column, answer_column = answer_column
 
     def get_numeric_final_answer(row):
@@ -75,10 +74,11 @@ def preprocess_mmlu(df, answer_column):
         return None
 
     df['numeric_final_answer'] = df.apply(get_numeric_final_answer, axis=1)
+    df = df.rename(columns={old_question_column: new_question_column})
     return df
 
 
-def preprocess_open_math_instruct(df, answer_column):
+def preprocess_open_math_instruct(df, answer_column, old_question_column, new_question_column):
     result_column = answer_column
 
     def get_numeric_final_answer(row):
@@ -87,10 +87,11 @@ def preprocess_open_math_instruct(df, answer_column):
         return is_valid_number(result)
 
     df['numeric_final_answer'] = df.apply(get_numeric_final_answer, axis=1)
+    df = df.rename(columns={old_question_column: new_question_column})
     return df
 
 
-def preprocess_gsm8k(df, answer_column):
+def preprocess_gsm8k(df, answer_column, old_question_column, new_question_column):
     answer_column = answer_column
 
     def get_numeric_final_answer(row):
@@ -100,10 +101,11 @@ def preprocess_gsm8k(df, answer_column):
         return is_valid_number(answer)
 
     df['numeric_final_answer'] = df.apply(get_numeric_final_answer, axis=1)
+    df = df.rename(columns={old_question_column: new_question_column})
     return df
 
 
-def preprocess_multi_arith(df, answer_column):
+def preprocess_multi_arith(df, answer_column, old_question_column, new_question_column):
     final_answer_column = answer_column
 
     def get_numeric_final_answer(row):
@@ -112,6 +114,7 @@ def preprocess_multi_arith(df, answer_column):
         return is_valid_number(final_answer)
 
     df['numeric_final_answer'] = df.apply(get_numeric_final_answer, axis=1)
+    df = df.rename(columns={old_question_column: new_question_column})
     return df
 
 
@@ -119,6 +122,8 @@ def preprocess_multi_arith(df, answer_column):
 def process_and_save_dataset(dataset_info, save_path):
     dataset_name = dataset_info["dataset_name"]
     answer_column = dataset_info["answer_column"]
+    old_question_column = dataset_info["old_question_column"]
+    new_question_column = dataset_info["new_question_column"]
     preprocess_function = dataset_info["preprocess_function"]
     config_name = dataset_info.get("config_name", None)  # Get the config name if provided
 
@@ -137,7 +142,7 @@ def process_and_save_dataset(dataset_info, save_path):
     df = combined_dataset.to_pandas()
 
     # Apply the specific preprocess function to find the numeric final answer
-    df = preprocess_function(df, answer_column)
+    df = preprocess_function(df, answer_column, old_question_column, new_question_column)
 
     # Filter out rows without a numeric final answer
     df = df.dropna(subset=['numeric_final_answer'])
@@ -153,21 +158,43 @@ if __name__ == '__main__':
     # Dictionary mapping dataset names to their specific preprocess functions and answer columns
     datasets_to_process = [
         {"dataset_name": "allenai/math_qa", "answer_column": ("options", "correct"),
-         "preprocess_function": preprocess_math_qa},
+         "preprocess_function": preprocess_math_qa,
+         "old_question_column": "Problem",
+         "new_question_column": "question",
+         },
+
         {"dataset_name": "meta-math/MetaMathQA", "answer_column": "response",
-         "preprocess_function": preprocess_meta_math_qa},
+         "preprocess_function": preprocess_meta_math_qa,
+         "old_question_column": "original_question",
+         "new_question_column": "question",
+        },
+
+
         {"dataset_name": "cais/mmlu", "answer_column": ("choices", "answer"), "config_name": "abstract_algebra",
-         "preprocess_function": preprocess_mmlu},
-        {"dataset_name": "nvidia/OpenMathInstruct-2", "answer_column": "expected_answer",
-         "preprocess_function": preprocess_open_math_instruct},
+         "preprocess_function": preprocess_mmlu,
+         "old_question_column": "question",
+         "new_question_column": "question",
+         },
+
+        # {"dataset_name": "nvidia/OpenMathInstruct-2", "answer_column": "expected_answer",
+        #  "preprocess_function": preprocess_open_math_instruct},
+
         {"dataset_name": "openai/gsm8k", "answer_column": "answer", "config_name": "main",
-         "preprocess_function": preprocess_gsm8k},
+         "preprocess_function": preprocess_gsm8k,
+         "old_question_column": "question",
+         "new_question_column": "question",
+         },
+
         {"dataset_name": "ChilleD/MultiArith", "answer_column": "final_ans",
-         "preprocess_function": preprocess_multi_arith}
+         "preprocess_function": preprocess_multi_arith,
+         "old_question_column": "question",
+         "new_question_column": "question"
+         },
+
     ]
 
     # Path to save processed datasets
-    save_path = "./data"
+    save_path = "data"
 
     # Process each dataset
     for dataset_info in datasets_to_process:

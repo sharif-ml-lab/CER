@@ -64,11 +64,11 @@ def evaluate_dataset(model, tokenizer, dataset, k, aggregate, decoding_mode, des
     results = []
 
     with tqdm(total=total_questions, desc=f"Processing {description}", dynamic_ncols=True) as pbar:
-        for idx, example in enumerate(dataset):
+        for idx, example in dataset.iterrows():
             question = example['question']
             correct_answer = str(example['numeric_final_answer'])
 
-            result_dict = evaluate_single_example(model, tokenizer, question, correct_answer, k, aggregate, decoding_mode, scoring_mode, baseline_cot, sampling_mode, few_shot, few_shot_path, description, confidence_method)
+            result_dict = evaluate_single_example(model, tokenizer, question, correct_answer, k, aggregate, decoding_mode, scoring_mode, baseline_cot, sampling_mode, few_shot, few_shot_path, confidence_method)
             results.append(result_dict)
 
             if result_dict['is_correct']:
