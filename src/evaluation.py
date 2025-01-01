@@ -201,7 +201,7 @@ def run_dataset(config: Config):
                     elif dataset_name == "gsm8k":
                         few_shot_path = config.gsm8k_shots
                     else:
-                        raise NotImplementedError('You have to provide the examples for the prompt')
+                        raise ValueError('You have to provide the examples for the prompt')
                 else:
                     few_shot_path = None
 
