@@ -3,13 +3,16 @@ from tqdm import tqdm
 from src.self_consistency import self_consistency_decode
 from src.decoding import cot_decode
 from src.greedy_on_numbers import greedy_number_cot_decode
-from src.utils import load_model_and_tokenizer, construct_prompt, print_final_accuracy, save_results_to_csv, load_and_sample_parquet_datasets
+from src.utils import load_model_and_tokenizer, construct_prompt, print_final_accuracy, save_results_to_csv, \
+    load_and_sample_parquet_datasets
 from src.config import Config, multi_run_configs
 
+
 # evaluate the model on a single example
-def evaluate_single_example(model, tokenizer, question, correct_answer_str, k, aggregate, decoding_mode, scoring_mode, baseline_cot, sampling_mode, few_shot, few_shot_path, confidence_method):
-    
-    messages = [{"role": "user", "content": construct_prompt(question=question, few_shot=few_shot, few_shot_path=few_shot_path)}]
+def evaluate_single_example(model, tokenizer, question, correct_answer_str, k, aggregate, decoding_mode, scoring_mode,
+                            baseline_cot, sampling_mode, few_shot, few_shot_path, confidence_method):
+    messages = [{"role": "user",
+                 "content": construct_prompt(question=question, few_shot=few_shot, few_shot_path=few_shot_path)}]
 
     # pick k-branch and continue each path with greedy sampling.
     if baseline_cot == "k-branch" or baseline_cot == "k-seperate":
@@ -36,9 +39,9 @@ def evaluate_single_example(model, tokenizer, question, correct_answer_str, k, a
     #         sampling_mode=sampling_mode,
     #         scoring_mode=scoring_mode
     #     )
-        
+
     elif baseline_cot == "self_consistency":
-        result, confidence, final_ans = self_consistency_decode(model, tokenizer, messages,k=k) 
+        result, confidence, final_ans = self_consistency_decode(model, tokenizer, messages, k=k)
 
     try:
         model_answer = float(final_ans)
@@ -58,7 +61,8 @@ def evaluate_single_example(model, tokenizer, question, correct_answer_str, k, a
 
 
 # evaluate the model on dataset
-def evaluate_dataset(model, tokenizer, dataset, k, aggregate, decoding_mode, description, scoring_mode, baseline_cot, sampling_mode, few_shot, few_shot_path, confidence_method):
+def evaluate_dataset(model, tokenizer, dataset, k, aggregate, decoding_mode, description, scoring_mode, baseline_cot,
+                     sampling_mode, few_shot, few_shot_path, confidence_method):
     total_questions = len(dataset)
     correct_answers = 0
     results = []
@@ -68,7 +72,9 @@ def evaluate_dataset(model, tokenizer, dataset, k, aggregate, decoding_mode, des
             question = example['question']
             correct_answer = str(example['numeric_final_answer'])
 
-            result_dict = evaluate_single_example(model, tokenizer, question, correct_answer, k, aggregate, decoding_mode, scoring_mode, baseline_cot, sampling_mode, few_shot, few_shot_path, confidence_method)
+            result_dict = evaluate_single_example(model, tokenizer, question, correct_answer, k, aggregate,
+                                                  decoding_mode, scoring_mode, baseline_cot, sampling_mode, few_shot,
+                                                  few_shot_path, confidence_method)
             results.append(result_dict)
 
             if result_dict['is_correct']:
@@ -84,29 +90,23 @@ def evaluate_dataset(model, tokenizer, dataset, k, aggregate, decoding_mode, des
     return accuracy
 
 
-
 def run_dataset(config: Config):
-    model_name=config.model_name
-    aggregate=config.aggregate
-    K=config.K
-    few_shot=config.few_shot
+    model_name = config.model_name
+    aggregate = config.aggregate
+    K = config.K
+    few_shot = config.few_shot
     number_samples = config.number_samples
     seed = config.seed
     read_model_from_local = config.read_model_from_local
     data_dir = config.data_dir
     run_name = config.run_name
-    
+
     model, tokenizer = load_model_and_tokenizer(model_name, read_model_from_local)
 
-    dataset_files = {
-        "allenai": "allenai_math_qa_processed.parquet",
-        # "open_math": "nvidia_OpenMathInstruct-2_processed.parquet",
-        # "multiarith": "ChilleD_MultiArith_processed.parquet",
-        # "metamath": "meta-math_MetaMathQA_processed.parquet",
-        # "gsm8k": "openai_gsm8k_processed.parquet",
-    }
+    dataset_files = config.datasets
 
-    loaded_datasets = load_and_sample_parquet_datasets(data_dir, dataset_files, number_samples=number_samples, seed=seed)
+    loaded_datasets = load_and_sample_parquet_datasets(data_dir, dataset_files, number_samples=number_samples,
+                                                       seed=seed)
 
     # Loop over each config
     for cfg_run_name, cfg in multi_run_configs.items():
@@ -121,7 +121,7 @@ def run_dataset(config: Config):
                 print(f"\nEvaluating {dataset_name} using {cfg_run_name} ...")
 
                 if few_shot:
-                    if dataset_name == "allenai": 
+                    if dataset_name == "allenai":
                         few_shot_path = config.allenai_shtos
                     elif dataset_name == "open_math":
                         few_shot_path = config.open_math_shtos
@@ -144,8 +144,8 @@ def run_dataset(config: Config):
                     baseline_cot=cfg['baseline_cot'],
                     sampling_mode=cfg['sampling_mode'],
                     confidence_method=cfg['confidence'],
-                    few_shot = few_shot,
-                    few_shot_path = few_shot_path,
+                    few_shot=few_shot,
+                    few_shot_path=few_shot_path,
                 )
 
             print(f"Finished run: {cfg_run_name}")
