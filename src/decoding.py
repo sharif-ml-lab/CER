@@ -5,7 +5,9 @@ from transformers import PreTrainedModel, PreTrainedTokenizer
 import numpy as np
 
 from src.utils import extract_all_numerical_values, extract_last_numerical_value
-from src.uncertainty import _find_subsequence_indices, calculate_confidence_for_final_answer, aggregate_paths_based_on_scores
+from src.uncertainty import _find_subsequence_indices, calculate_confidence_for_final_answer, \
+    aggregate_paths_based_on_scores
+
 
 # extract the final numerical value.
 def _handle_last_decoding(
@@ -31,7 +33,8 @@ def _handle_last_decoding(
         return None
 
     final_answer_scores = output_scores[final_answer_start_idx: final_answer_start_idx + len(final_answer_ids)]
-    confidence = calculate_confidence_for_final_answer(final_answer_scores, torch.tensor(final_answer_ids, device=device), confidence_method)
+    confidence = calculate_confidence_for_final_answer(final_answer_scores,
+                                                       torch.tensor(final_answer_ids, device=device), confidence_method)
     return answer_text, confidence, final_answer
 
 
@@ -44,7 +47,6 @@ def _handle_all_decoding(
         answer_ids,
         scoring_mode,
         confidence_method):
-    
     all_numerical_values = extract_all_numerical_values(answer_text)
     if not all_numerical_values:
         return None
@@ -69,7 +71,8 @@ def _handle_all_decoding(
             continue
 
         num_value_scores = output_scores[value_start_idx: value_start_idx + len(num_value_ids)]
-        conf_val = calculate_confidence_for_final_answer(num_value_scores, torch.tensor(num_value_ids, device=device), confidence_method)
+        conf_val = calculate_confidence_for_final_answer(num_value_scores, torch.tensor(num_value_ids, device=device),
+                                                         confidence_method)
 
         if scoring_mode == 'log':
             confidence_sum += np.log(1 + conf_val)
@@ -103,7 +106,6 @@ def _handle_all_decoding(
     return None
 
 
-
 # model.generate k times, each time generating a single path.
 def _k_seperate_generation(
         model: PreTrainedModel,
@@ -124,7 +126,6 @@ def _k_seperate_generation(
         scoring_mode,
         do_sample,
         confidence_method):
-    
     paths = []
     for _ in tqdm(range(k)):
         output = model.generate(
@@ -153,7 +154,8 @@ def _k_seperate_generation(
         if decoding_mode == "last":
             result = _handle_last_decoding(tokenizer, device, answer_text, output_scores, answer_ids, confidence_method)
         else:
-            result = _handle_all_decoding(tokenizer, device, answer_text, output_scores, answer_ids, scoring_mode, confidence_method)
+            result = _handle_all_decoding(tokenizer, device, answer_text, output_scores, answer_ids, scoring_mode,
+                                          confidence_method)
 
         if result is not None:
             paths.append(result)
@@ -181,7 +183,6 @@ def _k_branch_generation(
         scoring_mode,
         do_sample,
         confidence_method):
-    
     paths = []
     with torch.no_grad():
         outputs = model(input_ids, attention_mask=attention_mask)
@@ -215,15 +216,17 @@ def _k_branch_generation(
         answer_text = tokenizer.decode(answer_ids, skip_special_tokens=True)
         output_scores = output.scores
 
-        if decoding_mode == "last": # last nuemrical values
+        if decoding_mode == "last":  # last nuemrical values
             result = _handle_last_decoding(tokenizer, device, answer_text, output_scores, answer_ids, confidence_method)
-        else: # all numerical values
-            result = _handle_all_decoding(tokenizer, device, answer_text, output_scores, answer_ids, scoring_mode, confidence_method)
+        else:  # all numerical values
+            result = _handle_all_decoding(tokenizer, device, answer_text, output_scores, answer_ids, scoring_mode,
+                                          confidence_method)
 
         if result is not None:
             paths.append(result)
 
     return paths
+
 
 # cot-decoding as originally implemented.
 def cot_decode(
@@ -245,10 +248,9 @@ def cot_decode(
         no_repeat_ngram_size=0,
         max_new_tokens=512,
         do_sample=True,
-        early_stopping= False):
-    
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        early_stopping=False):
 
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     if hasattr(tokenizer, 'chat_template') and tokenizer.chat_template:
         input_text = tokenizer.apply_chat_template(
@@ -266,20 +268,20 @@ def cot_decode(
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token_id = tokenizer.eos_token_id
 
-    if sampling_mode == "temperature": # to set parameters for temperature-based sampling (different each time)
+    if sampling_mode == "temperature":  # to set parameters for temperature-based sampling (different each time)
         do_sample = True
 
-    elif sampling_mode == "greedy": # to set parameters for greedy-based sampling (unique each time)
+    elif sampling_mode == "greedy":  # to set parameters for greedy-based sampling (unique each time)
         do_sample = False
 
-    if baseline_cot == "k-branch": # make k branches and then continue each one with sampling mode
+    if baseline_cot == "k-branch":  # make k branches and then continue each one with sampling mode
         paths = _k_branch_generation(
-                model, tokenizer, device, input_ids, attention_mask, k,
-                max_new_tokens, num_beams, temperature, top_p,
-                repetition_penalty, length_penalty, no_repeat_ngram_size,
-                early_stopping, decoding_mode, scoring_mode, do_sample, confidence_method)
-    
-    elif baseline_cot == "k-seperate": # make k distinict paths with sampling mode
+            model, tokenizer, device, input_ids, attention_mask, k,
+            max_new_tokens, num_beams, temperature, top_p,
+            repetition_penalty, length_penalty, no_repeat_ngram_size,
+            early_stopping, decoding_mode, scoring_mode, do_sample, confidence_method)
+
+    elif baseline_cot == "k-seperate":  # make k distinict paths with sampling mode
         paths = _k_seperate_generation(
             model, tokenizer, device, input_ids, attention_mask, k,
             max_new_tokens, num_beams, temperature, top_p,
