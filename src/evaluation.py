@@ -140,6 +140,9 @@ def evaluate_dataset(
                 if result_dict["is_correct"]:
                     correct_answers += 1
 
+            running_accuracy = (correct_answers / (int(end_idx) + 1)) * 100
+            pbar.set_postfix(idx=int(end_idx) + 1, running_accuracy=f"{running_accuracy:.2f}%")
+
             pbar.update(end_idx - start_idx)
 
     # Save and print final results

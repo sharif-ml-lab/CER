@@ -1,5 +1,4 @@
 from pandas.core.window.doc import template_returns
-from tqdm import tqdm
 
 import torch
 from transformers import PreTrainedModel, PreTrainedTokenizer
@@ -131,7 +130,7 @@ def _k_seperate_generation(
     batch_size = tokenized_batch["input_ids"].shape[0]
     paths = [[] for _ in range(batch_size)]
 
-    for _ in tqdm(range(k), desc="k-separate generation"):
+    for _ in range(k):
         # Generate results for the entire batch at once
         batch_output = model.generate(
             **tokenized_batch,
@@ -330,7 +329,6 @@ def cot_decode(
             input_text += "\nassistant:"
 
         batch_template_messages.append(input_text)
-
 
     tokenized_batch = tokenizer(
         batch_template_messages,
