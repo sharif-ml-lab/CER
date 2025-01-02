@@ -1,8 +1,10 @@
 from dataclasses import dataclass
 import os
-from dotenv import load_dotenv
-load_dotenv() # Reads .env file and loads environment variables
+from distutils.util import strtobool
 
+from dotenv import load_dotenv
+
+load_dotenv()  # Reads .env file and loads environment variables
 
 # list of different settings to run
 multi_run_configs = {
@@ -108,12 +110,14 @@ multi_run_configs = {
 # general configuration
 @dataclass
 class Config:
-    model_name: str = os.getenv("MODEL_NAME", "meta-llama/Llama-3.1-8B-Instruct")  # Path to the HuggingFace model or local directory
+    model_name: str = os.getenv("MODEL_NAME",
+                                "meta-llama/Llama-3.1-8B-Instruct")  # Path to the HuggingFace model or local directory
     data_dir = os.getenv("DATA_DIR", "data")
-    read_model_from_local: bool = os.getenv("LOCAL_MODEL", True)  # Load the model from the local directory instead of the HF.
+    read_model_from_huggingface: bool = strtobool(
+        os.getenv("LOCAL_MODEL", True))  # Load the model from the local directory instead of the HF.
     hugging_face_token: str = os.getenv("HUGGING_FACE_TOKEN", "")  # Huggingface Token
 
-    run_name = "CoT Decoding"  # specify the running mode "all" that means all of them.
+    run_name = os.getenv("RUN_NAME", "Ours + Temp + Conf")  # specify the running mode "all" that means all of them.
     K: int = 10  # number of chains in self-consistency or number of branching in cot-decoding
     aggregate: bool = True  # True: aggregate paths False: the best path
 
@@ -135,4 +139,4 @@ class Config:
         # "gsm8k": "openai_gsm8k_processed.parquet",
     }
 
-    batch_size = 2
+    batch_size = int(os.getenv("BATCH_SIZE", 1))
