@@ -8,5 +8,5 @@ if __name__ == "__main__":
 
     if config.read_model_from_local:
         login(token=config.hugging_face_token)
-    
+
     run_dataset(config=config)

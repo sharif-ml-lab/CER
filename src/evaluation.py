@@ -3,87 +3,154 @@ from tqdm import tqdm
 from src.self_consistency import self_consistency_decode
 from src.decoding import cot_decode
 from src.greedy_on_numbers import greedy_number_cot_decode
-from src.utils import load_model_and_tokenizer, construct_prompt, print_final_accuracy, save_results_to_csv, load_and_sample_parquet_datasets
+from src.utils import load_model_and_tokenizer, construct_prompt, print_final_accuracy, save_results_to_csv, \
+    load_and_sample_parquet_datasets
 from src.config import Config, multi_run_configs
 
+
 # evaluate the model on a single example
+def evaluate_batch_examples(
+        model,
+        tokenizer,
+        batch_questions,
+        batch_correct_answers,
+        k,
+        aggregate,
+        decoding_mode,
+        scoring_mode,
+        baseline_cot,
+        sampling_mode,
+        few_shot,
+        few_shot_path,
+        confidence_method
+):
+    # Construct a list of messages for each question in the batch
+    batch_messages = []
+    for question in batch_questions:
+        batch_messages.append([
+            {
+                "role": "user",
+                "content": construct_prompt(
+                    question=question,
+                    few_shot=few_shot,
+                    few_shot_path=few_shot_path
+                )
+            }
+        ])
 
-
-def evaluate_single_example(model, tokenizer, question, correct_answer_str, k, aggregate, decoding_mode, scoring_mode, baseline_cot, sampling_mode, few_shot, few_shot_path, confidence_method):
-
-    messages = [{"role": "user", "content": construct_prompt(
-        question=question, few_shot=few_shot, few_shot_path=few_shot_path)}]
-
-    # pick k-branch and continue each path with greedy sampling.
-    if baseline_cot == "k-branch" or baseline_cot == "k-seperate":
-        result, confidence, final_ans = cot_decode(
+    # Depending on baseline_cot, call the appropriate batch decoding function
+    if baseline_cot in ("k-branch", "k-seperate"):
+        # These functions return lists of results, confidences, and final answers
+        results, confidences, final_answers = cot_decode(
             model,
             tokenizer,
-            messages,
+            batch_messages,
             aggregate_paths=aggregate,
             k=k,
             decoding_mode=decoding_mode,
             sampling_mode=sampling_mode,
             scoring_mode=scoring_mode,
             baseline_cot=baseline_cot,
-            confidence_method=confidence_method,
+            confidence_method=confidence_method
         )
-
-    # elif baseline_cot == "greedy_decoding": # ??????????????????
-    #     result, confidence, final_ans = greedy_number_cot_decode( # greedy
-    #         model,
-    #         tokenizer,
-    #         messages,
-    #         aggregate_paths=aggregate,
-    #         k=k,
-    #         sampling_mode=sampling_mode,
-    #         scoring_mode=scoring_mode
-    #     )
-
     elif baseline_cot == "self_consistency":
-        result, confidence, final_ans = self_consistency_decode(
-            model, tokenizer, messages, k=k)
+        results, confidences, final_answers = self_consistency_decode(
+            model,
+            tokenizer,
+            batch_messages,
+            k=k
+        )
+    else:
+        raise ValueError(f"Unsupported baseline_cot mode: {baseline_cot}")
 
-    try:
-        model_answer = float(final_ans)
-        correct_answer = float(correct_answer_str)
-        is_correct = ((model_answer - correct_answer) <= 1e-2)
-    except ValueError:
-        is_correct = False
+    # Build the output list with evaluation details
+    batch_output = []
+    for i, question in enumerate(batch_questions):
+        correct_answer_str = batch_correct_answers[i]
+        predicted_text = results[i]
+        predicted_final = final_answers[i]
+        confidence_score = confidences[i]
 
-    return {
-        'question': question,
-        'correct_answer': correct_answer_str,
-        'predicted_answer': result,
-        'predicted_final_answer': final_ans,
-        'confidence_score': confidence,
-        'is_correct': is_correct
-    }
+        # Compare numeric answers if both are valid floats
+        try:
+            model_answer = float(predicted_final)
+            correct_answer = float(correct_answer_str)
+            is_correct = abs(model_answer - correct_answer) <= 1e-2
+        except ValueError:
+            is_correct = False
+
+        batch_output.append({
+            "question": question,
+            "correct_answer": correct_answer_str,
+            "predicted_answer": predicted_text,
+            "predicted_final_answer": predicted_final,
+            "confidence_score": confidence_score,
+            "is_correct": is_correct
+        })
+
+    return batch_output
 
 
 # evaluate the model on dataset
-def evaluate_dataset(model, tokenizer, dataset, k, aggregate, decoding_mode, description, scoring_mode, baseline_cot, sampling_mode, few_shot, few_shot_path, confidence_method):
-    total_questions = len(dataset)
+def evaluate_dataset(
+        model,
+        tokenizer,
+        dataset,
+        k,
+        aggregate,
+        decoding_mode,
+        description,
+        scoring_mode,
+        baseline_cot,
+        sampling_mode,
+        few_shot,
+        few_shot_path,
+        confidence_method,
+        batch_size
+):
+    # Extract lists of questions and answers directly from the dataframe
+    questions = dataset["question"].tolist()
+    correct_answers_list = dataset["numeric_final_answer"].astype(str).tolist()
+
+    total_questions = len(questions)
     correct_answers = 0
     results = []
 
+    # Process the dataset in batches
     with tqdm(total=total_questions, desc=f"Processing {description}", dynamic_ncols=True) as pbar:
-        for idx, example in dataset.iterrows():
-            question = example['question']
-            correct_answer = str(example['numeric_final_answer'])
+        for start_idx in range(0, total_questions, batch_size):
+            end_idx = min(start_idx + batch_size, total_questions)
 
-            result_dict = evaluate_single_example(model, tokenizer, question, correct_answer, k, aggregate,
-                                                  decoding_mode, scoring_mode, baseline_cot, sampling_mode, few_shot, few_shot_path, confidence_method)
-            results.append(result_dict)
+            # Slice out the batch
+            batch_questions = questions[start_idx:end_idx]
+            batch_correct_answers = correct_answers_list[start_idx:end_idx]
 
-            if result_dict['is_correct']:
-                correct_answers += 1
+            # Evaluate the batch
+            batch_results = evaluate_batch_examples(
+                model,
+                tokenizer,
+                batch_questions,
+                batch_correct_answers,
+                k,
+                aggregate,
+                decoding_mode,
+                scoring_mode,
+                baseline_cot,
+                sampling_mode,
+                few_shot,
+                few_shot_path,
+                confidence_method
+            )
 
-            running_accuracy = (correct_answers / (idx + 1)) * 100
-            pbar.set_postfix(
-                idx=idx + 1, running_accuracy=f"{running_accuracy:.2f}%")
-            pbar.update(1)
+            # Accumulate results and update correct answers count
+            for result_dict in batch_results:
+                results.append(result_dict)
+                if result_dict["is_correct"]:
+                    correct_answers += 1
 
+            pbar.update(end_idx - start_idx)
+
+    # Save and print final results
     save_results_to_csv(results, f"{description}_evaluation_results.csv")
     accuracy = (correct_answers / total_questions) * 100
     print_final_accuracy(description, accuracy)
@@ -101,26 +168,22 @@ def run_dataset(config: Config):
     data_dir = config.data_dir
     run_name = config.run_name
 
+    batch_size = config.batch_size
+
     model, tokenizer = load_model_and_tokenizer(
         model_name, read_model_from_local)
 
-    dataset_files = {
-        "allenai": "allenai_math_qa_processed.parquet",
-        # "open_math": "nvidia_OpenMathInstruct-2_processed.parquet",
-        # "multiarith": "ChilleD_MultiArith_processed.parquet",
-        # "metamath": "meta-math_MetaMathQA_processed.parquet",
-        # "gsm8k": "openai_gsm8k_processed.parquet",
-    }
+    dataset_files = config.datasets
 
-    loaded_datasets = load_and_sample_parquet_datasets(
-        data_dir, dataset_files, number_samples=number_samples, seed=seed)
+    loaded_datasets = load_and_sample_parquet_datasets(data_dir, dataset_files, number_samples=number_samples,
+                                                       seed=seed)
 
     # Loop over each config
     for cfg_run_name, cfg in multi_run_configs.items():
         if run_name == cfg_run_name or run_name == "all":
             print("======================================")
             print(f"Running: {cfg_run_name}")
-            print(f"Cofing: {cfg}")
+            print(f"Confing: {cfg}")
             print("======================================")
 
             # Evaluate on each of the loaded datasets
@@ -138,6 +201,11 @@ def run_dataset(config: Config):
                         few_shot_path = config.metamath_shots
                     elif dataset_name == "gsm8k":
                         few_shot_path = config.gsm8k_shots
+                    else:
+                        raise ValueError(
+                            'You have to provide the examples for the prompt')
+                else:
+                    few_shot_path = None
 
                 evaluate_dataset(
                     model,
@@ -153,6 +221,7 @@ def run_dataset(config: Config):
                     confidence_method=cfg['confidence'],
                     few_shot=few_shot,
                     few_shot_path=few_shot_path,
+                    batch_size=batch_size
                 )
 
             print(f"Finished run: {cfg_run_name}")
