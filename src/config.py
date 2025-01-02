@@ -8,22 +8,22 @@ load_dotenv()  # Reads .env file and loads environment variables
 
 # list of different settings to run
 multi_run_configs = {
-    "Self Const": {
-        "decoding_mode": 'all',  # "all": all the numbers "last": the last number
-        "baseline_cot": 'self_consistency',  # [k-branch, k-seperate, self_consistency]
-        "scoring_mode": 'log',  # log, min, max, h_mean
-        "sampling_mode": "temperature",  # "temperature": temperature sampling  "greedy": greedy sampling
-        "confidence": "default"  # Options: "default", "sum", "entropy", "top_2_diff"
-    },
-
-    "CoT Decoding": {
-        "decoding_mode": 'last',  # "all": all the numbers "last": the last number
-        "baseline_cot": "k-branch",  # [k-branch, k-seperate, self_consistency]
-        "scoring_mode": 'log',  # log, min, max, h_mean
-        "sampling_mode": "greedy",
-        # "temperature": temperature sampling  "greedy": greedy sampling # (I'm not sure which one is correct?)
-        "confidence": "top_2_diff"  # Options: "default", "sum", "entropy", "top_2_diff"
-    },
+    # "Self Const": {
+    #     "decoding_mode": 'all',  # "all": all the numbers "last": the last number
+    #     "baseline_cot": 'self_consistency',  # [k-branch, k-seperate, self_consistency]
+    #     "scoring_mode": 'log',  # log, min, max, h_mean
+    #     "sampling_mode": "temperature",  # "temperature": temperature sampling  "greedy": greedy sampling
+    #     "confidence": "default"  # Options: "default", "sum", "entropy", "top_2_diff"
+    # },
+    #
+    # "CoT Decoding": {
+    #     "decoding_mode": 'last',  # "all": all the numbers "last": the last number
+    #     "baseline_cot": "k-branch",  # [k-branch, k-seperate, self_consistency]
+    #     "scoring_mode": 'log',  # log, min, max, h_mean
+    #     "sampling_mode": "greedy",
+    #     # "temperature": temperature sampling  "greedy": greedy sampling # (I'm not sure which one is correct?)
+    #     "confidence": "top_2_diff"  # Options: "default", "sum", "entropy", "top_2_diff"
+    # },
 
     "Ours + Temp + Conf": {
         "decoding_mode": 'all',  # "all": all the numbers "last": the last number 
