@@ -1,4 +1,9 @@
 from datasets import load_dataset, concatenate_datasets
+import os
+from dotenv import load_dotenv
+
+load_dotenv()  # Reads .env file and loads environment variables
+
 
 # Function to check if a string is a valid number (integer or float)
 def is_valid_number(s):
@@ -167,8 +172,7 @@ if __name__ == '__main__':
          "preprocess_function": preprocess_meta_math_qa,
          "old_question_column": "original_question",
          "new_question_column": "question",
-        },
-
+         },
 
         {"dataset_name": "cais/mmlu", "answer_column": ("choices", "answer"), "config_name": "abstract_algebra",
          "preprocess_function": preprocess_mmlu,
@@ -194,7 +198,7 @@ if __name__ == '__main__':
     ]
 
     # Path to save processed datasets
-    save_path = "data"
+    save_path = os.getenv("DATA_DIR", "data")
 
     # Process each dataset
     for dataset_info in datasets_to_process:
