@@ -1,3 +1,4 @@
+from pandas.core.window.doc import template_returns
 from tqdm import tqdm
 
 import torch
@@ -316,8 +317,23 @@ def cot_decode(
 
     tokenizer.padding_side = "left"
 
+    batch_template_messages = []
+    for message in batch_messages:
+        if hasattr(tokenizer, 'chat_template') and tokenizer.chat_template:
+            input_text = tokenizer.apply_chat_template(
+                message,
+                tokenize=False,
+                add_generation_prompt=True
+            )
+        else:
+            input_text = "\n".join([f"{msg['role']}: {msg['content']}" for msg in message])
+            input_text += "\nassistant:"
+
+        batch_template_messages.append(input_text)
+
+
     tokenized_batch = tokenizer(
-        batch_messages,
+        batch_template_messages,
         padding=True,
         truncation=True,
         return_tensors="pt"

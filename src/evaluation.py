@@ -27,10 +27,10 @@ def evaluate_batch_examples(
     # Construct a list of messages for each question in the batch
     batch_messages = []
     for question in batch_questions:
-        batch_messages.append(construct_prompt(
+        batch_messages.append([{"role": "user", "content": construct_prompt(
             question=question,
             few_shot=few_shot,
-            few_shot_path=few_shot_path))
+            few_shot_path=few_shot_path)}])
 
     # Depending on baseline_cot, call the appropriate batch decoding function
     if baseline_cot in ("k-branch", "k-seperate"):
