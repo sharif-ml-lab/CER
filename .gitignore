@@ -164,6 +164,7 @@ cython_debug/
 Ideas.iml
 *.xml
 
+*.ipynb
 data/
 CoT_Decoding/results/
 CoT_Decoding/chart/

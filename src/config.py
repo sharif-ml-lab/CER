@@ -1,9 +1,13 @@
 from dataclasses import dataclass
+import os
+from dotenv import load_dotenv
+load_dotenv() # Reads .env file and loads environment variables
+
 
 # list of different settings to run
 multi_run_configs = {
     "Self Const": {
-        "decoding_mode": 'all',  # "all": all the numbers "last": the last number 
+        "decoding_mode": 'all',  # "all": all the numbers "last": the last number
         "baseline_cot": 'self_consistency',  # [k-branch, k-seperate, self_consistency]
         "scoring_mode": 'log',  # log, min, max, h_mean
         "sampling_mode": "temperature",  # "temperature": temperature sampling  "greedy": greedy sampling
@@ -11,7 +15,7 @@ multi_run_configs = {
     },
 
     "CoT Decoding": {
-        "decoding_mode": 'last',  # "all": all the numbers "last": the last number 
+        "decoding_mode": 'last',  # "all": all the numbers "last": the last number
         "baseline_cot": "k-branch",  # [k-branch, k-seperate, self_consistency]
         "scoring_mode": 'log',  # log, min, max, h_mean
         "sampling_mode": "greedy",
@@ -104,10 +108,10 @@ multi_run_configs = {
 # general configuration
 @dataclass
 class Config:
-    model_name: str = "meta-llama/Llama-3.1-8B-Instruct"  # Path to the HuggingFace model or local directory
-    data_dir = "data"
-    read_model_from_local: bool = False  # Load the model from the local directory instead of the HF.
-    hugging_face_token: str = "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"  # Huggingface Token
+    model_name: str = os.getenv("MODEL_NAME", "meta-llama/Llama-3.1-8B-Instruct")  # Path to the HuggingFace model or local directory
+    data_dir = os.getenv("DATA_DIR", "data")
+    read_model_from_local: bool = os.getenv("LOCAL_MODEL", True)  # Load the model from the local directory instead of the HF.
+    hugging_face_token: str = os.getenv("HUGGING_FACE_TOKEN", "")  # Huggingface Token
 
     run_name = "CoT Decoding"  # specify the running mode "all" that means all of them.
     K: int = 10  # number of chains in self-consistency or number of branching in cot-decoding
@@ -131,4 +135,4 @@ class Config:
         # "gsm8k": "openai_gsm8k_processed.parquet",
     }
 
-    batch_size = 8
+    batch_size = 2
