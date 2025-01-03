@@ -86,7 +86,9 @@ def preprocess_open_math_instruct(df, answer_column, old_question_column, new_qu
     def get_numeric_final_answer(row):
         result = row[result_column]
         result = result.replace(',', '.')
-        return is_valid_number(result)
+        if is_valid_number(result):
+            return result
+        return None
 
     df['numeric_final_answer'] = df.apply(get_numeric_final_answer, axis=1)
     df = df.rename(columns={old_question_column: new_question_column})
@@ -115,7 +117,9 @@ def preprocess_multi_arith(df, answer_column, old_question_column, new_question_
     def get_numeric_final_answer(row):
         final_answer = row[final_answer_column]
         final_answer = final_answer.replace(',', '.')
-        return is_valid_number(final_answer)
+        if is_valid_number(final_answer):
+            return final_answer
+        return None
 
     df['numeric_final_answer'] = df.apply(get_numeric_final_answer, axis=1)
     df = df.rename(columns={old_question_column: new_question_column})
@@ -168,17 +172,17 @@ def process_and_save_dataset(dataset_info, save_path):
 if __name__ == '__main__':
     # Dictionary mapping dataset names to their specific preprocess functions and answer columns
     datasets_to_process = [
-        # {"dataset_name": "allenai/math_qa", "answer_column": ("options", "correct"),
-        #  "preprocess_function": preprocess_math_qa,
-        #  "old_question_column": "Problem",
-        #  "new_question_column": "question",
-        #  },
+        {"dataset_name": "allenai/math_qa", "answer_column": ("options", "correct"),
+         "preprocess_function": preprocess_math_qa,
+         "old_question_column": "Problem",
+         "new_question_column": "question",
+         },
 
-        # {"dataset_name": "meta-math/MetaMathQA", "answer_column": "response",
-        #  "preprocess_function": preprocess_meta_math_qa,
-        #  "old_question_column": "original_question",
-        #  "new_question_column": "question",
-        # },
+        {"dataset_name": "meta-math/MetaMathQA", "answer_column": "response",
+         "preprocess_function": preprocess_meta_math_qa,
+         "old_question_column": "original_question",
+         "new_question_column": "question",
+        },
 
 
         # {"dataset_name": "cais/mmlu", "answer_column": ("choices", "answer"), "config_name": "abstract_algebra",
@@ -187,8 +191,10 @@ if __name__ == '__main__':
         #  "new_question_column": "question",
         #  },
 
-        # {"dataset_name": "nvidia/OpenMathInstruct-2", "answer_column": "expected_answer",
-        #  "preprocess_function": preprocess_open_math_instruct},
+        {"dataset_name": "nvidia/OpenMathInstruct-2", "answer_column": "expected_answer",
+         "preprocess_function": preprocess_open_math_instruct,
+         "old_question_column": "problem",
+         "new_question_column": "question",},
 
         {"dataset_name": "openai/gsm8k", "answer_column": "answer", "config_name": "main",
          "preprocess_function": preprocess_gsm8k,
@@ -196,11 +202,11 @@ if __name__ == '__main__':
          "new_question_column": "question",
          },
 
-        # {"dataset_name": "ChilleD/MultiArith", "answer_column": "final_ans",
-        #  "preprocess_function": preprocess_multi_arith,
-        #  "old_question_column": "question",
-        #  "new_question_column": "question"
-        #  },
+        {"dataset_name": "ChilleD/MultiArith", "answer_column": "final_ans",
+         "preprocess_function": preprocess_multi_arith,
+         "old_question_column": "question",
+         "new_question_column": "question"
+         },
 
     ]
 
