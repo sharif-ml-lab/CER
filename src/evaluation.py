@@ -27,28 +27,15 @@ def evaluate_batch_examples(
     # Construct a list of messages for each question in the batch
     batch_messages = []
     for question in batch_questions:
-        user_prompt = construct_prompt(question=question,
-                                       few_shot=few_shot,
-                                       few_shot_path=few_shot_path
-                                       )
-
-        batch_messages.append(user_prompt)
-
-        # batch_messages.append([
-        #     {
-        #         "role": "user",
-        #         "content": construct_prompt(
-        #             question=question,
-        #             few_shot=few_shot,
-        #             few_shot_path=few_shot_path
-        #         )
-        #     }
-        # ])
+        batch_messages.append([{"role": "user", "content": construct_prompt(
+            question=question,
+            few_shot=few_shot,
+            few_shot_path=few_shot_path)}])
 
     # Depending on baseline_cot, call the appropriate batch decoding function
     if baseline_cot in ("k-branch", "k-seperate"):
         # These functions return lists of results, confidences, and final answers
-        results, confidences, final_answers = cot_decode(
+        batch_results = cot_decode(
             model,
             tokenizer,
             batch_messages,
@@ -61,7 +48,7 @@ def evaluate_batch_examples(
             confidence_method=confidence_method
         )
     elif baseline_cot == "self_consistency":
-        results, confidences, final_answers = self_consistency_decode(
+        batch_results = self_consistency_decode(
             model,
             tokenizer,
             batch_messages,
@@ -73,14 +60,12 @@ def evaluate_batch_examples(
     # Build the output list with evaluation details
     batch_output = []
     for i, question in enumerate(batch_questions):
+        predicted_text, confidence_score, predicted_final_answer = batch_results[i]
         correct_answer_str = batch_correct_answers[i]
-        predicted_text = results[i]
-        predicted_final = final_answers[i]
-        confidence_score = confidences[i]
 
         # Compare numeric answers if both are valid floats
         try:
-            model_answer = float(predicted_final)
+            model_answer = float(predicted_final_answer)
             correct_answer = float(correct_answer_str)
             is_correct = abs(model_answer - correct_answer) <= 1e-2
         except ValueError:
@@ -90,7 +75,7 @@ def evaluate_batch_examples(
             "question": question,
             "correct_answer": correct_answer_str,
             "predicted_answer": predicted_text,
-            "predicted_final_answer": predicted_final,
+            "predicted_final_answer": predicted_final_answer,
             "confidence_score": confidence_score,
             "is_correct": is_correct
         })
@@ -155,6 +140,10 @@ def evaluate_dataset(
                 if result_dict["is_correct"]:
                     correct_answers += 1
 
+            running_accuracy = (correct_answers / int(end_idx)) * 100
+            pbar.set_postfix(idx=int(end_idx),
+                             running_accuracy=f"{running_accuracy:.2f}%")
+
             pbar.update(end_idx - start_idx)
 
     # Save and print final results
@@ -171,10 +160,13 @@ def run_dataset(config: Config):
     few_shot = config.few_shot
     number_samples = config.number_samples
     seed = config.seed
-    read_model_from_local = config.read_model_from_local
+    read_model_from_huggingface = config.read_model_from_huggingface
     data_dir = config.data_dir
     run_name = config.run_name
     batch_size = config.batch_size
+
+    model, tokenizer = load_model_and_tokenizer(model_name)
+
     dataset_files = config.datasets
 
     model, tokenizer = load_model_and_tokenizer(

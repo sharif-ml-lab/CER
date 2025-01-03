@@ -1,4 +1,10 @@
 from dataclasses import dataclass
+import os
+from distutils.util import strtobool
+
+from dotenv import load_dotenv
+
+load_dotenv()  # Reads .env file and loads environment variables
 
 # list of different settings to run
 multi_run_configs = {
@@ -16,8 +22,8 @@ multi_run_configs = {
         "decoding_mode": 'last',  # "all": all the numbers "last": the last number
         "baseline_cot": "k-branch",  # [k-branch, k-seperate, self_consistency]
         "scoring_mode": 'log',  # log, min, max, h_mean
-        # "temperature": temperature sampling  "greedy": greedy sampling
         "sampling_mode": "greedy",
+        # "temperature": temperature sampling  "greedy": greedy sampling # (I'm not sure which one is correct?)
         "confidence": "top_2_diff"  # Options: "default", "sum", "entropy", "top_2_diff"
     },
 
@@ -128,15 +134,16 @@ multi_run_configs = {
 # general configuration
 @dataclass
 class Config:
-    # Path to the HuggingFace model or local directory
-    model_name: str = "meta-llama/Llama-3.1-8B-Instruct"
-    data_dir = "data"
-    # Load the model from the local directory instead of the HF.
-    read_model_from_local: bool = False
-    hugging_face_token: str = "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"  # Huggingface Token
+    model_name: str = os.getenv("MODEL_NAME",
+                                "meta-llama/Llama-3.1-8B-Instruct")  # Path to the HuggingFace model or local directory
+    data_dir = os.getenv("DATA_DIR", "data")
+    read_model_from_huggingface: bool = bool(
+        os.getenv("LOCAL_MODEL", True))  # Load the model from the local directory instead of the HF.
+    hugging_face_token: str = os.getenv(
+        "HUGGING_FACE_TOKEN", "")  # Huggingface Token
 
     # specify the running mode "all" that means all of them.
-    run_name = "CoT Decoding"
+    run_name = os.getenv("RUN_NAME", "Ours + Temp + Conf")
     K: int = 10  # number of chains in self-consistency or number of branching in cot-decoding
     aggregate: bool = True  # True: aggregate paths False: the best path
 
@@ -158,4 +165,4 @@ class Config:
         # "gsm8k": "openai_gsm8k_processed.parquet",
     }
 
-    batch_size = 3
+    batch_size = int(os.getenv("BATCH_SIZE", 1))

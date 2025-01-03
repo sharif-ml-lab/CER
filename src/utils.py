@@ -6,11 +6,11 @@ import torch
 from datasets import load_dataset
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
+
 # load the model and its tokenizer
-def load_model_and_tokenizer(model_name, read_model_from_local):
+def load_model_and_tokenizer(model_name):
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
-        local_files_only=read_model_from_local,
         device_map='cuda',
         torch_dtype=torch.float16
     )
@@ -31,13 +31,15 @@ def load_and_sample_parquet_datasets(data_dir, dataset_files, number_samples, se
             loaded_datasets[filename] = df
     return loaded_datasets
 
+
 # construct prompt for given question
-def construct_prompt(question, few_shot=True, few_shot_path=None):
-    if few_shot: # few-shot setting
+def construct_prompt(question, few_shot=True, few_shot_path=None) -> str:
+    # TODO may change to handle other formats of  prompts
+    if few_shot:  # few-shot setting
         few_shots = read_from_txt(few_shot_path)
         base_prompt = few_shots.format(question=question)
         return base_prompt
-    else: # zero-shot setting
+    else:  # zero-shot setting
         pass
 
 
@@ -46,14 +48,17 @@ def extract_last_numerical_value(text):
     matches = re.findall(r'\b\d+\.?\d*\b', text)
     return matches[-1] if matches else None
 
+
 # extract all numerical values from a given text
 def extract_all_numerical_values(text):
     return re.findall(r'\b\d+\.?\d*\b', text)
+
 
 # write content in a file_path
 def write_to_txt(file_path, content):
     with open(file_path, 'w', encoding='utf-8') as file:
         file.write(content)
+
 
 # read content from a file_path
 def read_from_txt(file_path):

@@ -24,7 +24,7 @@ def calculate_confidence_for_final_answer(logits, answer_ids, confidence_method:
             break
         token_logits = logits[t]
         probs = torch.softmax(token_logits, dim=-1)
-        ans_token_prob = probs[-1][token_id]
+        ans_token_prob = probs[token_id]
 
         if confidence_method == "default":
             confidence_sum *= ans_token_prob.item()
@@ -37,13 +37,13 @@ def calculate_confidence_for_final_answer(logits, answer_ids, confidence_method:
         elif confidence_method == "top_2_diff_weighted":
             top_2_probs, _ = torch.topk(probs, min(2, probs.size(-1)))
             if top_2_probs.size(-1) > 1:
-                confidence_sum += (top_2_probs[-1][0] - top_2_probs[-1][1]).item() * ans_token_prob.item()
+                confidence_sum += (top_2_probs[0] - top_2_probs[1]).item() * ans_token_prob.item()
             else:
                 confidence_sum += 1.0
         elif confidence_method == "top_2_diff":
             top_2_probs, _ = torch.topk(probs, min(2, probs.size(-1)))
             if top_2_probs.size(-1) > 1:
-                confidence_sum += (top_2_probs[-1][0] - top_2_probs[-1][1]).item()
+                confidence_sum += (top_2_probs[0] - top_2_probs[1]).item()
             else:
                 confidence_sum += 1.0
         else:

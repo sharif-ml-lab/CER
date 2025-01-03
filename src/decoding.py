@@ -1,4 +1,4 @@
-from tqdm import tqdm
+from pandas.core.window.doc import template_returns
 
 import torch
 from transformers import PreTrainedModel, PreTrainedTokenizer
@@ -134,7 +134,7 @@ def _k_seperate_generation(
     batch_size = tokenized_batch["input_ids"].shape[0]
     paths = [[] for _ in range(batch_size)]
 
-    for _ in tqdm(range(k), desc="k-separate generation"):
+    for _ in range(k):
         # Generate results for the entire batch at once
         batch_output = model.generate(
             **tokenized_batch,
@@ -161,7 +161,7 @@ def _k_seperate_generation(
             answer_ids = generated_sequence[input_length:]
             answer_text = tokenizer.decode(
                 answer_ids, skip_special_tokens=True)
-            output_scores = batch_output.scores[i]
+            output_scores = torch.stack([x[i] for x in batch_output.scores])
 
             if decoding_mode == "last":
                 result = _handle_last_decoding(tokenizer, device, answer_text, output_scores, answer_ids,
@@ -267,7 +267,7 @@ def _k_branch_generation(
 
         # Scores for the entire sequence; typically a list of step logits
         # We'll index them if needed in the decoding functions
-        output_scores = expanded_output.scores[idx]
+        output_scores = torch.stack([x[idx] for x in expanded_output.scores])
 
         # Decide which decoding function to apply
         if decoding_mode == "last":
@@ -321,8 +321,25 @@ def cot_decode(
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token_id = tokenizer.eos_token_id
 
+    tokenizer.padding_side = "left"
+
+    batch_template_messages = []
+    for message in batch_messages:
+        if hasattr(tokenizer, 'chat_template') and tokenizer.chat_template:
+            input_text = tokenizer.apply_chat_template(
+                message,
+                tokenize=False,
+                add_generation_prompt=True
+            )
+        else:
+            input_text = "\n".join(
+                [f"{msg['role']}: {msg['content']}" for msg in message])
+            input_text += "\nassistant:"
+
+        batch_template_messages.append(input_text)
+
     tokenized_batch = tokenizer(
-        batch_messages,
+        batch_template_messages,
         padding=True,
         truncation=True,
         return_tensors="pt"

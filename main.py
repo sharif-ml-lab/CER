@@ -6,7 +6,10 @@ from src.config import Config
 if __name__ == "__main__":
     config = Config()
 
-    if config.read_model_from_local:
+    print(config)
+    exit()
+
+    if config.read_model_from_huggingface:
         login(token=config.hugging_face_token)
 
     run_dataset(config=config)
