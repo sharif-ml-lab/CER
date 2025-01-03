@@ -10,8 +10,6 @@ from src.uncertainty import _find_subsequence_indices, calculate_confidence_for_
 
 
 # extract the final numerical value.
-
-
 def _handle_last_decoding(
         tokenizer: PreTrainedTokenizer,
         device,
@@ -289,8 +287,6 @@ def _k_branch_generation(
 
 
 # cot-decoding as originally implemented.
-
-
 def cot_decode(
         model: PreTrainedModel,
         tokenizer: PreTrainedTokenizer,

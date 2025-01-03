@@ -8,7 +8,7 @@ from src.utils import load_model_and_tokenizer, construct_prompt, print_final_ac
 from src.config import Config, multi_run_configs
 
 
-# evaluate the model on a single example
+# evaluate the model on a batch of exapmles
 def evaluate_batch_examples(
         model,
         tokenizer,
@@ -27,16 +27,23 @@ def evaluate_batch_examples(
     # Construct a list of messages for each question in the batch
     batch_messages = []
     for question in batch_questions:
-        batch_messages.append([
-            {
-                "role": "user",
-                "content": construct_prompt(
-                    question=question,
-                    few_shot=few_shot,
-                    few_shot_path=few_shot_path
-                )
-            }
-        ])
+        user_prompt = construct_prompt(question=question,
+                                       few_shot=few_shot,
+                                       few_shot_path=few_shot_path
+                                       )
+
+        batch_messages.append(user_prompt)
+
+        # batch_messages.append([
+        #     {
+        #         "role": "user",
+        #         "content": construct_prompt(
+        #             question=question,
+        #             few_shot=few_shot,
+        #             few_shot_path=few_shot_path
+        #         )
+        #     }
+        # ])
 
     # Depending on baseline_cot, call the appropriate batch decoding function
     if baseline_cot in ("k-branch", "k-seperate"):
@@ -167,13 +174,11 @@ def run_dataset(config: Config):
     read_model_from_local = config.read_model_from_local
     data_dir = config.data_dir
     run_name = config.run_name
-
     batch_size = config.batch_size
+    dataset_files = config.datasets
 
     model, tokenizer = load_model_and_tokenizer(
         model_name, read_model_from_local)
-
-    dataset_files = config.datasets
 
     loaded_datasets = load_and_sample_parquet_datasets(data_dir, dataset_files, number_samples=number_samples,
                                                        seed=seed)
@@ -205,6 +210,7 @@ def run_dataset(config: Config):
                         raise ValueError(
                             'You have to provide the examples for the prompt')
                 else:
+                    # it should be run in a zero-shot format
                     few_shot_path = None
 
                 evaluate_dataset(
