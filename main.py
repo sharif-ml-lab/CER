@@ -6,9 +6,6 @@ from src.config import Config
 if __name__ == "__main__":
     config = Config()
 
-    print(config)
-    exit()
-
     if config.read_model_from_huggingface:
         login(token=config.hugging_face_token)
 

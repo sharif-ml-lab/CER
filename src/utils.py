@@ -3,15 +3,15 @@ import re
 
 import pandas as pd
 import torch
-from datasets import load_dataset
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 
 # load the model and its tokenizer
-def load_model_and_tokenizer(model_name):
+def load_model_and_tokenizer(model_name, read_model_from_huggingface=True):
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
         device_map='cuda',
+        local_files_only=read_model_from_huggingface,
         torch_dtype=torch.float16
     )
     tokenizer = AutoTokenizer.from_pretrained(model_name)

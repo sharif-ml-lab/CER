@@ -164,13 +164,10 @@ def run_dataset(config: Config):
     data_dir = config.data_dir
     run_name = config.run_name
     batch_size = config.batch_size
-
-    model, tokenizer = load_model_and_tokenizer(model_name)
-
     dataset_files = config.datasets
 
     model, tokenizer = load_model_and_tokenizer(
-        model_name, read_model_from_local)
+        model_name, read_model_from_huggingface)
 
     loaded_datasets = load_and_sample_parquet_datasets(data_dir, dataset_files, number_samples=number_samples,
                                                        seed=seed)

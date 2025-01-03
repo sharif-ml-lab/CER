@@ -1,5 +1,3 @@
-from pandas.core.window.doc import template_returns
-
 import torch
 from transformers import PreTrainedModel, PreTrainedTokenizer
 import numpy as np
@@ -371,6 +369,9 @@ def cot_decode(
             do_sample=do_sample,
             confidence_method=confidence_method
         )
+        print(paths_for_batch)
+        exit()
+
     elif baseline_cot == "k-seperate":
         # _k_seperate_generation should return a list of paths for each example
         # Each element is a list of (generated_text, confidence_score, final_answer).
