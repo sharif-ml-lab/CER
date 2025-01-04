@@ -61,7 +61,7 @@ def _handle_all_decoding(
     total_valid_values = 0
     seen_dict = {}
 
-    for num_value in all_numerical_values:
+    for num_idx, num_value in enumerate(all_numerical_values):
         seen_dict[num_value] = seen_dict.get(num_value, 0) + 1
         num_value_ids = tokenizer.encode(num_value, add_special_tokens=False)
         occurrence_count = seen_dict[num_value]
@@ -80,18 +80,30 @@ def _handle_all_decoding(
         conf_val = calculate_confidence_for_final_answer(
             num_value_scores, torch.tensor(num_value_ids, device=device), confidence_method)
 
-        if scoring_mode == 'log':
+        if scoring_mode == 'log':  # (lop(1 + c1) + ... + log(1 + cn)) / n
             confidence_sum += np.log(1 + conf_val)
-        elif scoring_mode == 'min':
+
+        elif scoring_mode == 'min':  # min(c1, ..., cn)
             if conf_val < min_conf:
                 min_conf = conf_val
                 confidence_sum = conf_val
-        elif scoring_mode == 'max':
+
+        elif scoring_mode == 'max':  # max(c1, ..., cn)
             if conf_val > max_conf:
                 max_conf = conf_val
                 confidence_sum = conf_val
-        elif scoring_mode == 'h_mean':
+
+        elif scoring_mode == 'h_mean':  # (1/c1 + ... + 1/cn) / n
             confidence_sum += 1 / (1e-11 + conf_val)
+
+        elif scoring_mode == "mean":  # (c1 + ... + cn) / n
+            confidence_sum += conf_val
+
+        # (1*c1 + ... n*cn) / (1 + ... + n)
+        elif scoring_mode == "weighted_mean":
+            confidence_sum += (((1 + num_idx) * conf_val) /
+                               ((len(all_numerical_values) * len(all_numerical_values))/2))
+
         else:
             raise NotImplementedError("Unsupported scoring_mode")
 
@@ -100,7 +112,9 @@ def _handle_all_decoding(
     if total_valid_values > 0:
         if scoring_mode == 'log':
             confidence = confidence_sum.item() / total_valid_values
-        elif scoring_mode in ['min', 'max']:
+        elif scoring_mode in ["mean"]:
+            confidence = confidence_sum / total_valid_values
+        elif scoring_mode in ['min', 'max', "weighted_mean"]:
             confidence = confidence_sum
         elif scoring_mode == 'h_mean':
             confidence = total_valid_values / confidence_sum.item()

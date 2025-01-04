@@ -1,0 +1,88 @@
+question,correct_answer,predicted_answer,predicted_final_answer,confidence_score,is_correct
+"In 2004, there were some kids at a cookout. In 2005, half the number of kids came to the cookout as compared to 2004. In 2006, 2/3 as many kids came to the cookout as in 2005. If there were 20 kids at the cookout in 2006, how many kids came to the cookout in 2004?", 60,"To find the number of kids who came to the cookout in 2004, let's analyze the information step by step.
+
+1. In 2006, 20 kids attended the cookout.
+2. In 2006, the number of kids was 2/3 of the number in 2005. Let's find the number of kids who attended the cookout in 2005.
+   Let x be the number of kids in 2005. 
+   2/3 * x = 20
+   Multiplying both sides by 3/2 to isolate x:
+   x = 20 * (3/2)
+   x = 30
+   So, 30 kids came to the cookout in 2005.
+3. In 2005, the number of kids was half the number in 2004. 
+   Let y be the number of kids in 2004.
+   1/2 * y = 30 (the number of kids in 2005)
+   Multiplying both sides by 2 to isolate y:
+   y = 30 * 2
+   y = 60
+   So, 60 kids came to the cookout in 2004.
+
+The final answer is 60.",60,3.817911065789805,True
+"Karen is paddling her canoe up a river against the current. On a still pond, Karen can paddle 10 miles per hour. The river flows in the opposite direction at 4 miles per hour. If the river is 12 miles long, how many hours will it take Karen to paddle up it?", 2,"To find the time it takes Karen to paddle up the river, we need to first find her speed in still water. Her speed in still water is given as 10 miles per hour. However, when paddling against the current, her effective speed will be reduced.
+
+To find the effective speed, we subtract the speed of the current from her speed in still water: 
+Speed against the current = 10 mph (speed in still water) - 4 mph (speed of the current) 
+Speed against the current = 6 mph
+
+Next, we use the formula:
+Time = Distance / Speed
+
+Given the speed against the current (6 mph) and the distance of the river (12 miles), we can calculate the time:
+Time = 12 miles / 6 mph
+Time = 2 hours
+
+The final answer is 2.",2,4.417885279375829,True
+"Bob is building a vegetable garden. It is 220 feet long by 120 feet wide. Half of the garden is going to be tilled land. A third of the rest of it will have trellises for vining plants, and the rest will be devoted to raised beds. How big will the raised bed section of the garden be?", 8800,"To find the size of the raised bed section, we first need to find the total area of the garden and then determine the area used for the other two purposes.
+
+1. Calculate the total area of the garden:
+   Area = Length x Width
+   Area = 220 feet x 120 feet
+   Area = 26400 square feet
+
+2. Calculate the area for tilled land (half of the total area):
+   Area for tilled land = 26400 / 2
+   Area for tilled land = 13200 square feet
+
+3. Calculate the remaining area after removing the tilled land:
+   Remaining area = Total area - Area for tilled land
+   Remaining area = 26400 - 13200
+   Remaining area = 13200 square feet
+
+4. Calculate the area for trellises (a third of the remaining area):
+   Area for trellises = Remaining area / 3
+   Area for trellises = 13200 / 3
+   Area for trellises = 4400 square feet
+
+5. Calculate the area for raised beds (the rest of the remaining area after subtracting the area for trellises):
+   Area for raised beds = Remaining area - Area for trellises
+   Area for raised beds = 13200 - 4400
+   Area for raised beds = 8800 square feet
+
+The final answer is 8800.",8800,3.439599850511157,True
+There is a playground that is surrounded by a square fence that has a side length of 27 yards. There is a 12 yard by 9 yard garden that has fencing around it. How many yards of fencing do the playground and garden have together?, 150,"To find the total amount of fencing for the playground and garden together, we need to calculate the perimeter of each and then add them.
+
+1. First, let's find the total perimeter of the playground. Since the playground is a square with a side length of 27 yards, its perimeter can be calculated by multiplying the side length by 4.
+   Perimeter of the playground = 4 * 27 = 108 yards
+
+2. Next, let's find the perimeter of the garden. Given that the garden is a rectangle with dimensions 12 yards by 9 yards, its perimeter can be calculated by adding up the lengths of all four sides.
+   Perimeter of the garden = 2*(12 + 9) = 2*21 = 42 yards
+
+3. Finally, add both perimeters together to find the total amount of fencing needed for the playground and garden.
+   Total perimeter = Perimeter of the playground + Perimeter of the garden = 108 + 42 = 150 yards
+
+The final answer is 150.",150,4.1167832201719285,True
+"Jill runs a business breeding llamas. Nine of her llamas got pregnant with 1 calf, and 5 of them got pregnant with twins. After they give birth, Jill traded 8 of the calves for 2 new adult llamas. Then she sells 1/3 of her herd at the market. How many total llamas  (calves and adults) does Jill have now?", 18,"Let's break it down step by step:
+
+1. Initially, there are 9 llamas pregnant with 1 calf and 5 llamas pregnant with twins. The total number of calves is (9 * 1) + (5 * 2) = 9 + 10 = 19 calves. 
+
+2. The total number of llamas (calves and adults) before the births is 9 (pregnant with 1 calf) + 5 (pregnant with twins) = 14 adults.
+
+3. After the births, Jill has 19 calves and 14 adults.
+
+4. However, Jill traded 8 calves for 2 new adult llamas. The total number of calves now becomes 19 - 8 = 11. The total number of adults is 14 (previous adults) + 2 (traded in) = 16. 
+
+5. Finally, Jill sells 1/3 of her herd at the market. The total number of llamas in the herd is 11 (calves) + 16 (adults) = 27. One-third of 27 is 9, so Jill sells 9 llamas. 
+
+6. After selling 9 llamas, Jill has 27 - 9 = 18 llamas left.
+
+The final answer is 18.",18,3.8272073803028297,True
