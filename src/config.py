@@ -148,11 +148,11 @@ class Config:
 
     # specify the running mode "all" that means all of them.
     run_name = "Ours + Temp + Conf + Weighted_Mean"
-    K: int = 10  # number of chains in self-consistency or number of branching in cot-decoding
+    K: int = 2  # number of chains in self-consistency or number of branching in cot-decoding
     aggregate: bool = True  # True: aggregate paths False: the best path
 
     few_shot: bool = False  # True: few-shot False: zero-shot
-    number_samples: int = 500  # Number of samples to process
+    number_samples: int = 5  # Number of samples to process
     seed: int = 11  # Seed for shuffling the dataset
 
     gsm8k_shots: str = "inputs/shots/gsm8k.txt"  # path to shots of gsm8k

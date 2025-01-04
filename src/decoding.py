@@ -93,7 +93,7 @@ def _handle_all_decoding(
                 max_conf = conf_val
                 confidence_sum = conf_val
 
-        elif scoring_mode == 'h_mean':  # (1/c1 + ... + 1/cn) / n
+        elif scoring_mode == 'h_mean':  # n / (1/c1 + ... + 1/cn)
             confidence_sum += 1 / (1e-11 + conf_val)
 
         elif scoring_mode == "mean":  # (c1 + ... + cn) / n

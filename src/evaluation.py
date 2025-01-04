@@ -91,7 +91,7 @@ def evaluate_dataset(model, tokenizer, dataset, k, aggregate, decoding_mode, des
             pbar.update(1)
 
     save_results_to_csv(
-        results, f"outputs/{description}_evaluation_results.csv")
+        results, f"outputs/{description}_evaluation_results_{'few_shot' if few_shot else 'zero_shot'}.csv")
     accuracy = (correct_answers / total_questions) * 100
     print_final_accuracy(description, accuracy)
     return accuracy
