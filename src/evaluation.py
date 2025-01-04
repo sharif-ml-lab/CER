@@ -16,7 +16,7 @@ def evaluate_single_example(model, tokenizer, question, correct_answer_str, k, a
 
     # pick k-branch and continue each path with greedy sampling.
     if baseline_cot == "k-branch" or baseline_cot == "k-seperate":
-        result, confidence, final_ans = cot_decode(
+        predicted_full_answer, confidence, final_ans = cot_decode(
             model,
             tokenizer,
             messages,
@@ -30,7 +30,7 @@ def evaluate_single_example(model, tokenizer, question, correct_answer_str, k, a
         )
 
     # elif baseline_cot == "greedy_decoding": # ??????????????????
-    #     result, confidence, final_ans = greedy_number_cot_decode( # greedy
+    #     predicted_full_answer, confidence, final_ans = greedy_number_cot_decode( # greedy
     #         model,
     #         tokenizer,
     #         messages,
@@ -41,19 +41,20 @@ def evaluate_single_example(model, tokenizer, question, correct_answer_str, k, a
     #     )
 
     elif baseline_cot == "self_consistency":
-        result, confidence, final_ans = self_consistency_decode(model, tokenizer, messages, k=k)
+        predicted_full_answer, confidence, final_ans = self_consistency_decode(
+            model, tokenizer, messages, k=k)
 
     try:
         model_answer = float(final_ans)
         correct_answer = float(correct_answer_str)
-        is_correct = ((model_answer - correct_answer) <= 1e-2)
+        is_correct = abs(model_answer - correct_answer) <= 1e-2
     except ValueError:
         is_correct = False
 
     return {
         'question': question,
         'correct_answer': correct_answer_str,
-        'predicted_answer': result,
+        'predicted_answer': predicted_full_answer,
         'predicted_final_answer': final_ans,
         'confidence_score': confidence,
         'is_correct': is_correct
@@ -75,16 +76,22 @@ def evaluate_dataset(model, tokenizer, dataset, k, aggregate, decoding_mode, des
             result_dict = evaluate_single_example(model, tokenizer, question, correct_answer, k, aggregate,
                                                   decoding_mode, scoring_mode, baseline_cot, sampling_mode, few_shot,
                                                   few_shot_path, confidence_method)
+
+            # print(result_dict)
+            # exit()
+
             results.append(result_dict)
 
             if result_dict['is_correct']:
                 correct_answers += 1
 
             running_accuracy = (correct_answers / (idx + 1)) * 100
-            pbar.set_postfix(idx=idx + 1, running_accuracy=f"{running_accuracy:.2f}%")
+            pbar.set_postfix(
+                idx=idx + 1, running_accuracy=f"{running_accuracy:.2f}%")
             pbar.update(1)
 
-    save_results_to_csv(results, f"{description}_evaluation_results.csv")
+    save_results_to_csv(
+        results, f"outputs/{description}_evaluation_results.csv")
     accuracy = (correct_answers / total_questions) * 100
     print_final_accuracy(description, accuracy)
     return accuracy
@@ -101,7 +108,8 @@ def run_dataset(config: Config):
     data_dir = config.data_dir
     run_name = config.run_name
 
-    model, tokenizer = load_model_and_tokenizer(model_name, read_model_from_local)
+    model, tokenizer = load_model_and_tokenizer(
+        model_name, read_model_from_local)
 
     dataset_files = config.datasets
 
@@ -131,6 +139,8 @@ def run_dataset(config: Config):
                         few_shot_path = config.metamath_shots
                     elif dataset_name == "gsm8k":
                         few_shot_path = config.gsm8k_shots
+                else:
+                    few_shot_path = None  # zero-shot setting
 
                 evaluate_dataset(
                     model,
