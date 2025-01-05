@@ -6,8 +6,6 @@ load_dotenv()  # Reads .env file and loads environment variables
 
 
 # Function to check if a string is a valid number (integer or float)
-
-
 def is_valid_number(s):
     try:
         float(s.strip())
@@ -189,16 +187,10 @@ if __name__ == '__main__':
          "new_question_column": "question",
          },
 
-        {"dataset_name": "cais/mmlu", "answer_column": ("choices", "answer"), "config_name": "abstract_algebra",
-         "preprocess_function": preprocess_mmlu,
-         "old_question_column": "question",
-         "new_question_column": "question",
-         },
-
-        # {"dataset_name": "nvidia/OpenMathInstruct-2", "answer_column": "expected_answer",
-        #  "preprocess_function": preprocess_open_math_instruct,
-        #  "old_question_column": "problem",
-        #  "new_question_column": "question", },
+        {"dataset_name": "nvidia/OpenMathInstruct-2", "answer_column": "expected_answer",
+         "preprocess_function": preprocess_open_math_instruct,
+         "old_question_column": "problem",
+         "new_question_column": "question", },
 
         {"dataset_name": "openai/gsm8k", "answer_column": "answer", "config_name": "main",
          "preprocess_function": preprocess_gsm8k,
@@ -211,7 +203,7 @@ if __name__ == '__main__':
          "old_question_column": "question",
          "new_question_column": "question"
          },
-         
+
     ]
 
     # Path to save processed datasets

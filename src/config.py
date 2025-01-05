@@ -8,15 +8,15 @@ load_dotenv(override=True)  # Reads .env file and loads environment variables
 
 # list of different settings to run
 multi_run_configs = {
-    "Self Const": {
-        "decoding_mode": 'all',  # "all": all the numbers "last": the last number
-        # [k-branch, k-seperate, self_consistency]
-        "baseline_cot": 'self_consistency',
-        "scoring_mode": 'log',  # log, min, max, h_mean, mean, weighted_mean
-        # "temperature": temperature sampling  "greedy": greedy sampling
-        "sampling_mode": "temperature",
-        "confidence": "default"  # Options: "default", "sum", "entropy", "top_2_diff"
-    },
+    # "Self Const": {
+    #     "decoding_mode": 'all',  # "all": all the numbers "last": the last number
+    #     # [k-branch, k-seperate, self_consistency]
+    #     "baseline_cot": 'self_consistency',
+    #     "scoring_mode": 'log',  # log, min, max, h_mean, mean, weighted_mean
+    #     # "temperature": temperature sampling  "greedy": greedy sampling
+    #     "sampling_mode": "temperature",
+    #     "confidence": "default"  # Options: "default", "sum", "entropy", "top_2_diff"
+    # },
 
     "CoT Decoding": {
         "decoding_mode": 'last',  # "all": all the numbers "last": the last number
@@ -168,8 +168,8 @@ class Config:
 
     gsm8k_shots: str = "inputs/shots/gsm8k.txt"  # path to shots of gsm8k
     multiarith_shots: str = "inputs/shots/multiarith.txt"  # path to shots of multiarith
-    allenai_shtos: str = "inputs/shots/allenai.txt"  # path to shots of allenai
-    open_math_shtos: str = "inputs/shots/open_math.txt"  # path to shots of open_math
+    allenai_shots: str = "inputs/shots/allenai.txt"  # path to shots of allenai
+    open_math_shots: str = "inputs/shots/open_math.txt"  # path to shots of open_math
     metamath_shots: str = "inputs/shots/metamath.txt"  # path to shots of metamath
 
     datasets = {
