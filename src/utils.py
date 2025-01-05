@@ -33,34 +33,44 @@ def load_and_sample_parquet_datasets(data_dir, dataset_files, number_samples, se
 
 
 # construct prompt for given question
-def construct_prompt(question, few_shot=True, few_shot_path=None) -> str:
-    # TODO may change to handle other formats of  prompts
+
+
+def construct_prompt(question, few_shot=True, few_shot_path=None):
     if few_shot:  # few-shot setting
         few_shots = read_from_txt(few_shot_path)
         base_prompt = few_shots.format(question=question)
-        return base_prompt
     else:  # zero-shot setting
-        pass
-
+        # base_prompt = "Q: {question}\nA: Let's think step by step.".format(
+        #     question=question)
+        base_prompt = f"Q: {question}\nA: Let's think step by step.\n Your response should end with \"The final answer is [answer]\" where [answer] is the response to the problem."
+    return base_prompt
 
 # extract the last numerical value from a given text
+
+
 def extract_last_numerical_value(text):
     matches = re.findall(r'\b\d+\.?\d*\b', text)
     return matches[-1] if matches else None
 
 
 # extract all numerical values from a given text
+
+
 def extract_all_numerical_values(text):
     return re.findall(r'\b\d+\.?\d*\b', text)
 
 
 # write content in a file_path
+
+
 def write_to_txt(file_path, content):
     with open(file_path, 'w', encoding='utf-8') as file:
         file.write(content)
 
 
 # read content from a file_path
+
+
 def read_from_txt(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
         content = file.read()

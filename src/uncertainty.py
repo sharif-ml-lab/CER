@@ -1,6 +1,8 @@
 import torch
 
 #  compute the confidence for a single numerical value occurrence in the generated answer.
+
+
 def compute_confidence_for_value(output_scores, answer_ids, value_ids, device, confidence_method):
     value_start_idx = _find_subsequence_indices(answer_ids, value_ids, 1)
     if value_start_idx == -1:
@@ -10,7 +12,8 @@ def compute_confidence_for_value(output_scores, answer_ids, value_ids, device, c
     if value_start_idx < 0 or value_start_idx + len(value_ids) > len(output_scores):
         return None
 
-    value_scores = output_scores[value_start_idx: value_start_idx + len(value_ids)]
+    value_scores = output_scores[value_start_idx:
+                                 value_start_idx + len(value_ids)]
     return calculate_confidence_for_final_answer(value_scores, torch.tensor(value_ids, device=device), confidence_method)
 
 
@@ -20,9 +23,11 @@ def calculate_confidence_for_final_answer(logits, answer_ids, confidence_method:
     valid_tokens = 0
 
     for t, token_id in enumerate(answer_ids):
+
         if t >= len(logits):
             break
         token_logits = logits[t]
+
         probs = torch.softmax(token_logits, dim=-1)
         ans_token_prob = probs[token_id]
 
@@ -47,13 +52,16 @@ def calculate_confidence_for_final_answer(logits, answer_ids, confidence_method:
             else:
                 confidence_sum += 1.0
         else:
-            raise NotImplementedError("Unsupported confidence calculation mode")
+            raise NotImplementedError(
+                "Unsupported confidence calculation mode")
 
         valid_tokens += 1
 
     return confidence_sum / valid_tokens if valid_tokens > 0 else 0.0
 
 #  find the start index of the Nth occurrence (occurrence_count) of subsequence in sequence. Returns -1 if not found.
+
+
 def _find_subsequence_indices(sequence, subsequence, occurrence_count: int = 1):
     found_count = 0
     seq_len = len(sequence)
@@ -71,11 +79,15 @@ def _find_subsequence_indices(sequence, subsequence, occurrence_count: int = 1):
 def aggregate_paths_based_on_scores(paths):
     answer_scores = {}
     best_full_ans = None
-    best_full_ans_delta = -1
     for answer, delta, final_answer in paths:
-        answer_scores[final_answer] = answer_scores.get(final_answer, 0) + delta
-        if best_full_ans_delta < delta:
-            best_full_ans_delta = delta
-            best_full_ans = answer
+        answer_scores[final_answer] = answer_scores.get(
+            final_answer, 0) + delta
+
     best_answer = max(answer_scores, key=answer_scores.get)
+
+    for answer, delta, final_answer in paths:
+        if final_answer == best_answer:
+            best_full_ans = answer
+            break
+
     return best_full_ans, answer_scores[best_answer], best_answer
