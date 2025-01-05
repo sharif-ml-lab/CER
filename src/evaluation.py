@@ -117,9 +117,6 @@ def evaluate_dataset(
             batch_questions = questions[start_idx:end_idx]
             batch_correct_answers = correct_answers_list[start_idx:end_idx]
 
-            print(batch_questions)
-            print(batch_correct_answers)
-
             # Evaluate the batch
             batch_results = evaluate_batch_examples(
                 model,
@@ -137,8 +134,6 @@ def evaluate_dataset(
                 confidence_method
             )
 
-            print(batch_results)
-
             # Accumulate results and update correct answers count
             for result_dict in batch_results:
                 results.append(result_dict)
@@ -152,7 +147,8 @@ def evaluate_dataset(
             pbar.update(end_idx - start_idx)
 
     # Save and print final results
-    save_results_to_csv(results, f"{description}_evaluation_results.csv")
+    save_results_to_csv(
+        results, f"outputs/{description}_evaluation_results_{'few_shot' if few_shot else 'zero_shot'}.csv")
     accuracy = (correct_answers / total_questions) * 100
     print_final_accuracy(description, accuracy)
     return accuracy
