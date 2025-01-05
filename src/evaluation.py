@@ -117,6 +117,9 @@ def evaluate_dataset(
             batch_questions = questions[start_idx:end_idx]
             batch_correct_answers = correct_answers_list[start_idx:end_idx]
 
+            print(batch_questions)
+            print(batch_correct_answers)
+
             # Evaluate the batch
             batch_results = evaluate_batch_examples(
                 model,
@@ -133,6 +136,8 @@ def evaluate_dataset(
                 few_shot_path,
                 confidence_method
             )
+
+            print(batch_results)
 
             # Accumulate results and update correct answers count
             for result_dict in batch_results:

@@ -128,6 +128,8 @@ def _handle_all_decoding(
     return None
 
 # model.generate k times, each time generating a single path.
+
+
 def _k_seperate_generation(
         tokenized_batch,
         model: PreTrainedModel,
@@ -395,8 +397,6 @@ def cot_decode(
             do_sample=do_sample,
             confidence_method=confidence_method
         )
-        print(paths_for_batch)
-        exit()
 
     elif baseline_cot == "k-seperate":
         # _k_seperate_generation should return a list of paths for each example
