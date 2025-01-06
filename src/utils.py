@@ -32,18 +32,45 @@ def load_and_sample_parquet_datasets(data_dir, dataset_files, number_samples, se
     return loaded_datasets
 
 
+def extract_final_answer(text):
+    pattern = r"The final answer is ([^,\.]+)"
+    match = re.search(pattern, text)
+    return match.group(1) if match else None
+
+
+def extract_proper_nouns(doc):
+    proper_nouns = []
+    current_proper_noun = []
+
+    for token in doc:
+        if token.pos_ == "PROPN":
+            current_proper_noun.append(token.text)
+        elif current_proper_noun and (token.like_num or "-" in token.text):
+            current_proper_noun.append(token.text)
+        elif current_proper_noun:
+            proper_nouns.append(" ".join(current_proper_noun))
+            current_proper_noun = []
+
+    if current_proper_noun:
+        proper_nouns.append(" ".join(current_proper_noun))
+
+    return proper_nouns
+
 # construct prompt for given question
 
 
-def construct_prompt(question, few_shot=True, few_shot_path=None):
+def construct_prompt(question, few_shot=True, few_shot_path=None, multihop=False):
     if few_shot:  # few-shot setting
         few_shots = read_from_txt(few_shot_path)
         base_prompt = few_shots.format(question=question)
     else:  # zero-shot setting
-        # base_prompt = "Q: {question}\nA: Let's think step by step.".format(
-        #     question=question)
-        base_prompt = f"Q: {question}\nA: Let's think step by step.\n Your response should end with \"The final answer is [answer]\" where [answer] is the response to the problem."
+        if not multihop:
+            base_prompt = f"Q: {question}\nA: Let's think step by step.\n Your response should end with \"The final answer is [answer]\" where [answer] is the response to the problem."
+        else:
+            base_prompt = f"Q: {question}\nA: Let's Solve step by step.\n focusing only on the essential steps and limiting your response to 5 sentences. Your response should end with \"The final answer is [answer]\" where [answer] is the response to the problem."
+            # base_prompt = f"Q: {question}\nA: Let's think step by step.\n Your response should end with \"The final answer is [answer]\" where [answer] is the response to the problem."
     return base_prompt
+
 
 # extract the last numerical value from a given text
 

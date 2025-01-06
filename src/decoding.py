@@ -1,8 +1,9 @@
 import torch
+import spacy
 from transformers import PreTrainedModel, PreTrainedTokenizer
 import numpy as np
 
-from src.utils import extract_all_numerical_values, extract_last_numerical_value
+from src.utils import extract_all_numerical_values, extract_last_numerical_value, extract_proper_nouns, extract_final_answer
 from src.uncertainty import _find_subsequence_indices, calculate_confidence_for_final_answer, \
     aggregate_paths_based_on_scores
 
@@ -16,8 +17,18 @@ def _handle_last_decoding(
         answer_text,
         output_scores,
         answer_ids,
-        confidence_method):
-    final_answer = extract_last_numerical_value(answer_text)
+        confidence_method,
+        multihop,):
+
+    if not multihop:
+        final_answer = extract_last_numerical_value(answer_text)
+    else:
+        nlp = spacy.load("en_core_web_sm")
+        doc = nlp(answer_text)
+        all_values = extract_proper_nouns(doc)
+        final_answer = extract_final_answer(answer_text)
+        final_answer = final_answer if final_answer else all_values[-1]
+
     if final_answer is None:
         return None
 
@@ -48,9 +59,20 @@ def _handle_all_decoding(
         output_scores,
         answer_ids,
         scoring_mode,
-        confidence_method):
-    all_numerical_values = extract_all_numerical_values(answer_text)
-    if not all_numerical_values:
+        confidence_method,
+        multihop,):
+
+    if not multihop:
+        all_values = extract_all_numerical_values(answer_text)
+    else:
+        # print(answer_text)
+        nlp = spacy.load("en_core_web_sm")
+        doc = nlp(answer_text)
+        all_values = extract_proper_nouns(doc)
+        # print(answer_text)
+        # print(all_values)
+
+    if not all_values:
         return None
 
     answer_ids_list = answer_ids.tolist()
@@ -60,7 +82,7 @@ def _handle_all_decoding(
     total_valid_values = 0
     seen_dict = {}
 
-    for num_idx, num_value in enumerate(all_numerical_values):
+    for num_idx, num_value in enumerate(all_values):
         seen_dict[num_value] = seen_dict.get(num_value, 0) + 1
         num_value_ids = tokenizer.encode(num_value, add_special_tokens=False)
         occurrence_count = seen_dict[num_value]
@@ -103,7 +125,7 @@ def _handle_all_decoding(
         # (1*c1 + ... n*cn) / (1 + ... + n)
         elif scoring_mode == "weighted_mean":
             confidence_sum += (((1 + num_idx) * conf_val) /
-                               ((len(all_numerical_values) * len(all_numerical_values))/2))
+                               ((len(all_values) * len(all_values))/2))
 
         else:
             raise NotImplementedError("Unsupported scoring_mode")
@@ -122,7 +144,14 @@ def _handle_all_decoding(
         else:
             raise NotImplementedError
 
-        final_answer = all_numerical_values[-1]
+        if not multihop:
+            final_answer = all_values[-1]
+        else:
+            final_answer = extract_final_answer(answer_text)
+            final_answer = final_answer if final_answer else all_values[-1]
+            # print(final_answer)
+            # print("--------------------")
+
         return answer_text, confidence, final_answer
 
     return None
@@ -147,7 +176,8 @@ def _k_seperate_generation(
         decoding_mode,
         scoring_mode,
         do_sample,
-        confidence_method
+        confidence_method,
+        multihop,
 ):
     # Prepare a list of lists to store paths for each item in the batch
     batch_size = tokenized_batch["input_ids"].shape[0]
@@ -184,10 +214,10 @@ def _k_seperate_generation(
 
             if decoding_mode == "last":
                 result = _handle_last_decoding(tokenizer, device, answer_text, output_scores, answer_ids,
-                                               confidence_method)
+                                               confidence_method, multihop)
             else:
                 result = _handle_all_decoding(tokenizer, device, answer_text, output_scores, answer_ids, scoring_mode,
-                                              confidence_method)
+                                              confidence_method, multihop)
 
             # Only append valid results
             if result is not None:
@@ -218,7 +248,8 @@ def _k_branch_generation(
         decoding_mode,
         scoring_mode,
         do_sample,
-        confidence_method
+        confidence_method,
+        multihop,
 ):
     input_ids = tokenized_batch["input_ids"]
     attention_mask = tokenized_batch["attention_mask"]
@@ -324,13 +355,14 @@ def cot_decode(
         decoding_mode,
         baseline_cot,
         confidence_method,
+        multihop,
         num_beams=1,
         temperature=1.0,
         top_p=1.0,
         repetition_penalty=1.0,
         length_penalty=1.0,
         no_repeat_ngram_size=0,
-        max_new_tokens=512,
+        max_new_tokens=1024,
         early_stopping=False,
 ):
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -395,7 +427,8 @@ def cot_decode(
             decoding_mode=decoding_mode,
             scoring_mode=scoring_mode,
             do_sample=do_sample,
-            confidence_method=confidence_method
+            confidence_method=confidence_method,
+            multihop=multihop,
         )
 
     elif baseline_cot == "k-seperate":
@@ -418,7 +451,8 @@ def cot_decode(
             decoding_mode=decoding_mode,
             scoring_mode=scoring_mode,
             do_sample=do_sample,
-            confidence_method=confidence_method
+            confidence_method=confidence_method,
+            multihop=multihop,
         )
     else:
         raise ValueError(f"Unsupported baseline_cot mode: {baseline_cot}")

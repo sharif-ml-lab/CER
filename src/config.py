@@ -159,6 +159,7 @@ class Config:
     # number of chains in self-consistency or number of branching in cot-decoding
     K: int = int(os.getenv("K", 10))
     aggregate: bool = True  # True: aggregate paths False: the best path
+    multihop: bool = eval(os.getenv("MULTIHOP", False))
 
     # True: few-shot False: zero-shot
     few_shot: bool = eval(os.getenv("FEW_SHOT", True))
@@ -171,13 +172,17 @@ class Config:
     allenai_shtos: str = "inputs/shots/allenai.txt"  # path to shots of allenai
     open_math_shtos: str = "inputs/shots/open_math.txt"  # path to shots of open_math
     metamath_shots: str = "inputs/shots/metamath.txt"  # path to shots of metamath
+    hotpot_shots: str = "inputs/shots/hotpot.txt"  # path to shots of hotpot
+    trivia_shots: str = "inputs/shots/trivia.txt"  # path to shots of trivia
 
     datasets = {
         # "allenai": "allenai_math_qa_processed.parquet",
         # "open_math": "nvidia_OpenMathInstruct-2_processed.parquet",
         # "multiarith": "ChilleD_MultiArith_processed.parquet",
         # "metamath": "meta-math_MetaMathQA_processed.parquet",
-        "gsm8k": "openai_gsm8k_processed.parquet",
+        # "gsm8k": "openai_gsm8k_processed.parquet",
+        "hotpot": "hotpotqa_processed.parquet",
+        # "trivia": "triviaqa_processed.parquet"
     }
 
     batch_size = int(os.getenv("BATCH_SIZE", 1))

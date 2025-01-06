@@ -22,7 +22,8 @@ def evaluate_batch_examples(
         sampling_mode,
         few_shot,
         few_shot_path,
-        confidence_method
+        confidence_method,
+        multihop
 ):
     # Construct a list of messages for each question in the batch
     batch_messages = []
@@ -45,7 +46,8 @@ def evaluate_batch_examples(
             sampling_mode=sampling_mode,
             scoring_mode=scoring_mode,
             baseline_cot=baseline_cot,
-            confidence_method=confidence_method
+            confidence_method=confidence_method,
+            multihop=multihop
         )
     elif baseline_cot == "self_consistency":
         batch_results = self_consistency_decode(
@@ -65,9 +67,14 @@ def evaluate_batch_examples(
 
         # Compare numeric answers if both are valid floats
         try:
-            model_answer = float(predicted_final_answer)
-            correct_answer = float(correct_answer_str)
-            is_correct = abs(model_answer - correct_answer) <= 1e-2
+            if not multihop:
+                model_answer = float(predicted_final_answer)
+                correct_answer = float(correct_answer_str)
+                is_correct = abs(model_answer - correct_answer) <= 1e-2
+            else:
+                model_answer = predicted_final_answer
+                correct_answer = correct_answer_str
+                is_correct = model_answer.lower() == correct_answer.lower()
         except ValueError:
             is_correct = False
 
@@ -98,11 +105,17 @@ def evaluate_dataset(
         few_shot,
         few_shot_path,
         confidence_method,
-        batch_size
+        batch_size,
+        multihop,
 ):
     # Extract lists of questions and answers directly from the dataframe
     questions = dataset["question"].tolist()
-    correct_answers_list = dataset["numeric_final_answer"].astype(str).tolist()
+
+    if not multihop:
+        correct_answers_list = dataset["numeric_final_answer"].astype(
+            str).tolist()
+    else:
+        correct_answers_list = dataset["answer"].astype(str).tolist()
 
     total_questions = len(questions)
     correct_answers = 0
@@ -116,6 +129,9 @@ def evaluate_dataset(
             # Slice out the batch
             batch_questions = questions[start_idx:end_idx]
             batch_correct_answers = correct_answers_list[start_idx:end_idx]
+
+            print(batch_questions)
+            print(batch_correct_answers)
 
             # Evaluate the batch
             batch_results = evaluate_batch_examples(
@@ -131,7 +147,8 @@ def evaluate_dataset(
                 sampling_mode,
                 few_shot,
                 few_shot_path,
-                confidence_method
+                confidence_method,
+                multihop
             )
 
             # Accumulate results and update correct answers count
@@ -166,6 +183,7 @@ def run_dataset(config: Config):
     run_name = config.run_name
     batch_size = config.batch_size
     dataset_files = config.datasets
+    multihop = config.multihop
 
     model, tokenizer = load_model_and_tokenizer(
         model_name, read_model_from_huggingface)
@@ -196,6 +214,10 @@ def run_dataset(config: Config):
                         few_shot_path = config.metamath_shots
                     elif dataset_name == "gsm8k":
                         few_shot_path = config.gsm8k_shots
+                    elif dataset_name == "hotpot":
+                        few_shot_path = config.hotpot_shots
+                    elif dataset_name == "trivia":
+                        few_shot_path = config.trivia_shots
                     else:
                         raise ValueError(
                             'You have to provide the examples for the prompt')
@@ -217,7 +239,8 @@ def run_dataset(config: Config):
                     confidence_method=cfg['confidence'],
                     few_shot=few_shot,
                     few_shot_path=few_shot_path,
-                    batch_size=batch_size
+                    batch_size=batch_size,
+                    multihop=multihop,
                 )
 
             print(f"Finished run: {cfg_run_name}")
