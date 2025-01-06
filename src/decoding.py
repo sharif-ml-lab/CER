@@ -3,7 +3,7 @@ import spacy
 from transformers import PreTrainedModel, PreTrainedTokenizer
 import numpy as np
 
-from src.utils import extract_all_numerical_values, extract_last_numerical_value, extract_proper_nouns, extract_final_answer
+from src.utils import extract_all_numerical_values, extract_last_numerical_value, extract_proper_nouns, extract_final_answer, postprocess_final_answer
 from src.uncertainty import _find_subsequence_indices, calculate_confidence_for_final_answer, \
     aggregate_paths_based_on_scores
 
@@ -48,7 +48,7 @@ def _handle_last_decoding(
                                         final_answer_start_idx + len(final_answer_ids)]
     confidence = calculate_confidence_for_final_answer(final_answer_scores,
                                                        torch.tensor(final_answer_ids, device=device), confidence_method)
-    return answer_text, confidence, final_answer
+    return answer_text, confidence, postprocess_final_answer(final_answer)
 
 
 # extract all numerical values.
@@ -100,9 +100,6 @@ def _handle_all_decoding(
         conf_val = calculate_confidence_for_final_answer(num_value_scores, torch.tensor(num_value_ids, device=device),
                                                          confidence_method)
 
-        conf_val = calculate_confidence_for_final_answer(
-            num_value_scores, torch.tensor(num_value_ids, device=device), confidence_method)
-
         if scoring_mode == 'log':  # (lop(1 + c1) + ... + log(1 + cn)) / n
             confidence_sum += np.log(1 + conf_val)
 
@@ -125,8 +122,7 @@ def _handle_all_decoding(
         # (1*c1 + ... n*cn) / (1 + ... + n)
         elif scoring_mode == "weighted_mean":
             confidence_sum += (((1 + num_idx) * conf_val) /
-                               ((len(all_values) * len(all_values))/2))
-
+                               ((len(all_values) * len(all_values)) / 2))
         else:
             raise NotImplementedError("Unsupported scoring_mode")
 
@@ -145,7 +141,7 @@ def _handle_all_decoding(
             raise NotImplementedError
 
         if not multihop:
-            final_answer = all_values[-1]
+            final_answer = postprocess_final_answer(all_values[-1])
         else:
             final_answer = extract_final_answer(answer_text)
             final_answer = final_answer if final_answer else all_values[-1]
@@ -156,9 +152,8 @@ def _handle_all_decoding(
 
     return None
 
+
 # model.generate k times, each time generating a single path.
-
-
 def _k_seperate_generation(
         tokenized_batch,
         model: PreTrainedModel,

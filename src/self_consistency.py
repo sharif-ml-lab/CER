@@ -1,6 +1,6 @@
 import torch
 
-from src.utils import extract_last_numerical_value
+from src.utils import extract_last_numerical_value, postprocess_final_answer
 
 
 class SelfConsistency:
@@ -55,7 +55,7 @@ class SelfConsistency:
 
         voting = dict()
         for response in responses:
-            final_answer = extract_last_numerical_value(response)
+            final_answer = postprocess_final_answer(extract_last_numerical_value(response))
             if final_answer not in voting:
                 voting[final_answer] = 1
             else:

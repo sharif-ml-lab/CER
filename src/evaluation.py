@@ -4,7 +4,7 @@ from src.self_consistency import self_consistency_decode
 from src.decoding import cot_decode
 from src.greedy_on_numbers import greedy_number_cot_decode
 from src.utils import load_model_and_tokenizer, construct_prompt, print_final_accuracy, save_results_to_csv, \
-    load_and_sample_parquet_datasets
+    load_and_sample_parquet_datasets, postprocess_final_answer
 from src.config import Config, multi_run_configs
 
 
@@ -69,13 +69,16 @@ def evaluate_batch_examples(
         try:
             if not multihop:
                 model_answer = float(predicted_final_answer)
-                correct_answer = float(correct_answer_str)
+                correct_answer = float(
+                    postprocess_final_answer(correct_answer_str))
                 is_correct = abs(model_answer - correct_answer) <= 1e-2
             else:
                 model_answer = predicted_final_answer
                 correct_answer = correct_answer_str
                 is_correct = model_answer.lower() == correct_answer.lower()
         except ValueError:
+            print(
+                f'Can not compare correct {correct_answer_str} with predicted {predicted_final_answer}')
             is_correct = False
 
         batch_output.append({

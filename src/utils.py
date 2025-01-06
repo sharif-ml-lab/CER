@@ -72,19 +72,25 @@ def construct_prompt(question, few_shot=True, few_shot_path=None, multihop=False
     return base_prompt
 
 
+def postprocess_final_answer(numeric_expression: str) -> str:
+    try:
+        cleaned_up = numeric_expression.replace(',', '')
+        result = eval(cleaned_up)
+        return str(result)
+    except Exception:
+        print(f'can not clean this value {numeric_expression}:')
+        return numeric_expression
+
+
 # extract the last numerical value from a given text
-
-
 def extract_last_numerical_value(text):
-    matches = re.findall(r'\b\d+\.?\d*\b', text)
+    matches = re.findall(r'([+-]?\d?[0-9.,/*\-+]*\d)', text)
     return matches[-1] if matches else None
 
 
 # extract all numerical values from a given text
-
-
 def extract_all_numerical_values(text):
-    return re.findall(r'\b\d+\.?\d*\b', text)
+    return re.findall(r'([+-]?\d?[0-9.,/*\-+]*\d)', text)
 
 
 # write content in a file_path
