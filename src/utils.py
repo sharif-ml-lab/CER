@@ -12,7 +12,7 @@ def load_model_and_tokenizer(model_name, read_model_from_huggingface=True):
         model_name,
         device_map='cuda',
         local_files_only=read_model_from_huggingface,
-        torch_dtype=torch.float16
+        torch_dtype=torch.bfloat16
     )
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     return model, tokenizer
