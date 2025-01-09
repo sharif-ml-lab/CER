@@ -156,15 +156,15 @@ class Config:
     # specify the running mode "all" that means all of them.
     run_name: str = os.getenv("RUN_NAME", "Ours + Temp + Conf")
     # number of chains in self-consistency or number of branching in cot-decoding
-    K: int = int(os.getenv("K", '10'))
+    K: int = int(os.getenv("K", 10))
     aggregate: bool = True  # True: aggregate paths False: the best path
     multihop: bool = eval(os.getenv("MULTIHOP", 'False'))
 
     # True: few-shot False: zero-shot
     few_shot: bool = eval(os.getenv("FEW_SHOT", 'True'))
     # Number of samples to process
-    number_samples: int = int(os.getenv("N_SAMPLE", '500'))
-    seed: int = int(os.getenv("SEED", '11'))  # Seed for shuffling the dataset
+    number_samples: int = int(os.getenv("N_SAMPLE", 500))
+    seed: int = int(os.getenv("SEED", 11))  # Seed for shuffling the dataset
 
     gsm8k_shots: str = "inputs/shots/gsm8k.txt"  # path to shots of gsm8k
     multiarith_shots: str = "inputs/shots/multiarith.txt"  # path to shots of multiarith
@@ -173,13 +173,13 @@ class Config:
     hotpot_shots: str = "inputs/shots/hotpot.txt"  # path to shots of hotpot
     trivia_shots: str = "inputs/shots/trivia.txt"  # path to shots of trivia
 
-    datasets = {
-        # "allenai": "allenai_math_qa_processed.parquet",
-        # "multiarith": "ChilleD_MultiArith_processed.parquet",
-        # "metamath": "meta-math_MetaMathQA_processed.parquet",
-        # "gsm8k": "openai_gsm8k_processed.parquet",
-        # "hotpot": "hotpotqa_processed.parquet",
+    datasets = eval(os.getenv("DATASETS", """{
+        "allenai": "allenai_math_qa_processed.parquet",
+        "multiarith": "ChilleD_MultiArith_processed.parquet",
+        "metamath": "meta-math_MetaMathQA_processed.parquet",
+        "gsm8k": "openai_gsm8k_processed.parquet",
+        "hotpot": "hotpotqa_processed.parquet",
         "trivia": "triviaqa_processed.parquet"
-    }
+    }"""))
 
-    batch_size = int(os.getenv("BATCH_SIZE", '1'))
+    batch_size = int(os.getenv("BATCH_SIZE", 1))
