@@ -149,22 +149,22 @@ class Config:
     data_dir = os.getenv("DATA_DIR", "data")
     # Load the model from the local directory instead of the HF.
     read_model_from_huggingface: bool = eval(
-        os.getenv("LOCAL_MODEL", True))
+        os.getenv("LOCAL_MODEL", 'True'))
     hugging_face_token: str = os.getenv(
         "HUGGING_FACE_TOKEN", "")  # Huggingface Token
 
     # specify the running mode "all" that means all of them.
     run_name: str = os.getenv("RUN_NAME", "Ours + Temp + Conf")
     # number of chains in self-consistency or number of branching in cot-decoding
-    K: int = int(os.getenv("K", 10))
+    K: int = int(os.getenv("K", '10'))
     aggregate: bool = True  # True: aggregate paths False: the best path
-    multihop: bool = eval(os.getenv("MULTIHOP", False))
+    multihop: bool = eval(os.getenv("MULTIHOP", 'False'))
 
     # True: few-shot False: zero-shot
-    few_shot: bool = eval(os.getenv("FEW_SHOT", True))
+    few_shot: bool = eval(os.getenv("FEW_SHOT", 'True'))
     # Number of samples to process
-    number_samples: int = int(os.getenv("N_SAMPLE", 500))
-    seed: int = int(os.getenv("SEED", 11))  # Seed for shuffling the dataset
+    number_samples: int = int(os.getenv("N_SAMPLE", '500'))
+    seed: int = int(os.getenv("SEED", '11'))  # Seed for shuffling the dataset
 
     gsm8k_shots: str = "inputs/shots/gsm8k.txt"  # path to shots of gsm8k
     multiarith_shots: str = "inputs/shots/multiarith.txt"  # path to shots of multiarith
@@ -184,4 +184,4 @@ class Config:
         "trivia": "triviaqa_processed.parquet"
     }
 
-    batch_size = int(os.getenv("BATCH_SIZE", 1))
+    batch_size = int(os.getenv("BATCH_SIZE", '1'))
