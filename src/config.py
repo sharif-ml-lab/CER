@@ -169,14 +169,12 @@ class Config:
     gsm8k_shots: str = "inputs/shots/gsm8k.txt"  # path to shots of gsm8k
     multiarith_shots: str = "inputs/shots/multiarith.txt"  # path to shots of multiarith
     allenai_shots: str = "inputs/shots/allenai.txt"  # path to shots of allenai
-    open_math_shots: str = "inputs/shots/open_math.txt"  # path to shots of open_math
     metamath_shots: str = "inputs/shots/metamath.txt"  # path to shots of metamath
     hotpot_shots: str = "inputs/shots/hotpot.txt"  # path to shots of hotpot
     trivia_shots: str = "inputs/shots/trivia.txt"  # path to shots of trivia
 
     datasets = {
         # "allenai": "allenai_math_qa_processed.parquet",
-        # "open_math": "nvidia_OpenMathInstruct-2_processed.parquet",
         # "multiarith": "ChilleD_MultiArith_processed.parquet",
         # "metamath": "meta-math_MetaMathQA_processed.parquet",
         # "gsm8k": "openai_gsm8k_processed.parquet",

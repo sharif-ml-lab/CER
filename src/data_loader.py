@@ -83,21 +83,6 @@ def preprocess_mmlu(df, answer_column, old_question_column, new_question_column)
     return df
 
 
-def preprocess_open_math_instruct(df, answer_column, old_question_column, new_question_column):
-    result_column = answer_column
-
-    def get_numeric_final_answer(row):
-        result = row[result_column]
-        result = result.replace(',', '.')
-        if is_valid_number(result):
-            return result
-        return None
-
-    df['numeric_final_answer'] = df.apply(get_numeric_final_answer, axis=1)
-    df = df.rename(columns={old_question_column: new_question_column})
-    return df
-
-
 def preprocess_gsm8k(df, answer_column, old_question_column, new_question_column):
     answer_column = answer_column
 
@@ -140,18 +125,13 @@ def process_and_save_dataset(dataset_info, save_path):
     config_name = dataset_info.get("config_name", None)
 
     # Load the dataset
-    if dataset_name == "nvidia/OpenMathInstruct-2":
+    if config_name:
         dataset = load_dataset(
-            dataset_name, split="train_1M", trust_remote_code=True)
-        combined_dataset = dataset
+            dataset_name, config_name, trust_remote_code=True)
     else:
-        if config_name:
-            dataset = load_dataset(
-                dataset_name, config_name, trust_remote_code=True)
-        else:
-            dataset = load_dataset(dataset_name, trust_remote_code=True)
-        combined_dataset = concatenate_datasets(
-            [ds for split, ds in dataset.items()])
+        dataset = load_dataset(dataset_name, trust_remote_code=True)
+    combined_dataset = concatenate_datasets(
+        [ds for split, ds in dataset.items()])
 
     # Convert to pandas DataFrame for easier manipulation
     df = combined_dataset.to_pandas()
@@ -186,11 +166,6 @@ if __name__ == '__main__':
          "old_question_column": "original_question",
          "new_question_column": "question",
          },
-
-        {"dataset_name": "nvidia/OpenMathInstruct-2", "answer_column": "expected_answer",
-         "preprocess_function": preprocess_open_math_instruct,
-         "old_question_column": "problem",
-         "new_question_column": "question", },
 
         {"dataset_name": "openai/gsm8k", "answer_column": "answer", "config_name": "main",
          "preprocess_function": preprocess_gsm8k,
