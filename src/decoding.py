@@ -167,7 +167,7 @@ def _handle_all_decoding(
         elif scoring_mode in ['min', 'max', "weighted_mean"]:
             confidence = confidence_sum
         elif scoring_mode == 'h_mean':
-            confidence = total_valid_values / confidence_sum.item()
+            confidence = total_valid_values / confidence_sum
         else:
             raise NotImplementedError
 
