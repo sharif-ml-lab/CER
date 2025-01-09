@@ -210,18 +210,32 @@ def run_dataset(config: Config):
     dataset_files = config.datasets
     multihop = config.multihop
 
-    model, tokenizer = load_model_and_tokenizer(
-        model_name, read_model_from_huggingface)
+    # Print the provided configurations
+    print("======================================")
+    print("Initial Configurations:")
+    print(f"Model Name: {model_name}")
+    print(f"Aggregate: {aggregate}")
+    print(f"K: {K}")
+    print(f"Few Shot: {few_shot}")
+    print(f"Number of Samples: {number_samples}")
+    print(f"Seed: {seed}")
+    print(f"Data Directory: {data_dir}")
+    print(f"Run Name: {run_name}")
+    print(f"Batch Size: {batch_size}")
+    print(f"Dataset Files: {dataset_files}")
+    print(f"Multihop: {multihop}")
+    print("======================================\n")
 
-    loaded_datasets = load_and_sample_parquet_datasets(data_dir, dataset_files, number_samples=number_samples,
-                                                       seed=seed)
+    model, tokenizer = load_model_and_tokenizer(model_name, read_model_from_huggingface)
+
+    loaded_datasets = load_and_sample_parquet_datasets(data_dir, dataset_files, number_samples=number_samples, seed=seed)
 
     # Loop over each config
     for cfg_run_name, cfg in multi_run_configs.items():
         if run_name == cfg_run_name or run_name == "all":
             print("======================================")
             print(f"Running: {cfg_run_name}")
-            print(f"Confing: {cfg}")
+            print(f"Config: {cfg}")
             print("======================================")
 
             # Evaluate on each of the loaded datasets
@@ -244,8 +258,7 @@ def run_dataset(config: Config):
                     elif dataset_name == "trivia":
                         few_shot_path = config.trivia_shots
                     else:
-                        raise ValueError(
-                            'You have to provide the examples for the prompt')
+                        raise ValueError('You have to provide the examples for the prompt')
                 else:
                     # it should be run in a zero-shot format
                     few_shot_path = None
