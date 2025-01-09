@@ -68,7 +68,6 @@ def construct_prompt(question, few_shot=True, few_shot_path=None, multihop=False
             base_prompt = f"Q: {question}\nA: Let's think step by step.\n Your response should end with \"The final answer is [answer]\" where [answer] is the response to the problem."
         else:
             base_prompt = f"Q: {question}\nA: Let's Solve step by step.\n focusing only on the essential steps and limiting your response to 5 sentences. Your response should end with \"The final answer is [answer]\" where [answer] is the response to the problem."
-            # base_prompt = f"Q: {question}\nA: Let's think step by step.\n Your response should end with \"The final answer is [answer]\" where [answer] is the response to the problem."
     return base_prompt
 
 

@@ -27,6 +27,10 @@ def _handle_last_decoding(
         doc = nlp(answer_text)
         all_values = extract_proper_nouns(doc)
         final_answer = extract_final_answer(answer_text)
+
+        if not final_answer and not all_values:
+            return None
+
         final_answer = final_answer if final_answer else all_values[-1]
 
     if final_answer is None:
@@ -37,8 +41,14 @@ def _handle_last_decoding(
 
     final_answer_start_idx = _find_subsequence_indices(
         answer_ids_list, final_answer_ids, 1)
-    if final_answer_start_idx == -1:
-        return None
+    if final_answer_start_idx == -1:  # second try
+        final_answer_ids = tokenizer.encode(
+            " " + final_answer, add_special_tokens=False)
+        final_answer_start_idx = _find_subsequence_indices(
+            answer_ids_list, final_answer_ids, 1)
+
+        if final_answer_start_idx == -1:
+            return None
     final_answer_start_idx -= 1
 
     if final_answer_start_idx < 0 or final_answer_start_idx + len(final_answer_ids) > len(output_scores):
@@ -48,7 +58,11 @@ def _handle_last_decoding(
                                         final_answer_start_idx + len(final_answer_ids)]
     confidence = calculate_confidence_for_final_answer(final_answer_scores,
                                                        torch.tensor(final_answer_ids, device=device), confidence_method)
-    return answer_text, confidence, postprocess_final_answer(final_answer)
+
+    if not multihop:
+        final_answer = postprocess_final_answer(all_values[-1])
+
+    return answer_text, confidence, final_answer
 
 
 # extract all numerical values.
@@ -65,10 +79,18 @@ def _handle_all_decoding(
     if not multihop:
         all_values = extract_all_numerical_values(answer_text)
     else:
-        # print(answer_text)
         nlp = spacy.load("en_core_web_sm")
         doc = nlp(answer_text)
         all_values = extract_proper_nouns(doc)
+        final_answer = extract_final_answer(answer_text)
+
+        if not all_values and final_answer:
+            all_values.append(final_answer)
+
+        elif all_values[-1] != final_answer and final_answer:
+            all_values.append(final_answer)
+
+        # for testing
         # print(answer_text)
         # print(all_values)
 
@@ -89,8 +111,17 @@ def _handle_all_decoding(
 
         value_start_idx = _find_subsequence_indices(
             answer_ids_list, num_value_ids, occurrence_count)
+
         if value_start_idx == -1:
-            continue
+            # next try with considering whitespace at start
+            num_value_ids = tokenizer.encode(
+                " " + num_value, add_special_tokens=False)
+
+            value_start_idx = _find_subsequence_indices(
+                answer_ids_list, num_value_ids, occurrence_count)
+
+            if value_start_idx == -1:
+                continue
 
         if value_start_idx < 0 or value_start_idx + len(num_value_ids) > len(output_scores):
             continue
@@ -143,10 +174,10 @@ def _handle_all_decoding(
         if not multihop:
             final_answer = postprocess_final_answer(all_values[-1])
         else:
-            final_answer = extract_final_answer(answer_text)
-            final_answer = final_answer if final_answer else all_values[-1]
+            final_answer = all_values[-1]
+
+            # for testing
             # print(final_answer)
-            # print("--------------------")
 
         return answer_text, confidence, final_answer
 
@@ -218,6 +249,7 @@ def _k_seperate_generation(
             if result is not None:
                 paths[i].append(result)
 
+    # for testing
     # for path in paths:
     #     print(path)
     # print("======================================")
@@ -322,11 +354,11 @@ def _k_branch_generation(
         # Decide which decoding function to apply
         if decoding_mode == "last":
             result = _handle_last_decoding(
-                tokenizer, device, answer_text, output_scores, answer_ids, confidence_method
+                tokenizer, device, answer_text, output_scores, answer_ids, confidence_method, multihop
             )
         else:
             result = _handle_all_decoding(
-                tokenizer, device, answer_text, output_scores, answer_ids, scoring_mode, confidence_method
+                tokenizer, device, answer_text, output_scores, answer_ids, scoring_mode, confidence_method, multihop
             )
 
         # Append valid result to the corresponding batch item

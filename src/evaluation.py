@@ -23,7 +23,8 @@ def evaluate_batch_examples(
         few_shot,
         few_shot_path,
         confidence_method,
-        multihop
+        multihop,
+        dataset_name,
 ):
     # Construct a list of messages for each question in the batch
     batch_messages = []
@@ -31,7 +32,11 @@ def evaluate_batch_examples(
         batch_messages.append([{"role": "user", "content": construct_prompt(
             question=question,
             few_shot=few_shot,
-            few_shot_path=few_shot_path)}])
+            few_shot_path=few_shot_path,
+            multihop=multihop)}])
+
+        # for testing
+        # print(batch_messages)
 
     # Depending on baseline_cot, call the appropriate batch decoding function
     if baseline_cot in ("k-branch", "k-seperate"):
@@ -54,7 +59,8 @@ def evaluate_batch_examples(
             model,
             tokenizer,
             batch_messages,
-            k=k
+            k=k,
+            multihop=multihop,
         )
     else:
         raise ValueError(f"Unsupported baseline_cot mode: {baseline_cot}")
@@ -75,7 +81,17 @@ def evaluate_batch_examples(
             else:
                 model_answer = predicted_final_answer
                 correct_answer = correct_answer_str
-                is_correct = model_answer.lower() == correct_answer.lower()
+
+                if not model_answer:
+                    is_correct = False
+
+                else:
+                    if dataset_name == "hotpot":
+                        is_correct = model_answer.lower() == correct_answer.lower()
+                    elif dataset_name == "trivia":
+                        is_correct = (model_answer.lower() in correct_answer) or (
+                            model_answer in correct_answer)
+
         except ValueError:
             print(
                 f'Can not compare correct {correct_answer_str} with predicted {predicted_final_answer}')
@@ -110,6 +126,7 @@ def evaluate_dataset(
         confidence_method,
         batch_size,
         multihop,
+        dataset_name,
 ):
     # Extract lists of questions and answers directly from the dataframe
     questions = dataset["question"].tolist()
@@ -133,8 +150,9 @@ def evaluate_dataset(
             batch_questions = questions[start_idx:end_idx]
             batch_correct_answers = correct_answers_list[start_idx:end_idx]
 
-            print(batch_questions)
-            print(batch_correct_answers)
+            # for testing
+            # print(batch_questions)
+            # print(batch_correct_answers)
 
             # Evaluate the batch
             batch_results = evaluate_batch_examples(
@@ -151,8 +169,12 @@ def evaluate_dataset(
                 few_shot,
                 few_shot_path,
                 confidence_method,
-                multihop
+                multihop,
+                dataset_name,
             )
+
+            # for testing
+            # print(batch_results)
 
             # Accumulate results and update correct answers count
             for result_dict in batch_results:
@@ -244,6 +266,7 @@ def run_dataset(config: Config):
                     few_shot_path=few_shot_path,
                     batch_size=batch_size,
                     multihop=multihop,
+                    dataset_name=dataset_name
                 )
 
             print(f"Finished run: {cfg_run_name}")

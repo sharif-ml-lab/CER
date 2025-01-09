@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 import os
-from distutils.util import strtobool
 
 from dotenv import load_dotenv
 
@@ -8,15 +7,15 @@ load_dotenv(override=True)  # Reads .env file and loads environment variables
 
 # list of different settings to run
 multi_run_configs = {
-    # "Self Const": {
-    #     "decoding_mode": 'all',  # "all": all the numbers "last": the last number
-    #     # [k-branch, k-seperate, self_consistency]
-    #     "baseline_cot": 'self_consistency',
-    #     "scoring_mode": 'log',  # log, min, max, h_mean, mean, weighted_mean
-    #     # "temperature": temperature sampling  "greedy": greedy sampling
-    #     "sampling_mode": "temperature",
-    #     "confidence": "default"  # Options: "default", "sum", "entropy", "top_2_diff"
-    # },
+    "Self Const": {
+        "decoding_mode": 'all',  # "all": all the numbers "last": the last number
+        # [k-branch, k-seperate, self_consistency]
+        "baseline_cot": 'self_consistency',
+        "scoring_mode": 'log',  # log, min, max, h_mean, mean, weighted_mean
+        # "temperature": temperature sampling  "greedy": greedy sampling
+        "sampling_mode": "temperature",
+        "confidence": "default"  # Options: "default", "sum", "entropy", "top_2_diff"
+    },
 
     "CoT Decoding": {
         "decoding_mode": 'last',  # "all": all the numbers "last": the last number
@@ -181,8 +180,8 @@ class Config:
         # "multiarith": "ChilleD_MultiArith_processed.parquet",
         # "metamath": "meta-math_MetaMathQA_processed.parquet",
         # "gsm8k": "openai_gsm8k_processed.parquet",
-        "hotpot": "hotpotqa_processed.parquet",
-        # "trivia": "triviaqa_processed.parquet"
+        # "hotpot": "hotpotqa_processed.parquet",
+        "trivia": "triviaqa_processed.parquet"
     }
 
     batch_size = int(os.getenv("BATCH_SIZE", 1))
