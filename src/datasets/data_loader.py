@@ -45,23 +45,6 @@ def preprocess_math_qa(df, answer_column, old_question_column, new_question_colu
     return df
 
 
-def preprocess_meta_math_qa(df, answer_column, old_question_column, new_question_column):
-    def extractor(row):
-        text = row[answer_column]
-        try:
-            first, ans = text.split("The answer is:")
-            ans = ans.replace(',', '.').strip()
-            if is_valid_number(ans):
-                return ans
-        except ValueError:
-            print(f"Skipping row due to split error: {text}")
-        return None
-
-    df['numeric_final_answer'] = df.apply(extractor, axis=1)
-    df = df.rename(columns={old_question_column: new_question_column})
-    return df
-
-
 def preprocess_mmlu(df, answer_column, old_question_column, new_question_column):
     choices_column, answer_column = answer_column
 
@@ -158,12 +141,6 @@ if __name__ == '__main__':
         {"dataset_name": "allenai/math_qa", "answer_column": ("options", "correct"),
          "preprocess_function": preprocess_math_qa,
          "old_question_column": "Problem",
-         "new_question_column": "question",
-         },
-
-        {"dataset_name": "meta-math/MetaMathQA", "answer_column": "response",
-         "preprocess_function": preprocess_meta_math_qa,
-         "old_question_column": "original_question",
          "new_question_column": "question",
          },
 
