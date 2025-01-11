@@ -3,6 +3,10 @@ import json
 import datasets
 from dotenv import load_dotenv
 
+'''
+Dataset url https://people.eecs.berkeley.edu/\~hendrycks/MATH.tar
+'''
+
 load_dotenv(override=True)  # Reads .env file and loads environment variables
 
 
