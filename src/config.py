@@ -169,15 +169,15 @@ class Config:
     gsm8k_shots: str = "inputs/shots/gsm8k.txt"  # path to shots of gsm8k
     multiarith_shots: str = "inputs/shots/multiarith.txt"  # path to shots of multiarith
     allenai_shots: str = "inputs/shots/allenai.txt"  # path to shots of allenai
-    metamath_shots: str = "inputs/shots/metamath.txt"  # path to shots of metamath
+    math_shots: str = "inputs/shots/math.txt"  # path to shots of math
     hotpot_shots: str = "inputs/shots/hotpot.txt"  # path to shots of hotpot
     trivia_shots: str = "inputs/shots/trivia.txt"  # path to shots of trivia
 
     datasets = eval(os.getenv("DATASETS", """{
-        "allenai": "allenai_math_qa_processed.parquet",
-        "multiarith": "ChilleD_MultiArith_processed.parquet",
-        "metamath": "meta-math_MetaMathQA_processed.parquet",
-        "gsm8k": "openai_gsm8k_processed.parquet",
+        "allenai": "allenai_math_qa_test_processed.parquet",
+        "multiarith": "ChilleD_MultiArith_test_processed.parquett",
+        "math": "src_datasets_math_dataset_test_processed.parquet",
+        "gsm8k": "openai_gsm8k_test_processed.parquet",
         "hotpot": "hotpotqa_processed.parquet",
         "trivia": "triviaqa_processed.parquet"
     }"""))
