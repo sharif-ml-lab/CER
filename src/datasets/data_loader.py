@@ -99,27 +99,6 @@ def preprocess_math_qa(df, answer_column, old_question_column, new_question_colu
     return df
 
 
-def preprocess_mmlu(df, answer_column, old_question_column, new_question_column):
-    choices_column, answer_column = answer_column
-
-    def get_numeric_final_answer(row):
-        choices = row[choices_column]
-        answer_idx = row[answer_column]
-
-        # Ensure answer_info is a string
-        if not isinstance(answer_idx, int):
-            return None
-
-        final_answer = choices[answer_idx].replace(',', '.')
-        if is_valid_number(final_answer):
-            return final_answer
-        return None
-
-    df['numeric_final_answer'] = df.apply(get_numeric_final_answer, axis=1)
-    df = df.rename(columns={old_question_column: new_question_column})
-    return df
-
-
 def preprocess_gsm8k(df, answer_column, old_question_column, new_question_column):
     answer_column = answer_column
 
