@@ -3,7 +3,8 @@ import spacy
 from transformers import PreTrainedModel, PreTrainedTokenizer
 import numpy as np
 
-from src.utils import extract_all_numerical_values, extract_last_numerical_value, extract_proper_nouns, extract_final_answer, postprocess_final_answer
+from src.utils import extract_all_numerical_values, extract_last_numerical_value, extract_proper_nouns, \
+    extract_final_answer, postprocess_final_answer
 from src.uncertainty import _find_subsequence_indices, calculate_confidence_for_final_answer, \
     aggregate_paths_based_on_scores
 
@@ -18,8 +19,7 @@ def _handle_last_decoding(
         output_scores,
         answer_ids,
         confidence_method,
-        multihop,):
-
+        multihop, ):
     if not multihop:
         final_answer = extract_last_numerical_value(answer_text)
     else:
@@ -60,7 +60,7 @@ def _handle_last_decoding(
                                                        torch.tensor(final_answer_ids, device=device), confidence_method)
 
     if not multihop:
-        final_answer = postprocess_final_answer(all_values[-1])
+        final_answer = postprocess_final_answer(final_answer)
 
     return answer_text, confidence, final_answer
 
@@ -74,8 +74,7 @@ def _handle_all_decoding(
         answer_ids,
         scoring_mode,
         confidence_method,
-        multihop,):
-
+        multihop, ):
     if not multihop:
         all_values = extract_all_numerical_values(answer_text)
     else:
