@@ -163,7 +163,7 @@ def process_and_save_dataset(dataset_info, save_path):
 
     # Save the processed dataset in Parquet format to save disk space
     df.to_parquet(
-        f"{save_path}/{dataset_name.replace('/', '_')}_{split}_processed.parquet", index=False)
+        f"{save_path}/{dataset_name.replace('/', '_').replace('.py', '')}_{split}_processed.parquet", index=False)
 
 
 if __name__ == '__main__':
