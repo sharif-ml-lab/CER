@@ -14,6 +14,7 @@ def load_model_and_tokenizer(model_name, read_model_from_huggingface=True):
         local_files_only=read_model_from_huggingface,
         torch_dtype=torch.bfloat16
     )
+    model = model.eval()
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     return model, tokenizer
 
@@ -55,6 +56,7 @@ def extract_proper_nouns(doc):
         proper_nouns.append(" ".join(current_proper_noun))
 
     return proper_nouns
+
 
 # construct prompt for given question
 

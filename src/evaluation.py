@@ -244,9 +244,9 @@ def run_dataset(config: Config):
 
                 if few_shot:
                     if dataset_name == "allenai":
-                        few_shot_path = config.allenai_shtos
+                        few_shot_path = config.allenai_shots
                     elif dataset_name == "open_math":
-                        few_shot_path = config.open_math_shtos
+                        few_shot_path = config.open_math_shots
                     elif dataset_name == "multiarith":
                         few_shot_path = config.multiarith_shots
                     elif dataset_name == "metamath":
