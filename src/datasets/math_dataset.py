@@ -17,7 +17,8 @@ class MathDatasetConfig(datasets.BuilderConfig):
 
 class MathDataset(datasets.GeneratorBasedBuilder):
     BUILDER_CONFIGS = [
-        MathDatasetConfig(name="default", version=datasets.Version("1.0.0"), description="MATH Dataset"),
+        MathDatasetConfig(name="default", version=datasets.Version(
+            "1.0.0"), description="MATH Dataset"),
     ]
 
     def _info(self):

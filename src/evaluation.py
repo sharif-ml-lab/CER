@@ -105,7 +105,7 @@ def evaluate_batch_examples(
                         is_correct = model_answer.lower() == correct_answer.lower()
                     elif dataset_name == "trivia":
                         is_correct = (model_answer.lower() in correct_answer) or (
-                                model_answer in correct_answer)
+                            model_answer in correct_answer)
 
         except ValueError:
             print(
@@ -241,7 +241,8 @@ def run_dataset(config: Config):
     print(f"Multihop: {multihop}")
     print("======================================\n")
 
-    model, tokenizer = load_model_and_tokenizer(model_name, read_model_from_huggingface)
+    model, tokenizer = load_model_and_tokenizer(
+        model_name, read_model_from_huggingface)
 
     loaded_datasets = load_and_sample_parquet_datasets(data_dir, dataset_files, number_samples=number_samples,
                                                        seed=seed)
@@ -274,7 +275,8 @@ def run_dataset(config: Config):
                     elif dataset_name == "trivia":
                         few_shot_path = config.trivia_shots
                     else:
-                        raise ValueError('You have to provide the examples for the prompt')
+                        raise ValueError(
+                            'You have to provide the examples for the prompt')
                 else:
                     # it should be run in a zero-shot format
                     few_shot_path = None
