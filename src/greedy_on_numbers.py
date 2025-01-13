@@ -208,45 +208,47 @@ def _k_seperate_generation(
     batch_size = tokenized_batch["input_ids"].shape[0]
     paths = [[] for _ in range(batch_size)]
 
-    for _ in range(k):
-        # Generate results for the entire batch at once
-        batch_output = model.generate(
-            **tokenized_batch,
-            max_new_tokens=max_new_tokens,
-            num_beams=num_beams,
-            temperature=temperature,
-            do_sample=do_sample,
-            top_p=top_p,
-            repetition_penalty=repetition_penalty,
-            length_penalty=length_penalty,
-            no_repeat_ngram_size=no_repeat_ngram_size,
-            early_stopping=early_stopping,
-            pad_token_id=tokenizer.pad_token_id,
-            eos_token_id=tokenizer.eos_token_id,
-            output_scores=True,
-            return_dict_in_generate=True,
-        )
+    with torch.no_grad():
+        for _ in range(k):
+            # Generate results for the entire batch at once
+            batch_output = model.generate(
+                **tokenized_batch,
+                max_new_tokens=max_new_tokens,
+                num_beams=num_beams,
+                temperature=temperature,
+                do_sample=do_sample,
+                top_p=top_p,
+                repetition_penalty=repetition_penalty,
+                length_penalty=length_penalty,
+                no_repeat_ngram_size=no_repeat_ngram_size,
+                early_stopping=early_stopping,
+                pad_token_id=tokenizer.pad_token_id,
+                eos_token_id=tokenizer.eos_token_id,
+                output_scores=True,
+                return_dict_in_generate=True,
+            )
 
-        for i in range(batch_size):
-            # Retrieve the generated sequence for this batch element
-            generated_sequence = batch_output.sequences[i]
-            input_length = tokenized_batch["input_ids"][i].shape[0]
+            for i in range(batch_size):
+                # Retrieve the generated sequence for this batch element
+                generated_sequence = batch_output.sequences[i]
+                input_length = tokenized_batch["input_ids"][i].shape[0]
 
-            answer_ids = generated_sequence[input_length:]
-            answer_text = tokenizer.decode(
-                answer_ids, skip_special_tokens=True)
-            output_scores = torch.stack([x[i] for x in batch_output.scores])
+                answer_ids = generated_sequence[input_length:]
+                answer_text = tokenizer.decode(
+                    answer_ids, skip_special_tokens=True)
+                output_scores = torch.stack([x[i] for x in batch_output.scores])
 
-            if decoding_mode == "last":
-                result = _handle_last_decoding(tokenizer, device, answer_text, output_scores, answer_ids,
-                                               confidence_method, multihop)
-            else:
-                result = _handle_all_decoding(tokenizer, device, answer_text, output_scores, answer_ids, scoring_mode,
-                                              confidence_method, multihop)
+                if decoding_mode == "last":
+                    result = _handle_last_decoding(tokenizer, device, answer_text, output_scores, answer_ids,
+                                                   confidence_method, multihop)
+                else:
+                    result = _handle_all_decoding(tokenizer, device, answer_text, output_scores, answer_ids,
+                                                  scoring_mode,
+                                                  confidence_method, multihop)
 
-            # Only append valid results
-            if result is not None:
-                paths[i].append(result)
+                # Only append valid results
+                if result is not None:
+                    paths[i].append(result)
 
     # for testing
     # for path in paths:
@@ -286,25 +288,25 @@ def _k_branch_generation(
     all_start_masks = []
     index_map = []  # Will store (original_batch_idx) for each expanded example
 
-    paths = []
+    # Initial forward pass to get logits
     with torch.no_grad():
         outputs = model(input_ids=input_ids, attention_mask=attention_mask)
         # outputs.logits has shape [batch_size, seq_len, vocab_size]
 
     # For each item in the batch, pick top-k tokens from the last position
     for i in range(batch_size):
-        # Shape [vocab_size]
-        final_token_logits = outputs.logits[i, -1, :]
+        final_token_logits = outputs.logits[i, -1, :]  # [vocab_size]
         _, top_k_indices = torch.topk(final_token_logits, k)
 
         for token_idx in top_k_indices:
             # Extend the input_ids with a single top-k token
-            branch_ids = torch.cat(
-                [input_ids[i], token_idx.unsqueeze(0)], dim=0)
+            branch_ids = torch.cat([input_ids[i], token_idx.unsqueeze(0)], dim=0)
             # Extend attention_mask with a single 1
             branch_mask = torch.cat(
-                [attention_mask[i], torch.ones(
-                    (1), dtype=torch.long, device=device)],
+                [
+                    attention_mask[i],
+                    torch.ones((1,), dtype=torch.long, device=device)
+                ],
                 dim=0
             )
             all_start_ids.append(branch_ids)
@@ -312,57 +314,76 @@ def _k_branch_generation(
             index_map.append(i)
 
     # Stack all branches into a single expanded batch
-    expanded_input_ids = torch.stack(all_start_ids, dim=0).to(device)  # [batch_size * k, seq_len]
-    expanded_attention_masks = torch.stack(all_start_masks, dim=0).to(device)  # [batch_size * k, seq_len]
+    expanded_input_ids = torch.stack(all_start_ids, dim=0).to(device)  # [batch_size*k, seq_len+1]
+    expanded_attention_masks = torch.stack(all_start_masks, dim=0).to(device)  # [batch_size*k, seq_len+1]
+
+    # Initialize generation tracking tensors
+    # We'll treat expanded_input_ids as the starting sequence for generation
+    generated_ids = expanded_input_ids.clone()
+    gen_masks = expanded_attention_masks.clone()
+
+    # Collect logits for each generation step:
+    # collected_logits[step] will be shape [batch_size*k, vocab_size]
+    collected_logits = []
 
     # Start generation loop
-    for _ in range(max_new_tokens):
-        outputs = model(expanded_input_ids,
-                        attention_mask=expanded_attention_masks)  # [batch_size * k, seq_len, vocab_Size]
-        logits = outputs.logits  # [batch_size * k, seq_len, vocab_Size]
-        next_token_logits = logits[:, -1, :]  # [batch_size * k, vocab_Size]
+    for step in range(max_new_tokens):
+        with torch.no_grad():
+            outputs = model(generated_ids, attention_mask=gen_masks)
+            logits = outputs.logits  # [batch_size*k, seq_len + step, vocab_size]
+            next_token_logits = logits[:, -1, :]  # [batch_size*k, vocab_size]
 
-        # Highest probability token
-        top_token_id = torch.argmax(next_token_logits, dim=-1)
-        top_token_str = tokenizer.batch_decode(top_token_id)
+        collected_logits.append(next_token_logits.detach().cpu().clone())
 
-        terminated_indices = top_token_id == tokenizer.eos_token_id
+        # Find the highest-probability token across the batch
+        top_token_ids = torch.argmax(next_token_logits, dim=-1)  # [batch_size*k]
+        top_token_strs = tokenizer.batch_decode(top_token_ids.unsqueeze(-1))
 
-        # Check if the top token is numeric; if not, apply temperature sampling
-        if top_token_str.isnumeric():
-            next_token_id = top_token_id
-        else:
-            adjusted_logits = next_token_logits / temperature
-            adjusted_probabilities = torch.softmax(adjusted_logits, dim=-1)
-            next_token_id = torch.multinomial(
-                adjusted_probabilities, num_samples=1).item()
+        # Prepare a placeholder for the next tokens
+        next_token_ids = torch.zeros_like(top_token_ids, dtype=torch.long, device=device)
 
-        generated_ids = torch.cat(
-            [generated_ids, torch.tensor(
-                [[next_token_id]], dtype=torch.long, device=device)],
-            dim=1
-        )
-        gen_mask = torch.cat(
-            [gen_mask, torch.ones(
-                (1, 1), dtype=torch.long, device=device)],
-            dim=-1
-        )
+        # Iterate over each sample in the expanded batch to apply the mixed decoding logic
+        for i in range(top_token_ids.shape[0]):
+            # If the top token is numeric, choose it
 
+            if step != 0 and top_token_ids[i] == tokenizer.eos_token_id:
+                next_token_ids[i] = tokenizer.eos_token_id
+            elif top_token_strs[i].strip().isnumeric():
+                next_token_ids[i] = top_token_ids[i]
+            else:
+                # Otherwise, use temperature sampling
+                adjusted_logits = next_token_logits[i] / temperature
+                adjusted_prob = torch.softmax(adjusted_logits, dim=-1)
+                sampled_id = torch.multinomial(adjusted_prob, num_samples=1)
+                next_token_ids[i] = sampled_id
+
+        # Append the chosen token to all sequences in the batch
+        next_token_ids = next_token_ids.unsqueeze(-1)  # [batch_size*k, 1]
+        generated_ids = torch.cat([generated_ids, next_token_ids], dim=1)
+
+        # Update the attention mask
+        gen_step_mask = torch.ones((gen_masks.shape[0], 1), dtype=torch.long, device=device)
+        gen_masks = torch.cat([gen_masks, gen_step_mask], dim=-1)
+
+    # At this point, 'generated_ids' contains the final token sequences
+    # and 'collected_logits' holds the logits for each generation step.
     # Prepare a list of lists to store generated paths for each item
     paths = [[] for _ in range(batch_size)]
 
     # Process each expanded result and map it back to the original batch item
-    for idx, generated_sequence in enumerate(batch_generated_output.sequences):
-        # Determine which original item this belongs to
+    for idx in range(generated_ids.shape[0]):
         original_i = index_map[idx]
-        # The original sequence length was input_ids[i].shape[0] + 1 for the branch token
+
+        # The original sequence length was input_ids[original_i].shape[0] + 1 for the branch token
         original_length_plus_one = input_ids[original_i].shape[0] + 1
-        answer_ids = generated_sequence[original_length_plus_one:]
+        # Extract the generated portion (beyond the original + branch token)
+        answer_ids = generated_ids[idx, original_length_plus_one:]
         answer_text = tokenizer.decode(answer_ids, skip_special_tokens=True)
 
-        # Scores for the entire sequence; typically a list of step logits
-        # We'll index them if needed in the decoding functions
-        output_scores = torch.stack([x[idx] for x in batch_generated_output.scores])
+        # Gather the per-step logits for this sequence
+        # Each step in collected_logits has shape [batch_size*k, vocab_size],
+        # so we index [step][idx].
+        output_scores = torch.stack([step_logits[idx] for step_logits in collected_logits], dim=0)
 
         # Decide which decoding function to apply
         if decoding_mode == "last":
