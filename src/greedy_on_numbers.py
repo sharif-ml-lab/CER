@@ -1,273 +1,517 @@
 import torch
+import spacy
 from transformers import PreTrainedModel, PreTrainedTokenizer
-from typing import List, Tuple
+import numpy as np
 
-from src.uncertainty import aggregate_paths_based_on_scores
+from src.utils import extract_all_numerical_values, extract_last_numerical_value, extract_proper_nouns, \
+    extract_final_answer, postprocess_final_answer
+from src.uncertainty import _find_subsequence_indices, calculate_confidence_for_final_answer, \
+    aggregate_paths_based_on_scores
 
 
-def calculate_confidence_for_final_answer(
-        logits: List[torch.Tensor],
-        answer_ids: torch.Tensor
-) -> float:
-    """
-    Calculate the confidence score for the final answer tokens.
-    """
+# extract the final numerical value.
+
+
+def _handle_last_decoding(
+        tokenizer: PreTrainedTokenizer,
+        device,
+        answer_text,
+        output_scores,
+        answer_ids,
+        confidence_method,
+        multihop, ):
+    if not multihop:
+        final_answer = extract_last_numerical_value(answer_text)
+    else:
+        nlp = spacy.load("en_core_web_sm")
+        doc = nlp(answer_text)
+        all_values = extract_proper_nouns(doc)
+        final_answer = extract_final_answer(answer_text)
+
+        if not final_answer and not all_values:
+            return None
+
+        final_answer = final_answer if final_answer else all_values[-1]
+
+    if final_answer is None:
+        return None
+
+    final_answer_ids = tokenizer.encode(final_answer, add_special_tokens=False)
+    answer_ids_list = answer_ids.tolist()
+
+    final_answer_start_idx = _find_subsequence_indices(
+        answer_ids_list, final_answer_ids, 1)
+    if final_answer_start_idx == -1:  # second try
+        final_answer_ids = tokenizer.encode(
+            " " + final_answer, add_special_tokens=False)
+        final_answer_start_idx = _find_subsequence_indices(
+            answer_ids_list, final_answer_ids, 1)
+
+        if final_answer_start_idx == -1:
+            return None
+    final_answer_start_idx -= 1
+
+    if final_answer_start_idx < 0 or final_answer_start_idx + len(final_answer_ids) > len(output_scores):
+        return None
+
+    final_answer_scores = output_scores[final_answer_start_idx:
+                                        final_answer_start_idx + len(final_answer_ids)]
+    confidence = calculate_confidence_for_final_answer(final_answer_scores,
+                                                       torch.tensor(final_answer_ids, device=device), confidence_method)
+
+    if not multihop:
+        final_answer = postprocess_final_answer(final_answer)
+
+    return answer_text, confidence, final_answer
+
+
+# extract all numerical values.
+def _handle_all_decoding(
+        tokenizer: PreTrainedTokenizer,
+        device,
+        answer_text,
+        output_scores,
+        answer_ids,
+        scoring_mode,
+        confidence_method,
+        multihop, ):
+    if not multihop:
+        all_values = extract_all_numerical_values(answer_text)
+    else:
+        nlp = spacy.load("en_core_web_sm")
+        doc = nlp(answer_text)
+        all_values = extract_proper_nouns(doc)
+        final_answer = extract_final_answer(answer_text)
+
+        if not all_values and final_answer:
+            all_values.append(final_answer)
+
+        elif all_values[-1] != final_answer and final_answer:
+            all_values.append(final_answer)
+
+        # for testing
+        # print(answer_text)
+        # print(all_values)
+
+    if not all_values:
+        return None
+
+    answer_ids_list = answer_ids.tolist()
     confidence_sum = 0.0
-    valid_tokens = 0
-    for t, token_id in enumerate(answer_ids):
-        if t >= len(logits):
-            break
-        token_logits = logits[t]
-        probs = torch.softmax(token_logits, dim=-1)
-        ans_token_prob = probs[-1][token_id]
-        if probs.size(-1) > 1:
-            top_2_probs, _ = torch.topk(probs, min(2, probs.size(-1)))
-            if top_2_probs.size(-1) > 1:
-                # Here we add the probability of the answer token to the confidence
-                confidence_sum += ans_token_prob.item()
-            else:
-                # Only one token probability
-                confidence_sum += 1.0
+    min_conf = 10
+    max_conf = -1
+    total_valid_values = 0
+    seen_dict = {}
+
+    for num_idx, num_value in enumerate(all_values):
+        seen_dict[num_value] = seen_dict.get(num_value, 0) + 1
+        num_value_ids = tokenizer.encode(num_value, add_special_tokens=False)
+        occurrence_count = seen_dict[num_value]
+
+        value_start_idx = _find_subsequence_indices(
+            answer_ids_list, num_value_ids, occurrence_count)
+
+        if value_start_idx == -1:
+            # next try with considering whitespace at start
+            num_value_ids = tokenizer.encode(
+                " " + num_value, add_special_tokens=False)
+
+            value_start_idx = _find_subsequence_indices(
+                answer_ids_list, num_value_ids, occurrence_count)
+
+            if value_start_idx == -1:
+                continue
+
+        if value_start_idx < 0 or value_start_idx + len(num_value_ids) > len(output_scores):
+            continue
+
+        num_value_scores = output_scores[value_start_idx:
+                                         value_start_idx + len(num_value_ids)]
+        conf_val = calculate_confidence_for_final_answer(num_value_scores, torch.tensor(num_value_ids, device=device),
+                                                         confidence_method)
+
+        if scoring_mode == 'log':  # (lop(1 + c1) + ... + log(1 + cn)) / n
+            confidence_sum += np.log(1 + conf_val)
+
+        elif scoring_mode == 'min':  # min(c1, ..., cn)
+            if conf_val < min_conf:
+                min_conf = conf_val
+                confidence_sum = conf_val
+
+        elif scoring_mode == 'max':  # max(c1, ..., cn)
+            if conf_val > max_conf:
+                max_conf = conf_val
+                confidence_sum = conf_val
+
+        elif scoring_mode == 'h_mean':  # n / (1/c1 + ... + 1/cn)
+            confidence_sum += 1 / (1e-11 + conf_val)
+
+        elif scoring_mode == "mean":  # (c1 + ... + cn) / n
+            confidence_sum += conf_val
+
+        # (1*c1 + ... n*cn) / (1 + ... + n)
+        elif scoring_mode == "weighted_mean":
+            confidence_sum += (((1 + num_idx) * conf_val) /
+                               ((len(all_values) * len(all_values)) / 2))
         else:
-            # Only one token probability
-            confidence_sum += 1.0
-        valid_tokens += 1
+            raise NotImplementedError("Unsupported scoring_mode")
 
-    return confidence_sum / valid_tokens if valid_tokens > 0 else 0.0
+        total_valid_values += 1
+
+    if total_valid_values > 0:
+        if scoring_mode == 'log':
+            confidence = confidence_sum.item() / total_valid_values
+        elif scoring_mode in ["mean"]:
+            confidence = confidence_sum / total_valid_values
+        elif scoring_mode in ['min', 'max', "weighted_mean"]:
+            confidence = confidence_sum
+        elif scoring_mode == 'h_mean':
+            confidence = total_valid_values / confidence_sum
+        else:
+            raise NotImplementedError
+
+        if not multihop:
+            final_answer = postprocess_final_answer(all_values[-1])
+        else:
+            final_answer = all_values[-1]
+
+            # for testing
+            # print(final_answer)
+
+        return answer_text, confidence, final_answer
+
+    return None
 
 
-def _sample_cot_paths(
+# model.generate k times, each time generating a single path.
+def _k_seperate_generation(
+        tokenized_batch,
         model: PreTrainedModel,
         tokenizer: PreTrainedTokenizer,
-        device: torch.device,
-        input_ids: torch.Tensor,
-        attention_mask: torch.Tensor,
-        k: int,
-        max_new_tokens: int,
-        temperature: float
-) -> List[Tuple[str, float, str]]:
-    """
-    Generate paths using CoT sampling mode.
-    We pick the top-k next tokens, then generate one path per token.
-    """
+        device,
+        k,
+        max_new_tokens,
+        num_beams,
+        temperature,
+        top_p,
+        repetition_penalty,
+        length_penalty,
+        no_repeat_ngram_size,
+        early_stopping,
+        decoding_mode,
+        scoring_mode,
+        do_sample,
+        confidence_method,
+        multihop,
+):
+    # Prepare a list of lists to store paths for each item in the batch
+    batch_size = tokenized_batch["input_ids"].shape[0]
+    paths = [[] for _ in range(batch_size)]
+
+    for _ in range(k):
+        # Generate results for the entire batch at once
+        batch_output = model.generate(
+            **tokenized_batch,
+            max_new_tokens=max_new_tokens,
+            num_beams=num_beams,
+            temperature=temperature,
+            do_sample=do_sample,
+            top_p=top_p,
+            repetition_penalty=repetition_penalty,
+            length_penalty=length_penalty,
+            no_repeat_ngram_size=no_repeat_ngram_size,
+            early_stopping=early_stopping,
+            pad_token_id=tokenizer.pad_token_id,
+            eos_token_id=tokenizer.eos_token_id,
+            output_scores=True,
+            return_dict_in_generate=True,
+        )
+
+        for i in range(batch_size):
+            # Retrieve the generated sequence for this batch element
+            generated_sequence = batch_output.sequences[i]
+            input_length = tokenized_batch["input_ids"][i].shape[0]
+
+            answer_ids = generated_sequence[input_length:]
+            answer_text = tokenizer.decode(
+                answer_ids, skip_special_tokens=True)
+            output_scores = torch.stack([x[i] for x in batch_output.scores])
+
+            if decoding_mode == "last":
+                result = _handle_last_decoding(tokenizer, device, answer_text, output_scores, answer_ids,
+                                               confidence_method, multihop)
+            else:
+                result = _handle_all_decoding(tokenizer, device, answer_text, output_scores, answer_ids, scoring_mode,
+                                              confidence_method, multihop)
+
+            # Only append valid results
+            if result is not None:
+                paths[i].append(result)
+
+    # for testing
+    # for path in paths:
+    #     print(path)
+    # print("======================================")
+
+    return paths
+
+
+#  we first pick the top-k next tokens and then generate one path per token.
+def _k_branch_generation(
+        tokenized_batch,
+        model: PreTrainedModel,
+        tokenizer: PreTrainedTokenizer,
+        device,
+        k,
+        max_new_tokens,
+        num_beams,
+        temperature,
+        top_p,
+        repetition_penalty,
+        length_penalty,
+        no_repeat_ngram_size,
+        early_stopping,
+        decoding_mode,
+        scoring_mode,
+        do_sample,
+        confidence_method,
+        multihop,
+):
+    input_ids = tokenized_batch["input_ids"]
+    attention_mask = tokenized_batch["attention_mask"]
+    batch_size = input_ids.shape[0]
+
+    # We'll accumulate all top-k branch starts into these lists
+    all_start_ids = []
+    all_start_masks = []
+    index_map = []  # Will store (original_batch_idx) for each expanded example
+
     paths = []
     with torch.no_grad():
-        outputs = model(input_ids, attention_mask=attention_mask)
-        first_token_logits = outputs.logits[0, -1, :]
-        _, top_k_indices = torch.topk(first_token_logits, k)
+        outputs = model(input_ids=input_ids, attention_mask=attention_mask)
+        # outputs.logits has shape [batch_size, seq_len, vocab_size]
 
-    for idx in top_k_indices:
+    # For each item in the batch, pick top-k tokens from the last position
+    for i in range(batch_size):
+        # Shape [vocab_size]
+        final_token_logits = outputs.logits[i, -1, :]
+        _, top_k_indices = torch.topk(final_token_logits, k)
+
+        for token_idx in top_k_indices:
+            # Extend the input_ids with a single top-k token
+            branch_ids = torch.cat(
+                [input_ids[i], token_idx.unsqueeze(0)], dim=0)
+            # Extend attention_mask with a single 1
+            branch_mask = torch.cat(
+                [attention_mask[i], torch.ones(
+                    (1), dtype=torch.long, device=device)],
+                dim=0
+            )
+            all_start_ids.append(branch_ids)
+            all_start_masks.append(branch_mask)
+            index_map.append(i)
+
+    # Stack all branches into a single expanded batch
+    expanded_input_ids = torch.stack(all_start_ids, dim=0).to(device)  # [batch_size * k, seq_len]
+    expanded_attention_masks = torch.stack(all_start_masks, dim=0).to(device)  # [batch_size * k, seq_len]
+
+    # Start generation loop
+    for _ in range(max_new_tokens):
+        outputs = model(expanded_input_ids,
+                        attention_mask=expanded_attention_masks)  # [batch_size * k, seq_len, vocab_Size]
+        logits = outputs.logits  # [batch_size * k, seq_len, vocab_Size]
+        next_token_logits = logits[:, -1, :]  # [batch_size * k, vocab_Size]
+
+        # Highest probability token
+        top_token_id = torch.argmax(next_token_logits, dim=-1)
+        top_token_str = tokenizer.batch_decode(top_token_id)
+
+        terminated_indices = top_token_id == tokenizer.eos_token_id
+
+        # Check if the top token is numeric; if not, apply temperature sampling
+        if top_token_str.isnumeric():
+            next_token_id = top_token_id
+        else:
+            adjusted_logits = next_token_logits / temperature
+            adjusted_probabilities = torch.softmax(adjusted_logits, dim=-1)
+            next_token_id = torch.multinomial(
+                adjusted_probabilities, num_samples=1).item()
+
         generated_ids = torch.cat(
-            [input_ids, idx.unsqueeze(0).unsqueeze(0)], dim=-1)
-        scores_list = []
-
+            [generated_ids, torch.tensor(
+                [[next_token_id]], dtype=torch.long, device=device)],
+            dim=1
+        )
         gen_mask = torch.cat(
-            [attention_mask, torch.ones(
+            [gen_mask, torch.ones(
                 (1, 1), dtype=torch.long, device=device)],
             dim=-1
         )
 
-        # Start generation loop
-        for _ in range(max_new_tokens):
-            outputs = model(generated_ids, attention_mask=gen_mask)
-            logits = outputs.logits
-            next_token_logits = logits[:, -1, :]
-            probabilities = torch.softmax(next_token_logits, dim=-1)
-            scores_list.append(next_token_logits.detach().cpu())
+    # Prepare a list of lists to store generated paths for each item
+    paths = [[] for _ in range(batch_size)]
 
-            # Highest probability token
-            top_token_id = torch.argmax(probabilities, dim=-1).item()
-            top_token_str = tokenizer.decode([top_token_id])
+    # Process each expanded result and map it back to the original batch item
+    for idx, generated_sequence in enumerate(batch_generated_output.sequences):
+        # Determine which original item this belongs to
+        original_i = index_map[idx]
+        # The original sequence length was input_ids[i].shape[0] + 1 for the branch token
+        original_length_plus_one = input_ids[original_i].shape[0] + 1
+        answer_ids = generated_sequence[original_length_plus_one:]
+        answer_text = tokenizer.decode(answer_ids, skip_special_tokens=True)
 
-            # Stop if EOS token is generated
-            if top_token_id == tokenizer.eos_token_id:
-                break
+        # Scores for the entire sequence; typically a list of step logits
+        # We'll index them if needed in the decoding functions
+        output_scores = torch.stack([x[idx] for x in batch_generated_output.scores])
 
-            # Check if the top token is numeric; if not, apply temperature sampling
-            if top_token_str.isnumeric():
-                next_token_id = top_token_id
-            else:
-                adjusted_logits = next_token_logits / temperature
-                adjusted_probabilities = torch.softmax(adjusted_logits, dim=-1)
-                next_token_id = torch.multinomial(
-                    adjusted_probabilities, num_samples=1).item()
-
-            generated_ids = torch.cat(
-                [generated_ids, torch.tensor(
-                    [[next_token_id]], dtype=torch.long, device=device)],
-                dim=1
+        # Decide which decoding function to apply
+        if decoding_mode == "last":
+            result = _handle_last_decoding(
+                tokenizer, device, answer_text, output_scores, answer_ids, confidence_method, multihop
             )
-            gen_mask = torch.cat(
-                [gen_mask, torch.ones(
-                    (1, 1), dtype=torch.long, device=device)],
-                dim=-1
+        else:
+            result = _handle_all_decoding(
+                tokenizer, device, answer_text, output_scores, answer_ids, scoring_mode, confidence_method, multihop
             )
 
-        answer_text = tokenizer.decode(
-            generated_ids[0], skip_special_tokens=True)
-        output_scores = scores_list
-
-        result = _handle_new_decoding_cot_mode(
-            tokenizer, device, answer_text, output_scores, generated_ids[0]
-        )
-
+        # Append valid result to the corresponding batch item
         if result is not None:
-            paths.append(result)
+            paths[original_i].append(result)
 
     return paths
 
 
-def _sample_temp_paths(
+def special_greedy_decode(
         model: PreTrainedModel,
         tokenizer: PreTrainedTokenizer,
-        device: torch.device,
-        input_ids: torch.Tensor,
-        attention_mask: torch.Tensor,
-        k: int,
-        max_new_tokens: int,
-        temperature: float,
-        scoring_mode: str
-) -> List[Tuple[str, float, str]]:
-    """
-    Generate paths using temperature-based sampling mode.
-    We call model.generate k times, each time generating a single path.
-    """
-    paths = []
-
-    for _ in range(k):
-        generated_ids = input_ids.clone()
-        scores_list = []
-
-        gen_mask = attention_mask
-
-        for _ in range(max_new_tokens):
-            outputs = model(generated_ids, attention_mask=gen_mask)
-            logits = outputs.logits
-            next_token_logits = logits[:, -1, :]
-            probabilities = torch.softmax(next_token_logits, dim=-1)
-            scores_list.append(next_token_logits.detach().cpu())
-
-            top_token_id = torch.argmax(probabilities, dim=-1).item()
-            top_token_str = tokenizer.decode([top_token_id])
-
-            if top_token_id == tokenizer.eos_token_id:
-                break
-
-            if top_token_str.isnumeric():
-                next_token_id = top_token_id
-            else:
-                adjusted_logits = next_token_logits / temperature
-                adjusted_probabilities = torch.softmax(adjusted_logits, dim=-1)
-                next_token_id = torch.multinomial(
-                    adjusted_probabilities, num_samples=1).item()
-
-            generated_ids = torch.cat(
-                [generated_ids, torch.tensor(
-                    [[next_token_id]], dtype=torch.long, device=device)],
-                dim=1
-            )
-            gen_mask = torch.cat(
-                [gen_mask, torch.ones(
-                    (1, 1), dtype=torch.long, device=device)],
-                dim=-1
-            )
-
-        answer_text = tokenizer.decode(
-            generated_ids[0], skip_special_tokens=True)
-        output_scores = scores_list
-
-        result = _handle_new_decoding_temp_mode(
-            tokenizer, device, answer_text, output_scores, generated_ids[0], scoring_mode
-        )
-
-        if result is not None:
-            paths.append(result)
-
-    return paths
-
-
-def greedy_number_cot_decode(
-        model: PreTrainedModel,
-        tokenizer: PreTrainedTokenizer,
-        messages,
+        batch_messages,
         sampling_mode,
         scoring_mode,
         k,
-        max_new_tokens,
-        temperature,
-        aggregate_paths,):
+        aggregate_paths,
+        decoding_mode,
+        baseline_cot,
+        confidence_method,
+        multihop,
+        num_beams=1,
+        temperature=1.0,
+        top_p=1.0,
+        repetition_penalty=1.0,
+        length_penalty=1.0,
+        no_repeat_ngram_size=0,
+        max_new_tokens=1024,
+        early_stopping=False,
+):
+    device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
-
-    if hasattr(tokenizer, 'chat_template') and tokenizer.chat_template:
-        input_text = tokenizer.apply_chat_template(
-            messages,
-            tokenize=False,
-            add_generation_prompt=True
-        )
+    # Determine sampling mode.
+    if sampling_mode == "temperature":
+        do_sample = True
+    elif sampling_mode == "greedy":
+        do_sample = False
     else:
-        input_text = "\n".join(
-            [f"{msg['role']}: {msg['content']}" for msg in messages])
-        input_text += "\nassistant:"
+        raise ValueError(f"Unsupported sampling_mode: {sampling_mode}")
 
-    input_ids = tokenizer.encode(input_text, return_tensors="pt").to(device)
-    attention_mask = torch.ones_like(input_ids).to(device)
-
+    # Ensure the tokenizer has a pad token ID.
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token_id = tokenizer.eos_token_id
 
-    # # to set parameters for temperature-based sampling (different each time)
-    # if sampling_mode == "temperature":
-    #     do_sample = True
+    tokenizer.padding_side = "left"
 
-    # # to set parameters for greedy-based sampling (unique each time)
-    # elif sampling_mode == "greedy":
-    #     do_sample = False
+    batch_template_messages = []
+    for message in batch_messages:
+        if hasattr(tokenizer, 'chat_template') and tokenizer.chat_template:
+            input_text = tokenizer.apply_chat_template(
+                message,
+                tokenize=False,
+                add_generation_prompt=True
+            )
+        else:
+            input_text = "\n".join(
+                [f"{msg['role']}: {msg['content']}" for msg in message])
+            input_text += "\nassistant:"
 
-    if baseline_cot == "k-branch":  # make k branches and then continue each one with sampling mode
-        paths = _k_branch_generation(
-            model, tokenizer, device, input_ids, attention_mask, k,
-            max_new_tokens, num_beams, temperature, top_p,
-            repetition_penalty, length_penalty, no_repeat_ngram_size,
-            early_stopping, decoding_mode, scoring_mode, do_sample, confidence_method)
+        batch_template_messages.append(input_text)
 
-    elif baseline_cot == "k-seperate":  # make k distinict paths with sampling mode
-        paths = _k_seperate_generation(
-            model, tokenizer, device, input_ids, attention_mask, k,
-            max_new_tokens, num_beams, temperature, top_p,
-            repetition_penalty, length_penalty, no_repeat_ngram_size,
-            early_stopping, decoding_mode, scoring_mode, do_sample, confidence_method)
+    tokenized_batch = tokenizer(
+        batch_template_messages,
+        padding=True,
+        truncation=True,
+        return_tensors="pt"
+    )
 
-    # if sampling_mode == "cot":
-    #     paths = _sample_cot_paths(
-    #         model=model,
-    #         tokenizer=tokenizer,
-    #         device=device,
-    #         input_ids=input_ids,
-    #         attention_mask=attention_mask,
-    #         k=k,
-    #         max_new_tokens=max_new_tokens,
-    #         temperature=temperature
-    #     )
-    # elif sampling_mode == "temp":
-    #     paths = _sample_temp_paths(
-    #         model=model,
-    #         tokenizer=tokenizer,
-    #         device=device,
-    #         input_ids=input_ids,
-    #         attention_mask=attention_mask,
-    #         k=k,
-    #         max_new_tokens=max_new_tokens,
-    #         temperature=temperature,
-    #         scoring_mode=scoring_mode
-    #     )
+    # Move the batch dict to the same device
+    tokenized_batch = tokenized_batch.to(device)
+
+    # Branch or separate generation depending on the baseline_cot mode.
+    if baseline_cot == "branch_greedy_special":
+        # _k_branch_generation should return a list of paths for each example
+        # Each element is a list of (generated_text, confidence_score, final_answer).
+        paths_for_batch = _k_branch_generation(
+            tokenized_batch=tokenized_batch,
+            model=model,
+            tokenizer=tokenizer,
+            device=device,
+            k=k,
+            max_new_tokens=max_new_tokens,
+            num_beams=num_beams,
+            temperature=temperature,
+            top_p=top_p,
+            repetition_penalty=repetition_penalty,
+            length_penalty=length_penalty,
+            no_repeat_ngram_size=no_repeat_ngram_size,
+            early_stopping=early_stopping,
+            decoding_mode=decoding_mode,
+            scoring_mode=scoring_mode,
+            do_sample=do_sample,
+            confidence_method=confidence_method,
+            multihop=multihop,
+        )
+
+    elif baseline_cot == "seperated_greedy_special":
+        # _k_seperate_generation should return a list of paths for each example
+        # Each element is a list of (generated_text, confidence_score, final_answer).
+        paths_for_batch = _k_seperate_generation(
+            tokenized_batch=tokenized_batch,
+            model=model,
+            tokenizer=tokenizer,
+            device=device,
+            k=k,
+            max_new_tokens=max_new_tokens,
+            num_beams=num_beams,
+            temperature=temperature,
+            top_p=top_p,
+            repetition_penalty=repetition_penalty,
+            length_penalty=length_penalty,
+            no_repeat_ngram_size=no_repeat_ngram_size,
+            early_stopping=early_stopping,
+            decoding_mode=decoding_mode,
+            scoring_mode=scoring_mode,
+            do_sample=do_sample,
+            confidence_method=confidence_method,
+            multihop=multihop,
+        )
     else:
-        raise ValueError("Unsupported sampling_mode")
+        raise ValueError(f"Unsupported baseline_cot mode: {baseline_cot}")
 
-    if not paths:
-        return "", 0.0, ""
+    # If no paths returned, ensure we have a default result for each input.
+    if not paths_for_batch or len(paths_for_batch) != len(batch_messages):
+        raise RuntimeError("There was a problem with inferring this batch")
 
-    if aggregate_paths:
-        return aggregate_paths_based_on_scores(paths)
-    else:
-        return max(paths, key=lambda x: x[1])
+    # For each example, pick either an aggregated path or the best path by score.
+    all_decoded = []
+    for i, single_example_paths in enumerate(paths_for_batch):
+        if not single_example_paths:
+            # If no generation for a specific example, append defaults.
+            all_decoded.append(("", 0.0, ""))
+            continue
+
+        if aggregate_paths:
+            # Aggregate the paths if needed.
+            aggregated = aggregate_paths_based_on_scores(single_example_paths)
+            all_decoded.append(aggregated)
+        else:
+            # Otherwise pick the path with the best confidence.
+            all_decoded.append(max(single_example_paths, key=lambda x: x[1]))
+
+    return all_decoded

@@ -2,7 +2,7 @@ from tqdm import tqdm
 
 from src.self_consistency import self_consistency_decode
 from src.decoding import cot_decode
-from src.greedy_on_numbers import greedy_number_cot_decode
+from src.greedy_on_numbers import special_greedy_decode
 from src.utils import load_model_and_tokenizer, construct_prompt, print_final_accuracy, save_results_to_csv, \
     load_and_sample_parquet_datasets, postprocess_final_answer
 from src.config import Config, multi_run_configs
@@ -62,6 +62,21 @@ def evaluate_batch_examples(
             k=k,
             multihop=multihop,
         )
+    elif baseline_cot in ("branch_greedy_special", "seperated_greedy_special"):
+        # These functions return lists of results, confidences, and final answers
+        batch_results = special_greedy_decode(
+            model,
+            tokenizer,
+            batch_messages,
+            aggregate_paths=aggregate,
+            k=k,
+            decoding_mode=decoding_mode,
+            sampling_mode=sampling_mode,
+            scoring_mode=scoring_mode,
+            baseline_cot=baseline_cot,
+            confidence_method=confidence_method,
+            multihop=multihop
+        )
     else:
         raise ValueError(f"Unsupported baseline_cot mode: {baseline_cot}")
 
@@ -90,7 +105,7 @@ def evaluate_batch_examples(
                         is_correct = model_answer.lower() == correct_answer.lower()
                     elif dataset_name == "trivia":
                         is_correct = (model_answer.lower() in correct_answer) or (
-                            model_answer in correct_answer)
+                                model_answer in correct_answer)
 
         except ValueError:
             print(
@@ -228,7 +243,8 @@ def run_dataset(config: Config):
 
     model, tokenizer = load_model_and_tokenizer(model_name, read_model_from_huggingface)
 
-    loaded_datasets = load_and_sample_parquet_datasets(data_dir, dataset_files, number_samples=number_samples, seed=seed)
+    loaded_datasets = load_and_sample_parquet_datasets(data_dir, dataset_files, number_samples=number_samples,
+                                                       seed=seed)
 
     # Loop over each config
     for cfg_run_name, cfg in multi_run_configs.items():

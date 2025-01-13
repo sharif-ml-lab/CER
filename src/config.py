@@ -7,6 +7,26 @@ load_dotenv(override=True)  # Reads .env file and loads environment variables
 
 # list of different settings to run
 multi_run_configs = {
+    "Branch Greedy Special Case": {
+        "decoding_mode": 'all',  # "all": all the numbers "last": the last number
+        # seperated_greedy_special, branch_greedy_special
+        "baseline_cot": 'branch_greedy_special',
+        "scoring_mode": 'log',  # log, min, max, h_mean, mean, weighted_mean
+        # "temperature": temperature sampling  "greedy": greedy sampling
+        "sampling_mode": "temperature",
+        "confidence": "default"  # Options: "default", "sum", "entropy", "top_2_diff"
+    },
+
+    "Seperated Greedy Special Case": {
+        "decoding_mode": 'all',  # "all": all the numbers "last": the last number
+        # seperated_greedy_special, branch_greedy_special
+        "baseline_cot": 'seperated_greedy_special',
+        "scoring_mode": 'log',  # log, min, max, h_mean, mean, weighted_mean
+        # "temperature": temperature sampling  "greedy": greedy sampling
+        "sampling_mode": "temperature",
+        "confidence": "default"  # Options: "default", "sum", "entropy", "top_2_diff"
+    },
+
     "Self Const": {
         "decoding_mode": 'all',  # "all": all the numbers "last": the last number
         # [k-branch, k-seperate, self_consistency]
