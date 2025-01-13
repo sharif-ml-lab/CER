@@ -191,16 +191,9 @@ def _k_seperate_generation(
         device,
         k,
         max_new_tokens,
-        num_beams,
         temperature,
-        top_p,
-        repetition_penalty,
-        length_penalty,
-        no_repeat_ngram_size,
-        early_stopping,
         decoding_mode,
         scoring_mode,
-        do_sample,
         confidence_method,
         multihop,
 ):
@@ -210,50 +203,97 @@ def _k_seperate_generation(
 
     with torch.no_grad():
         for _ in range(k):
-            # Generate results for the entire batch at once
-            batch_output = model.generate(
-                **tokenized_batch,
-                max_new_tokens=max_new_tokens,
-                num_beams=num_beams,
-                temperature=temperature,
-                do_sample=do_sample,
-                top_p=top_p,
-                repetition_penalty=repetition_penalty,
-                length_penalty=length_penalty,
-                no_repeat_ngram_size=no_repeat_ngram_size,
-                early_stopping=early_stopping,
-                pad_token_id=tokenizer.pad_token_id,
-                eos_token_id=tokenizer.eos_token_id,
-                output_scores=True,
-                return_dict_in_generate=True,
-            )
+            # Initialize generation tracking tensors
+            # We'll treat expanded_input_ids as the starting sequence for generation
+            generated_ids = tokenized_batch["input_ids"]
+            gen_masks = tokenized_batch["attention_mask"]
+
+            # Collect logits for each generation step:
+            # collected_logits[step] will be shape [batch_size*k, vocab_size]
+            collected_logits = []
+
+            # Track finished states for each sequence
+            finished = torch.zeros(generated_ids.shape[0], dtype=torch.bool, device=device)
+
+            # Start generation loop
+            for step in range(max_new_tokens):
+                # If all sequences are finished, break early
+                if finished.all():
+                    break
+
+                with torch.no_grad():
+                    outputs = model(generated_ids, attention_mask=gen_masks)
+                    logits = outputs.logits  # [batch_size*k, seq_len + step, vocab_size]
+                    next_token_logits = logits[:, -1, :]  # [batch_size*k, vocab_size]
+
+                collected_logits.append(next_token_logits.detach().cpu().clone())
+
+                # Find the highest-probability token across the batch
+                top_token_ids = torch.argmax(next_token_logits, dim=-1)  # [batch_size*k]
+                top_token_strs = tokenizer.batch_decode(top_token_ids.unsqueeze(-1))
+
+                # Prepare a placeholder for the next tokens
+                next_token_ids_final = torch.zeros_like(top_token_ids, dtype=torch.long, device=device)
+
+                # Iterate over each sample in the expanded batch to apply the mixed decoding logic
+                for i in range(top_token_ids.shape[0]):
+                    # Skip if this sample is already finished
+                    if finished[i]:
+                        next_token_ids_final[i] = tokenizer.eos_token_id
+                        continue
+
+                    # Check if the highest-probability token is numeric
+                    if top_token_strs[i] == tokenizer.eos_token_id:
+                        chosen_token_id = tokenizer.eos_token_id
+                    elif top_token_strs[i].strip().isnumeric():
+                        chosen_token_id = top_token_ids[i]
+                    else:
+                        # Otherwise, use temperature sampling
+                        adjusted_logits = next_token_logits[i] / temperature
+                        adjusted_prob = torch.softmax(adjusted_logits, dim=-1)
+                        sampled_id = torch.multinomial(adjusted_prob, num_samples=1)
+                        chosen_token_id = sampled_id.item()
+
+                    # If chosen token is EOS, mark as finished
+                    if chosen_token_id == tokenizer.eos_token_id:
+                        finished[i] = True
+
+                    next_token_ids_final[i] = chosen_token_id
+
+                # Append the chosen token to sequences in the batch
+                next_token_ids_final = next_token_ids_final.unsqueeze(-1)  # [batch_size*k, 1]
+                generated_ids = torch.cat([generated_ids, next_token_ids_final], dim=1)
+
+                # Update the attention mask
+                step_mask = torch.ones((gen_masks.shape[0], 1), dtype=torch.long, device=device)
+                gen_masks = torch.cat([gen_masks, step_mask], dim=-1)
 
             for i in range(batch_size):
-                # Retrieve the generated sequence for this batch element
-                generated_sequence = batch_output.sequences[i]
-                input_length = tokenized_batch["input_ids"][i].shape[0]
+                # The original sequence length was input_ids[original_i].shape[0] for the branch token
+                original_length = tokenized_batch["input_ids"][i].shape[0]
+                # Extract the generated portion (beyond the original + branch token)
+                answer_ids = generated_ids[i, original_length:]
+                answer_text = tokenizer.decode(answer_ids, skip_special_tokens=True)
 
-                answer_ids = generated_sequence[input_length:]
-                answer_text = tokenizer.decode(
-                    answer_ids, skip_special_tokens=True)
-                output_scores = torch.stack([x[i] for x in batch_output.scores])
+                # Gather the per-step logits for this sequence
+                # Each step in collected_logits has shape [batch_size*k, vocab_size],
+                # so we index [step][idx].
+                output_scores = torch.stack([step_logits[i] for step_logits in collected_logits], dim=0)
 
+                # Decide which decoding function to apply
                 if decoding_mode == "last":
-                    result = _handle_last_decoding(tokenizer, device, answer_text, output_scores, answer_ids,
-                                                   confidence_method, multihop)
+                    result = _handle_last_decoding(
+                        tokenizer, device, answer_text, output_scores, answer_ids, confidence_method, multihop
+                    )
                 else:
-                    result = _handle_all_decoding(tokenizer, device, answer_text, output_scores, answer_ids,
-                                                  scoring_mode,
-                                                  confidence_method, multihop)
+                    result = _handle_all_decoding(
+                        tokenizer, device, answer_text, output_scores, answer_ids, scoring_mode, confidence_method,
+                        multihop
+                    )
 
                 # Only append valid results
                 if result is not None:
                     paths[i].append(result)
-
-    # for testing
-    # for path in paths:
-    #     print(path)
-    # print("======================================")
 
     return paths
 
@@ -266,16 +306,9 @@ def _k_branch_generation(
         device,
         k,
         max_new_tokens,
-        num_beams,
         temperature,
-        top_p,
-        repetition_penalty,
-        length_penalty,
-        no_repeat_ngram_size,
-        early_stopping,
         decoding_mode,
         scoring_mode,
-        do_sample,
         confidence_method,
         multihop,
 ):
@@ -319,8 +352,8 @@ def _k_branch_generation(
 
     # Initialize generation tracking tensors
     # We'll treat expanded_input_ids as the starting sequence for generation
-    generated_ids = expanded_input_ids.clone()
-    gen_masks = expanded_attention_masks.clone()
+    generated_ids = expanded_input_ids
+    gen_masks = expanded_attention_masks
 
     # Collect logits for each generation step:
     # collected_logits[step] will be shape [batch_size*k, vocab_size]
@@ -340,7 +373,7 @@ def _k_branch_generation(
             logits = outputs.logits  # [batch_size*k, seq_len + step, vocab_size]
             next_token_logits = logits[:, -1, :]  # [batch_size*k, vocab_size]
 
-        collected_logits.append(next_token_logits.detach().cpu().clone())
+        collected_logits.append(next_token_logits.detach().cpu())
 
         # Find the highest-probability token across the batch
         top_token_ids = torch.argmax(next_token_logits, dim=-1)  # [batch_size*k]
@@ -492,16 +525,9 @@ def special_greedy_decode(
             device=device,
             k=k,
             max_new_tokens=max_new_tokens,
-            num_beams=num_beams,
             temperature=temperature,
-            top_p=top_p,
-            repetition_penalty=repetition_penalty,
-            length_penalty=length_penalty,
-            no_repeat_ngram_size=no_repeat_ngram_size,
-            early_stopping=early_stopping,
             decoding_mode=decoding_mode,
             scoring_mode=scoring_mode,
-            do_sample=do_sample,
             confidence_method=confidence_method,
             multihop=multihop,
         )
@@ -516,16 +542,9 @@ def special_greedy_decode(
             device=device,
             k=k,
             max_new_tokens=max_new_tokens,
-            num_beams=num_beams,
             temperature=temperature,
-            top_p=top_p,
-            repetition_penalty=repetition_penalty,
-            length_penalty=length_penalty,
-            no_repeat_ngram_size=no_repeat_ngram_size,
-            early_stopping=early_stopping,
             decoding_mode=decoding_mode,
             scoring_mode=scoring_mode,
-            do_sample=do_sample,
             confidence_method=confidence_method,
             multihop=multihop,
         )
