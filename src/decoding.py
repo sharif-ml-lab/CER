@@ -516,8 +516,7 @@ def cot_decode(
         raise ValueError(f"Unsupported baseline_cot mode: {baseline_cot}")
 
     # for testing
-    print(paths_for_batch)
-    exit()
+    # print(paths_for_batch)
 
     # If no paths returned, ensure we have a default result for each input.
     if not paths_for_batch or len(paths_for_batch) != len(batch_messages):
