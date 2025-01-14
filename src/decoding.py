@@ -23,7 +23,7 @@ def _handle_last_decoding(
     if not multihop:
         final_answer = extract_last_numerical_value(answer_text)
     else:
-        nlp = spacy.load("en_core_web_sm")
+        nlp = spacy.load("en_core_web_trf")
         doc = nlp(answer_text)
         all_values = extract_proper_nouns(doc)
         final_answer = extract_final_answer(answer_text)
@@ -78,10 +78,13 @@ def _handle_all_decoding(
     if not multihop:
         all_values = extract_all_numerical_values(answer_text)
     else:
-        nlp = spacy.load("en_core_web_sm")
+        nlp = spacy.load("en_core_web_trf")
         doc = nlp(answer_text)
         all_values = extract_proper_nouns(doc)
         final_answer = extract_final_answer(answer_text)
+
+        if not all_values and not final_answer:
+            return None
 
         if not all_values and final_answer:
             all_values.append(final_answer)

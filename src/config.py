@@ -7,44 +7,44 @@ load_dotenv(override=True)  # Reads .env file and loads environment variables
 
 # list of different settings to run
 multi_run_configs = {
-    "Branch Greedy Special Case": {
-        "decoding_mode": 'all',  # "all": all the numbers "last": the last number
-        # seperated_greedy_special, branch_greedy_special
-        "baseline_cot": 'branch_greedy_special',
-        "scoring_mode": 'log',  # log, min, max, h_mean, mean, weighted_mean
-        # "temperature": temperature sampling  "greedy": greedy sampling
-        "sampling_mode": "temperature",
-        "confidence": "default"  # Options: "default" -> product , "sum", "entropy", "top_2_diff"
-    },
+    # "Branch Greedy Special Case": {
+    #     "decoding_mode": 'all',  # "all": all the numbers "last": the last number
+    #     # seperated_greedy_special, branch_greedy_special
+    #     "baseline_cot": 'branch_greedy_special',
+    #     "scoring_mode": 'log',  # log, min, max, h_mean, mean, weighted_mean
+    #     # "temperature": temperature sampling  "greedy": greedy sampling
+    #     "sampling_mode": "temperature",
+    #     "confidence": "default"  # Options: "default" -> product , "sum", "entropy", "top_2_diff"
+    # },
+    #
+    # "Seperated Greedy Special Case": {
+    #     "decoding_mode": 'all',  # "all": all the numbers "last": the last number
+    #     # seperated_greedy_special, branch_greedy_special
+    #     "baseline_cot": 'seperated_greedy_special',
+    #     "scoring_mode": 'log',  # log, min, max, h_mean, mean, weighted_mean
+    #     # "temperature": temperature sampling  "greedy": greedy sampling
+    #     "sampling_mode": "temperature",
+    #     "confidence": "default"  # Options: "default" -> product , "sum", "entropy", "top_2_diff"
+    # },
+    #
+    # "Self Const": {
+    #     "decoding_mode": 'all',  # "all": all the numbers "last": the last number
+    #     # [k-branch, k-seperate, self_consistency]
+    #     "baseline_cot": 'self_consistency',
+    #     "scoring_mode": 'log',  # log, min, max, h_mean, mean, weighted_mean
+    #     # "temperature": temperature sampling  "greedy": greedy sampling
+    #     "sampling_mode": "temperature",
+    #     "confidence": "default"  # Options: "default", "sum", "entropy", "top_2_diff"
+    # },
 
-    "Seperated Greedy Special Case": {
-        "decoding_mode": 'all',  # "all": all the numbers "last": the last number
-        # seperated_greedy_special, branch_greedy_special
-        "baseline_cot": 'seperated_greedy_special',
-        "scoring_mode": 'log',  # log, min, max, h_mean, mean, weighted_mean
-        # "temperature": temperature sampling  "greedy": greedy sampling
-        "sampling_mode": "temperature",
-        "confidence": "default"  # Options: "default" -> product , "sum", "entropy", "top_2_diff"
-    },
-
-    "Self Const": {
-        "decoding_mode": 'all',  # "all": all the numbers "last": the last number
-        # [k-branch, k-seperate, self_consistency]
-        "baseline_cot": 'self_consistency',
-        "scoring_mode": 'log',  # log, min, max, h_mean, mean, weighted_mean
-        # "temperature": temperature sampling  "greedy": greedy sampling
-        "sampling_mode": "temperature",
-        "confidence": "default"  # Options: "default", "sum", "entropy", "top_2_diff"
-    },
-
-    "CoT Decoding": {
-        "decoding_mode": 'last',  # "all": all the numbers "last": the last number
-        "baseline_cot": "k-branch",  # [k-branch, k-seperate, self_consistency]
-        "scoring_mode": 'log',  # log, min, max, h_mean, mean, weighted_mean
-        "sampling_mode": "greedy",
-        # "temperature": temperature sampling  "greedy": greedy sampling # (I'm not sure which one is correct?)
-        "confidence": "top_2_diff"  # Options: "default", "sum", "entropy", "top_2_diff"
-    },
+    # "CoT Decoding": {
+    #     "decoding_mode": 'last',  # "all": all the numbers "last": the last number
+    #     "baseline_cot": "k-branch",  # [k-branch, k-seperate, self_consistency]
+    #     "scoring_mode": 'log',  # log, min, max, h_mean, mean, weighted_mean
+    #     "sampling_mode": "greedy",
+    #     # "temperature": temperature sampling  "greedy": greedy sampling # (I'm not sure which one is correct?)
+    #     "confidence": "top_2_diff"  # Options: "default", "sum", "entropy", "top_2_diff"
+    # },
 
     "Ours + Temp + Conf": {
         "decoding_mode": 'all',  # "all": all the numbers "last": the last number
@@ -56,14 +56,14 @@ multi_run_configs = {
         "confidence": "top_2_diff"  # Options: "default", "sum", "entropy", "top_2_diff"
     },
 
-    "Ours + CoT + Conf": {
-        "decoding_mode": 'all',  # "all": all the numbers "last": the last number
-        "baseline_cot": "k-branch",  # [k-branch, k-seperate, self_consistency]
-        "scoring_mode": 'log',  # log, min, max, h_mean, mean, weighted_mean
-        # "temperature": temperature sampling  "greedy": greedy sampling
-        "sampling_mode": "temperature",
-        "confidence": "default"  # Options: "default", "sum", "entropy", "top_2_diff"
-    },
+    # "Ours + CoT + Conf": {
+    #     "decoding_mode": 'all',  # "all": all the numbers "last": the last number
+    #     "baseline_cot": "k-branch",  # [k-branch, k-seperate, self_consistency]
+    #     "scoring_mode": 'log',  # log, min, max, h_mean, mean, weighted_mean
+    #     # "temperature": temperature sampling  "greedy": greedy sampling
+    #     "sampling_mode": "temperature",
+    #     "confidence": "default"  # Options: "default", "sum", "entropy", "top_2_diff"
+    # },
 
     "Ours + Temp + Conf + min": {
         "decoding_mode": 'all',  # "all": all the numbers "last": the last number
