@@ -27,15 +27,15 @@ multi_run_configs = {
     #     "confidence": "default"  # Options: "default", "sum", "entropy", "top_2_diff"
     # },
 
-    # "Self Const": {
-    #     "decoding_mode": 'all',  # "all": all the numbers "last": the last number
-    #     # [k-branch, k-seperate, self_consistency]
-    #     "baseline_cot": 'self_consistency',
-    #     "scoring_mode": 'log',  # log, min, max, h_mean, mean, weighted_mean
-    #     # "temperature": temperature sampling  "greedy": greedy sampling
-    #     "sampling_mode": "temperature",
-    #     "confidence": "default"  # Options: "default", "sum", "entropy", "top_2_diff"
-    # },
+    "Self Const": {
+        "decoding_mode": 'all',  # "all": all the numbers "last": the last number
+        # [k-branch, k-seperate, self_consistency]
+        "baseline_cot": 'self_consistency',
+        "scoring_mode": 'log',  # log, min, max, h_mean, mean, weighted_mean
+        # "temperature": temperature sampling  "greedy": greedy sampling
+        "sampling_mode": "temperature",
+        "confidence": "default"  # Options: "default", "sum", "entropy", "top_2_diff"
+    },
 
     # "CoT Decoding": {
     #     "decoding_mode": 'last',  # "all": all the numbers "last": the last number
@@ -199,6 +199,11 @@ class Config:
     K: int = int(os.getenv("K", 10))
     aggregate: bool = True  # True: aggregate paths False: the best path
     multihop: bool = eval(os.getenv("MULTIHOP", 'False'))
+
+    # whether to use random selection setting or not.
+    random_selection: bool = eval(os.getenv("RANDOM", "False"))
+    # number of words to be selected randomly.
+    random_selection_number_words: int = int(os.getenv("RANDOM_NUM", 5))
 
     # True: few-shot False: zero-shot
     few_shot: bool = eval(os.getenv("FEW_SHOT", 'True'))

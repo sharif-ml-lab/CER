@@ -1,3 +1,5 @@
+import random
+
 import torch
 from transformers import PreTrainedModel, PreTrainedTokenizer
 import numpy as np
@@ -18,7 +20,9 @@ def _handle_last_decoding(
         output_scores,
         answer_ids,
         confidence_method,
-        multihop, doc):
+        multihop,
+        doc,
+):
     if not multihop:
         final_answer = extract_last_numerical_value(answer_text)
     else:
@@ -71,20 +75,34 @@ def _handle_all_decoding(
         answer_ids,
         scoring_mode,
         confidence_method,
-        multihop, doc):
-    if not multihop:
-        all_values = extract_all_numerical_values(answer_text)
+        multihop, doc,
+        random_selection,
+        random_selection_number_words):
+
+    if not random_selection:
+        if not multihop:
+            all_values = extract_all_numerical_values(answer_text)
+        else:
+            all_values = extract_proper_nouns(doc)
+            final_answer = extract_final_answer(answer_text)
+
+            if not all_values and not final_answer:
+                return None
+
+            if not all_values and final_answer:
+                all_values.append(final_answer)
+
+            elif all_values[-1] != final_answer and final_answer:
+                all_values.append(final_answer)
     else:
-        all_values = extract_proper_nouns(doc)
-        final_answer = extract_final_answer(answer_text)
+        all_values = random.sample(
+            answer_text.split(), min(random_selection_number_words, len(answer_text.split())))
+        if not multihop:
+            final_answer = extract_last_numerical_value(answer_text)
+        else:
+            final_answer = extract_final_answer(answer_text)
 
-        if not all_values and not final_answer:
-            return None
-
-        if not all_values and final_answer:
-            all_values.append(final_answer)
-
-        elif all_values[-1] != final_answer and final_answer:
+        if all_values[-1] != final_answer and final_answer:
             all_values.append(final_answer)
 
     if not all_values:
@@ -198,6 +216,8 @@ def _k_seperate_generation(
         confidence_method,
         multihop,
         nlp,
+        random_selection,
+        random_selection_number_words,
 ):
     # Prepare a list of lists to store paths for each item in the batch
     batch_size = tokenized_batch["input_ids"].shape[0]
@@ -240,20 +260,23 @@ def _k_seperate_generation(
             batch_answer_texts.append(answer_text)
             batch_output_scores.append(output_scores)
 
-        batch_docs = list(nlp.pipe(batch_answer_texts))
+        if multihop:
+            batch_docs = list(nlp.pipe(batch_answer_texts))
 
         for i in range(batch_size):
             answer_text = batch_answer_texts[i]
             answer_ids = batch_answer_ids[i]
             output_scores = batch_output_scores[i]
-            doc = batch_docs[i]
+            doc = batch_docs[i] if multihop else None
 
             if decoding_mode == "last":
                 result = _handle_last_decoding(tokenizer, device, answer_text, output_scores, answer_ids,
-                                               confidence_method, multihop, doc)
+                                               confidence_method, multihop, doc,)
             else:
                 result = _handle_all_decoding(tokenizer, device, answer_text, output_scores, answer_ids, scoring_mode,
-                                              confidence_method, multihop, doc)
+                                              confidence_method, multihop, doc,
+                                              random_selection,
+                                              random_selection_number_words,)
 
             # Only append valid results
             if result is not None:
@@ -288,6 +311,8 @@ def _k_branch_generation(
         confidence_method,
         multihop,
         nlp,
+        random_selection,
+        random_selection_number_words,
 ):
     input_ids = tokenized_batch["input_ids"]
     attention_mask = tokenized_batch["attention_mask"]
@@ -372,11 +397,12 @@ def _k_branch_generation(
         batch_output_scores.append(output_scores)
         batch_originals.append(original_i)
 
-    batch_docs = list(nlp.pipe(batch_answer_texts))
+    if multihop:
+        batch_docs = list(nlp.pipe(batch_answer_texts))
 
     for i, answer_text in enumerate(batch_answer_texts):
         original_i = batch_originals[i]
-        doc = batch_docs[i]
+        doc = batch_docs[i] if multihop else None
         answer_ids = batch_answer_ids[i]
         output_scores = batch_output_scores[i]
 
@@ -387,6 +413,8 @@ def _k_branch_generation(
         else:
             result = _handle_all_decoding(
                 tokenizer, device, answer_text, output_scores, answer_ids, scoring_mode, confidence_method, multihop, doc,
+                random_selection,
+                random_selection_number_words,
             )
 
         # Append valid result to the corresponding batch item
@@ -412,6 +440,8 @@ def cot_decode(
         confidence_method,
         multihop,
         nlp,
+        random_selection,
+        random_selection_number_words,
         num_beams=1,
         temperature=1.0,
         top_p=1.0,
@@ -486,6 +516,8 @@ def cot_decode(
             confidence_method=confidence_method,
             multihop=multihop,
             nlp=nlp,
+            random_selection=random_selection,
+            random_selection_number_words=random_selection_number_words,
         )
 
     elif baseline_cot == "k-seperate":
@@ -511,6 +543,8 @@ def cot_decode(
             confidence_method=confidence_method,
             multihop=multihop,
             nlp=nlp,
+            random_selection=random_selection,
+            random_selection_number_words=random_selection_number_words,
         )
     else:
         raise ValueError(f"Unsupported baseline_cot mode: {baseline_cot}")

@@ -78,7 +78,8 @@ def self_consistency_decode(
         model,
         tokenizer,
         messages,
-        k, multihop):
+        k,
+        multihop):
     batch_results = []
 
     for message in messages:

@@ -28,6 +28,8 @@ def evaluate_batch_examples(
         multihop,
         dataset_name,
         nlp,
+        random_selection,
+        random_selection_number_words,
 ):
     # Construct a list of messages for each question in the batch
     batch_messages = []
@@ -57,6 +59,8 @@ def evaluate_batch_examples(
             confidence_method=confidence_method,
             multihop=multihop,
             nlp=nlp,
+            random_selection=random_selection,
+            random_selection_number_words=random_selection_number_words,
         )
     elif baseline_cot == "self_consistency":
         batch_results = self_consistency_decode(
@@ -65,7 +69,6 @@ def evaluate_batch_examples(
             batch_messages,
             k=k,
             multihop=multihop,
-            nlp=nlp,
         )
     elif baseline_cot in ("branch_greedy_special", "seperated_greedy_special"):
         # These functions return lists of results, confidences, and final answers
@@ -149,6 +152,8 @@ def evaluate_dataset(
         multihop,
         dataset_name,
         nlp,
+        random_selection,
+        random_selection_number_words,
 ):
     # Extract lists of questions and answers directly from the dataframe
     questions = dataset["question"].tolist()
@@ -194,6 +199,8 @@ def evaluate_dataset(
                 multihop,
                 dataset_name,
                 nlp,
+                random_selection,
+                random_selection_number_words,
             )
 
             # for testing
@@ -213,7 +220,7 @@ def evaluate_dataset(
 
     # Save and print final results
     save_results_to_csv(
-        results, f"outputs/{description}_evaluation_results_{'few_shot' if few_shot else 'zero_shot'}.csv")
+        results, f"outputs/{description}_evaluation_results_{'few_shot' if few_shot else 'zero_shot'}{'_random' if random_selection else ''}.csv")
     accuracy = (correct_answers / total_questions) * 100
     print_final_accuracy(description, accuracy)
     return accuracy
@@ -232,6 +239,8 @@ def run_dataset(config: Config):
     batch_size = config.batch_size
     dataset_files = config.datasets
     multihop = config.multihop
+    random_selection = config.random_selection
+    random_selection_number_words = config.random_selection_number_words
 
     # Print the provided configurations
     print("======================================")
@@ -311,7 +320,9 @@ def run_dataset(config: Config):
                     batch_size=batch_size,
                     multihop=multihop,
                     dataset_name=dataset_name,
-                    nlp=nlp
+                    nlp=nlp,
+                    random_selection=random_selection,
+                    random_selection_number_words=random_selection_number_words,
                 )
 
             print(f"Finished run: {cfg_run_name}")
