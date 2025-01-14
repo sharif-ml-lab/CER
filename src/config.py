@@ -14,7 +14,7 @@ multi_run_configs = {
         "scoring_mode": 'log',  # log, min, max, h_mean, mean, weighted_mean
         # "temperature": temperature sampling  "greedy": greedy sampling
         "sampling_mode": "temperature",
-        "confidence": "default"  # Options: "default", "sum", "entropy", "top_2_diff"
+        "confidence": "default"  # Options: "default" -> product , "sum", "entropy", "top_2_diff"
     },
 
     "Seperated Greedy Special Case": {
@@ -24,7 +24,7 @@ multi_run_configs = {
         "scoring_mode": 'log',  # log, min, max, h_mean, mean, weighted_mean
         # "temperature": temperature sampling  "greedy": greedy sampling
         "sampling_mode": "temperature",
-        "confidence": "default"  # Options: "default", "sum", "entropy", "top_2_diff"
+        "confidence": "default"  # Options: "default" -> product , "sum", "entropy", "top_2_diff"
     },
 
     "Self Const": {
@@ -65,16 +65,6 @@ multi_run_configs = {
         "confidence": "default"  # Options: "default", "sum", "entropy", "top_2_diff"
     },
 
-    "Ours + Temp + Conf + min + default": {
-        "decoding_mode": 'all',  # "all": all the numbers "last": the last number
-        # [k-branch, k-seperate, self_consistency]
-        "baseline_cot": "k-seperate",
-        "scoring_mode": 'min',  # log, min, max, h_mean, mean, weighted_mean
-        # "temperature": temperature sampling  "greedy": greedy sampling
-        "sampling_mode": "temperature",
-        "confidence": "default"  # Options: "default", "sum", "entropy", "top_2_diff"
-    },
-
     "Ours + Temp + Conf + min": {
         "decoding_mode": 'all',  # "all": all the numbers "last": the last number
         # [k-branch, k-seperate, self_consistency]
@@ -103,17 +93,6 @@ multi_run_configs = {
         # "temperature": temperature sampling  "greedy": greedy sampling
         "sampling_mode": "temperature",
         "confidence": "top_2_diff"  # Options: "default", "sum", "entropy", "top_2_diff"
-    },
-
-
-    "Ours + Temp + Conf + hmean + default": {
-        "decoding_mode": 'all',  # "all": all the numbers "last": the last number
-        # 0 for regular CoT, 1 for greedy number COT , None for self-consistency
-        "baseline_cot": "k-seperate",
-        "scoring_mode": 'h_mean',  # log, min, max, h_mean, mean, weighted_mean
-        # "temperature": temperature sampling  "greedy": greedy sampling
-        "sampling_mode": "temperature",
-        "confidence": "default"  # Options: "default", "sum", "entropy", "top_2_diff"
     },
 
     "Ours + Temp + + P + log": {
@@ -178,6 +157,26 @@ multi_run_configs = {
         # "temperature": temperature sampling  "greedy": greedy sampling
         "sampling_mode": "temperature",
         "confidence": "top_2_diff"  # Options: "default", "sum", "entropy", "top_2_diff"
+    },
+
+    "Ours + Temp + *P + min": {
+        "decoding_mode": 'all',  # "all": all the numbers "last": the last number
+        # [k-branch, k-seperate, self_consistency]
+        "baseline_cot": "k-seperate",
+        "scoring_mode": 'min',  # log, min, max, h_mean, mean, weighted_mean
+        # "temperature": temperature sampling  "greedy": greedy sampling
+        "sampling_mode": "temperature",
+        "confidence": "default"  # Options: "default", "sum", "entropy", "top_2_diff"
+    },
+
+    "Ours + Temp + *P + hmean": {
+        "decoding_mode": 'all',  # "all": all the numbers "last": the last number
+        # 0 for regular CoT, 1 for greedy number COT , None for self-consistency
+        "baseline_cot": "k-seperate",
+        "scoring_mode": 'h_mean',  # log, min, max, h_mean, mean, weighted_mean
+        # "temperature": temperature sampling  "greedy": greedy sampling
+        "sampling_mode": "temperature",
+        "confidence": "default"  # Options: "default", "sum", "entropy", "top_2_diff"
     },
 }
 
