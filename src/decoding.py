@@ -1,5 +1,4 @@
 import torch
-import spacy
 from transformers import PreTrainedModel, PreTrainedTokenizer
 import numpy as np
 
@@ -19,12 +18,10 @@ def _handle_last_decoding(
         output_scores,
         answer_ids,
         confidence_method,
-        multihop, ):
+        multihop, doc):
     if not multihop:
         final_answer = extract_last_numerical_value(answer_text)
     else:
-        nlp = spacy.load("en_core_web_sm")
-        doc = nlp(answer_text)
         all_values = extract_proper_nouns(doc)
         final_answer = extract_final_answer(answer_text)
 
@@ -74,24 +71,21 @@ def _handle_all_decoding(
         answer_ids,
         scoring_mode,
         confidence_method,
-        multihop, ):
+        multihop, doc):
     if not multihop:
         all_values = extract_all_numerical_values(answer_text)
     else:
-        nlp = spacy.load("en_core_web_sm")
-        doc = nlp(answer_text)
         all_values = extract_proper_nouns(doc)
         final_answer = extract_final_answer(answer_text)
+
+        if not all_values and not final_answer:
+            return None
 
         if not all_values and final_answer:
             all_values.append(final_answer)
 
         elif all_values[-1] != final_answer and final_answer:
             all_values.append(final_answer)
-
-        # for testing
-        # print(answer_text)
-        # print(all_values)
 
     if not all_values:
         return None
@@ -203,6 +197,7 @@ def _k_seperate_generation(
         do_sample,
         confidence_method,
         multihop,
+        nlp,
 ):
     # Prepare a list of lists to store paths for each item in the batch
     batch_size = tokenized_batch["input_ids"].shape[0]
@@ -227,6 +222,9 @@ def _k_seperate_generation(
             return_dict_in_generate=True,
         )
 
+        batch_output_scores = []
+        batch_answer_texts = []
+        batch_answer_ids = []
         for i in range(batch_size):
             # Retrieve the generated sequence for this batch element
             generated_sequence = batch_output.sequences[i]
@@ -237,12 +235,25 @@ def _k_seperate_generation(
                 answer_ids, skip_special_tokens=True)
             output_scores = torch.stack([x[i] for x in batch_output.scores])
 
+            # Save the result of the batch
+            batch_answer_ids.append(answer_ids)
+            batch_answer_texts.append(answer_text)
+            batch_output_scores.append(output_scores)
+
+        batch_docs = list(nlp.pipe(batch_answer_texts))
+
+        for i in range(batch_size):
+            answer_text = batch_answer_texts[i]
+            answer_ids = batch_answer_ids[i]
+            output_scores = batch_output_scores[i]
+            doc = batch_docs[i]
+
             if decoding_mode == "last":
                 result = _handle_last_decoding(tokenizer, device, answer_text, output_scores, answer_ids,
-                                               confidence_method, multihop)
+                                               confidence_method, multihop, doc)
             else:
                 result = _handle_all_decoding(tokenizer, device, answer_text, output_scores, answer_ids, scoring_mode,
-                                              confidence_method, multihop)
+                                              confidence_method, multihop, doc)
 
             # Only append valid results
             if result is not None:
@@ -276,6 +287,7 @@ def _k_branch_generation(
         do_sample,
         confidence_method,
         multihop,
+        nlp,
 ):
     input_ids = tokenized_batch["input_ids"]
     attention_mask = tokenized_batch["attention_mask"]
@@ -338,6 +350,11 @@ def _k_branch_generation(
     paths = [[] for _ in range(batch_size)]
 
     # Process each expanded result and map it back to the original batch item
+    batch_output_scores = []
+    batch_answer_texts = []
+    batch_answer_ids = []
+    batch_originals = []
+
     for idx, generated_sequence in enumerate(expanded_output.sequences):
         # Determine which original item this belongs to
         original_i = index_map[idx]
@@ -350,14 +367,26 @@ def _k_branch_generation(
         # We'll index them if needed in the decoding functions
         output_scores = torch.stack([x[idx] for x in expanded_output.scores])
 
+        batch_answer_texts.append(answer_text)
+        batch_answer_ids.append(answer_ids)
+        batch_output_scores.append(output_scores)
+        batch_originals.append(original_i)
+
+    batch_docs = list(nlp.pipe(batch_answer_texts))
+
+    for i, answer_text in enumerate(batch_answer_texts):
+        original_i = batch_originals[i]
+        doc = batch_docs[i]
+        answer_ids = batch_answer_ids[i]
+        output_scores = batch_output_scores[i]
+
         # Decide which decoding function to apply
         if decoding_mode == "last":
             result = _handle_last_decoding(
-                tokenizer, device, answer_text, output_scores, answer_ids, confidence_method, multihop
-            )
+                tokenizer, device, answer_text, output_scores, answer_ids, confidence_method, multihop, doc,)
         else:
             result = _handle_all_decoding(
-                tokenizer, device, answer_text, output_scores, answer_ids, scoring_mode, confidence_method, multihop
+                tokenizer, device, answer_text, output_scores, answer_ids, scoring_mode, confidence_method, multihop, doc,
             )
 
         # Append valid result to the corresponding batch item
@@ -382,6 +411,7 @@ def cot_decode(
         baseline_cot,
         confidence_method,
         multihop,
+        nlp,
         num_beams=1,
         temperature=1.0,
         top_p=1.0,
@@ -455,6 +485,7 @@ def cot_decode(
             do_sample=do_sample,
             confidence_method=confidence_method,
             multihop=multihop,
+            nlp=nlp,
         )
 
     elif baseline_cot == "k-seperate":
@@ -479,9 +510,14 @@ def cot_decode(
             do_sample=do_sample,
             confidence_method=confidence_method,
             multihop=multihop,
+            nlp=nlp,
         )
     else:
         raise ValueError(f"Unsupported baseline_cot mode: {baseline_cot}")
+
+    # for testing
+    print(paths_for_batch)
+    exit()
 
     # If no paths returned, ensure we have a default result for each input.
     if not paths_for_batch or len(paths_for_batch) != len(batch_messages):

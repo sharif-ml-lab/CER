@@ -1,5 +1,7 @@
 from tqdm import tqdm
 
+import spacy
+
 from src.self_consistency import self_consistency_decode
 from src.decoding import cot_decode
 from src.greedy_on_numbers import special_greedy_decode
@@ -25,6 +27,7 @@ def evaluate_batch_examples(
         confidence_method,
         multihop,
         dataset_name,
+        nlp,
 ):
     # Construct a list of messages for each question in the batch
     batch_messages = []
@@ -52,7 +55,8 @@ def evaluate_batch_examples(
             scoring_mode=scoring_mode,
             baseline_cot=baseline_cot,
             confidence_method=confidence_method,
-            multihop=multihop
+            multihop=multihop,
+            nlp=nlp,
         )
     elif baseline_cot == "self_consistency":
         batch_results = self_consistency_decode(
@@ -61,6 +65,7 @@ def evaluate_batch_examples(
             batch_messages,
             k=k,
             multihop=multihop,
+            nlp=nlp,
         )
     elif baseline_cot in ("branch_greedy_special", "seperated_greedy_special"):
         # These functions return lists of results, confidences, and final answers
@@ -75,7 +80,8 @@ def evaluate_batch_examples(
             scoring_mode=scoring_mode,
             baseline_cot=baseline_cot,
             confidence_method=confidence_method,
-            multihop=multihop
+            multihop=multihop,
+            nlp=nlp,
         )
     else:
         raise ValueError(f"Unsupported baseline_cot mode: {baseline_cot}")
@@ -142,6 +148,7 @@ def evaluate_dataset(
         batch_size,
         multihop,
         dataset_name,
+        nlp,
 ):
     # Extract lists of questions and answers directly from the dataframe
     questions = dataset["question"].tolist()
@@ -186,6 +193,7 @@ def evaluate_dataset(
                 confidence_method,
                 multihop,
                 dataset_name,
+                nlp,
             )
 
             # for testing
@@ -247,6 +255,11 @@ def run_dataset(config: Config):
     loaded_datasets = load_and_sample_parquet_datasets(data_dir, dataset_files, number_samples=number_samples,
                                                        seed=seed)
 
+    if multihop:
+        nlp = spacy.load("en_core_web_trf")
+    else:
+        nlp = None
+
     # Loop over each config
     for cfg_run_name, cfg in multi_run_configs.items():
         if run_name == cfg_run_name or run_name == "all":
@@ -297,7 +310,8 @@ def run_dataset(config: Config):
                     few_shot_path=few_shot_path,
                     batch_size=batch_size,
                     multihop=multihop,
-                    dataset_name=dataset_name
+                    dataset_name=dataset_name,
+                    nlp=nlp
                 )
 
             print(f"Finished run: {cfg_run_name}")
