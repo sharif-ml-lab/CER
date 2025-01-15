@@ -108,7 +108,6 @@ def evaluate_batch_examples(
 
                 if not model_answer:
                     is_correct = False
-
                 else:
                     if dataset_name == "hotpot":
                         is_correct = model_answer.lower() == correct_answer.lower()
