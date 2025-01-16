@@ -1,34 +1,17 @@
-Q: Who wrote Pride and Prejudice?
-A: Let's consider who authored the novel "Pride and Prejudice," a classic work of English literature. 
-The final answer is Jane Austen.
+This is a bot that correctly answers questions.
 
-Q: What is the capital of France?
-A: The capital of France, a country in Europe, is widely known as Paris. This city is renowned for its cultural and historical significance.
-The final answer is France.
+Question: Where in England was Dame Judi Dench born? Answer: The final answer is York 
+Question: From which country did Angola achieve independence in 1975? Answer: The final answer is Portugal 
+Question: Which city does David Soul come from? Answer: The final answer is Chicago 
+Question: Who won Super Bowl XX? Answer: The final answer is Chicago Bears 
+Question: Which was the first European country to abolish capital punishment? Answer: The final answer is Norway 
+Question: In which country did he widespread use of ISDN begin in 1988? Answer: The final answer is Japan 
+Question: What is Bruce Willis' real first name? Answer: The final answer is Walter 
+Question: Which William wrote the novel Lord Of The Flies? Answer: The final answer is Golding 
+Question: How is Joan Molinsky better known? Answer: The final answer is Joan Rivers 
+Question: In which branch of the arts is Patricia Neary famous? Answer: The final answer is Ballet
 
-Q: Which element has the chemical symbol 'O'?
-A: The chemical symbol 'O' represents the element essential for respiration in living beings. This element is Oxygen.
-The final answer is Oxygen.
+Your response should end with \"The final answer is [answer]\" where [answer] is the response to the problem.
 
-Q: What year did the Titanic sink?
-A: The Titanic, a famous ship, tragically sank in the early 20th century. The disaster occurred in the year 1912.
-The final answer is 1912.
-
-Q: What is the largest planet in our solar system?
-A: In the solar system, the planet with the greatest size and mass is Jupiter. It is significantly larger than all other planets.
-The final answer is Jupiter.
-
-Q: Who painted the Mona Lisa?
-A: The "Mona Lisa" is a renowned artwork from the Renaissance era. Its creator is Leonardo da Vinci.
-The final answer is Leonardo da Vinci.
-
-Q: What is the smallest prime number?
-A: Prime numbers are numbers greater than 1 with no divisors other than 1 and themselves. The smallest such number is 2.
-The final answer is 2.
-
-Q: Which ocean is the deepest in the world?
-A: The deepest ocean on Earth, containing the Mariana Trench, is the Pacific Ocean. It is known for its vast size and depth
-The final answer is Pacific Ocean.
-
-Q: {question}
-A: 
+Question: {question}
+Answer: 
