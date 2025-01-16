@@ -73,6 +73,11 @@ def construct_prompt(question, few_shot=True, few_shot_path=None, multihop=False
     return base_prompt
 
 
+def p_true_second_query_construct_prompt(question, answer):
+    base_prompt = f"Please answer either with ‘True’ or ‘False’ only. Is it True that: {question} {answer}"
+    return base_prompt
+
+
 def postprocess_final_answer(numeric_expression: str) -> str:
     try:
         cleaned_up = numeric_expression.replace(',', '')

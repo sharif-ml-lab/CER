@@ -8,6 +8,7 @@ from src.greedy_on_numbers import special_greedy_decode
 from src.utils import load_model_and_tokenizer, construct_prompt, print_final_accuracy, save_results_to_csv, \
     load_and_sample_parquet_datasets, postprocess_final_answer
 from src.config import Config, multi_run_configs
+from src.true_baseline import p_true
 
 
 # evaluate the model on a batch of exapmles
@@ -85,6 +86,19 @@ def evaluate_batch_examples(
             confidence_method=confidence_method,
             multihop=multihop,
             nlp=nlp,
+        )
+    elif baseline_cot == "p_true":
+        batch_results = p_true(
+            model,
+            tokenizer,
+            batch_questions,
+            aggregate_paths=aggregate,
+            k=k,
+            sampling_mode=sampling_mode,
+            multihop=multihop,
+            nlp=nlp,
+            few_shot=few_shot,
+            few_shot_path=few_shot_path,
         )
     else:
         raise ValueError(f"Unsupported baseline_cot mode: {baseline_cot}")
