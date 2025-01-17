@@ -31,6 +31,7 @@ def evaluate_batch_examples(
         nlp,
         random_selection,
         random_selection_number_words,
+        sampling_strategy,
 ):
     # Construct a list of messages for each question in the batch
     batch_messages = []
@@ -62,6 +63,7 @@ def evaluate_batch_examples(
             nlp=nlp,
             random_selection=random_selection,
             random_selection_number_words=random_selection_number_words,
+            sampling_strategy=sampling_strategy,
         )
     elif baseline_cot == "self_consistency":
         batch_results = self_consistency_decode(
@@ -167,6 +169,7 @@ def evaluate_dataset(
         nlp,
         random_selection,
         random_selection_number_words,
+        sampling_strategy,
 ):
     # Extract lists of questions and answers directly from the dataframe
     questions = dataset["question"].tolist()
@@ -214,6 +217,7 @@ def evaluate_dataset(
                 nlp,
                 random_selection,
                 random_selection_number_words,
+                sampling_strategy,
             )
 
             # for testing
@@ -254,6 +258,7 @@ def run_dataset(config: Config):
     multihop = config.multihop
     random_selection = config.random_selection
     random_selection_number_words = config.random_selection_number_words
+    sampling_strategy = config.sampling_strategy
 
     # Print the provided configurations
     print("======================================")
@@ -269,6 +274,7 @@ def run_dataset(config: Config):
     print(f"Batch Size: {batch_size}")
     print(f"Dataset Files: {dataset_files}")
     print(f"Multihop: {multihop}")
+    print(f"Sampling Strategy: {sampling_strategy}")
     print("======================================\n")
 
     model, tokenizer = load_model_and_tokenizer(
@@ -336,6 +342,7 @@ def run_dataset(config: Config):
                     nlp=nlp,
                     random_selection=random_selection,
                     random_selection_number_words=random_selection_number_words,
+                    sampling_strategy=sampling_strategy
                 )
 
             print(f"Finished run: {cfg_run_name}")
