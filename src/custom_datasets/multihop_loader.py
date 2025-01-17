@@ -1,14 +1,14 @@
 from datasets import load_dataset
 import pandas as pd
 
-dataset_name = "trivia"
+dataset_name = "hotpot"
 
 if dataset_name == "hotpot":
     # dict_keys(['_id', 'answer', 'question', 'supporting_facts', 'context', 'type', 'level']) 7405
     file_path = "data/hotpot_dev_fullwiki_v1.json"
 
     # dict_keys(['supporting_facts', 'level', 'question', 'context', 'answer', '_id', 'type']) 90447
-    file_path = "data/hotpot_train_v1.1.json"
+    # file_path = "data/hotpot_train_v1.1.json"
 
     dataset = pd.read_json(file_path)
     dataset = dataset[dataset['type'] != "comparison"]
