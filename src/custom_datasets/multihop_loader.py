@@ -4,9 +4,15 @@ import pandas as pd
 dataset_name = "hotpot"
 
 if dataset_name == "hotpot":
-    # dict_keys(['supporting_facts', 'level', 'question', 'context', 'answer', '_id', 'type']) 90447
-    dataset = load_dataset("hotpotqa/hotpot_qa", "fullwiki", split='test', trust_remote_code=True)
+    # http://curtis.ml.cmu.edu/datasets/hotpot/hotpot_test_fullwiki_v1.json
+    # http://curtis.ml.cmu.edu/datasets/hotpot/hotpot_dev_fullwiki_v1.json
+    # dict_keys(['_id', 'answer', 'question', 'supporting_facts', 'context', 'type', 'level']) 7405
+    file_path = "data/hotpot_dev_fullwiki_v1.json"
 
+    # dict_keys(['supporting_facts', 'level', 'question', 'context', 'answer', '_id', 'type']) 90447
+    # file_path = "data/hotpot_train_v1.1.json"
+
+    dataset = pd.read_json(file_path)
     dataset = dataset[dataset['type'] != "comparison"]
     dataset = dataset[['question', 'answer', 'level']]
 
