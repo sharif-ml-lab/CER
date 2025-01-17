@@ -4,6 +4,8 @@ import pandas as pd
 dataset_name = "hotpot"
 
 if dataset_name == "hotpot":
+    # http://curtis.ml.cmu.edu/datasets/hotpot/hotpot_test_fullwiki_v1.json
+    # http://curtis.ml.cmu.edu/datasets/hotpot/hotpot_dev_fullwiki_v1.json
     # dict_keys(['_id', 'answer', 'question', 'supporting_facts', 'context', 'type', 'level']) 7405
     file_path = "data/hotpot_dev_fullwiki_v1.json"
 
