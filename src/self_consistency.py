@@ -4,10 +4,9 @@ from src.utils import extract_last_numerical_value, postprocess_final_answer, ex
 
 
 class SelfConsistency:
-    def __init__(self, model, tokenizer, num_samples, nlp):
+    def __init__(self, model, tokenizer, num_samples):
         self.model = model
         self.tokenizer = tokenizer
-        self.nlp = nlp
 
         if self.tokenizer.pad_token_id is None:
             self.tokenizer.pad_token_id = self.tokenizer.eos_token_id
@@ -31,13 +30,10 @@ class SelfConsistency:
             # sampling strategy: (0) DEFAULT_SAMPLING (1) "GREEDY_NUMBER_SAMPLING", (2) CONFIDENCE_SAMPLING
             if sampling_strategy == "GREEDY_NUMBER_SAMPLING":
                 sampling_extension = 1
-            elif sampling_strategy == "PROPER_NOUN_SAMPLING":
+            elif sampling_strategy == "CONFIDENCE_SAMPLING":  # future: copy code from sampling to transformers.utils
                 sampling_extension = 2
-            elif sampling_strategy == "CONFIDENCE_SAMPLING": # future: copy code from sampling to transformers.utils
-                sampling_extension = 3
             else:
-                sampling_extension = 0 # DEFAULT_SAMPLING
-
+                sampling_extension = 0  # DEFAULT_SAMPLING
 
             output = self.model.generate(
                 input_ids,
@@ -56,7 +52,6 @@ class SelfConsistency:
                 return_dict_in_generate=True,
                 sampling_extension=sampling_extension,
                 tokenizer=self.tokenizer,
-                nlp=self.nlp,
             )
 
             generated_sequence = output.sequences[0]
@@ -97,7 +92,6 @@ def self_consistency_decode(
         k,
         multihop,
         sampling_strategy,
-        nlp,
 ):
     batch_results = []
 
@@ -111,7 +105,7 @@ def self_consistency_decode(
                 [f"{msg['role']}: {msg['content']}" for msg in message])
             input_text += "\nassistant:"
 
-        self_consistency = SelfConsistency(model, tokenizer, num_samples=k, nlp=nlp)
+        self_consistency = SelfConsistency(model, tokenizer, num_samples=k)
         result = self_consistency.evaluate(
             input_text, multihop, sampling_strategy)
 

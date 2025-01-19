@@ -73,7 +73,6 @@ def evaluate_batch_examples(
             k=k,
             multihop=multihop,
             sampling_strategy=sampling_strategy,
-            nlp=nlp,
         )
     elif baseline_cot in ("branch_greedy_special", "seperated_greedy_special"):
         # These functions return lists of results, confidences, and final answers
