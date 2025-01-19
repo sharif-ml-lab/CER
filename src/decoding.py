@@ -27,19 +27,10 @@ def _k_seperate_generation(
         nlp,
         random_selection,
         random_selection_number_words,
-        sampling_strategy,
 ):
     # Prepare a list of lists to store paths for each item in the batch
     batch_size = tokenized_batch["input_ids"].shape[0]
     paths = [[] for _ in range(batch_size)]
-
-    # sampling strategy: (0) DEFAULT_SAMPLING (1) "GREEDY_NUMBER_SAMPLING", (2) CONFIDENCE_SAMPLING
-    if sampling_strategy == "GREEDY_NUMBER_SAMPLING":
-        sampling_extension = 1
-    elif sampling_strategy == "CONFIDENCE_SAMPLING": # future: copy code from sampling to transformers.utils
-        sampling_extension = 2
-    else:
-        sampling_extension = 0 # DEFAULT_SAMPLING
 
     for _ in range(k):
         # Generate results for the entire batch at once
@@ -58,8 +49,6 @@ def _k_seperate_generation(
             eos_token_id=tokenizer.eos_token_id,
             output_scores=True,
             return_dict_in_generate=True,
-            sampling_extension=sampling_extension,
-            tokenizer=tokenizer,
         )
 
         batch_output_scores = []
@@ -133,7 +122,6 @@ def _k_branch_generation(
         nlp,
         random_selection,
         random_selection_number_words,
-        sampling_strategy,
 ):
     input_ids = tokenized_batch["input_ids"]
     attention_mask = tokenized_batch["attention_mask"]
@@ -174,15 +162,6 @@ def _k_branch_generation(
     expanded_attention_masks = torch.stack(all_start_masks, dim=0).to(device)
 
     # Generate for the entire expanded batch in one pass
-    
-    # sampling strategy: (0) DEFAULT_SAMPLING (1) "GREEDY_NUMBER_SAMPLING", (2) CONFIDENCE_SAMPLING
-    if sampling_strategy == "GREEDY_NUMBER_SAMPLING":
-        sampling_extension = 1
-    elif sampling_strategy == "CONFIDENCE_SAMPLING": # future: copy code from sampling to transformers.utils
-        sampling_extension = 2
-    else:
-        sampling_extension = 0 # DEFAULT_SAMPLING
-
     expanded_output = model.generate(
         input_ids=expanded_input_ids,
         attention_mask=expanded_attention_masks,
@@ -199,8 +178,6 @@ def _k_branch_generation(
         eos_token_id=tokenizer.eos_token_id,
         output_scores=True,
         return_dict_in_generate=True,
-        sampling_extension=sampling_extension,
-        tokenizer=tokenizer,
     )
 
     # Prepare a list of lists to store generated paths for each item
@@ -274,7 +251,6 @@ def cot_decode(
         nlp,
         random_selection,
         random_selection_number_words,
-        sampling_strategy,
         num_beams=1,
         temperature=1.0,
         top_p=1.0,
@@ -351,7 +327,6 @@ def cot_decode(
             nlp=nlp,
             random_selection=random_selection,
             random_selection_number_words=random_selection_number_words,
-            sampling_strategy=sampling_strategy,
         )
 
     elif baseline_cot == "k-seperate":
@@ -379,7 +354,6 @@ def cot_decode(
             nlp=nlp,
             random_selection=random_selection,
             random_selection_number_words=random_selection_number_words,
-            sampling_strategy=sampling_strategy,
         )
     else:
         raise ValueError(f"Unsupported baseline_cot mode: {baseline_cot}")
