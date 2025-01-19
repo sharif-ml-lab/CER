@@ -1,12 +1,11 @@
-import sys
-
-from src.utils import construct_prompt, p_true_second_query_construct_prompt
-from src.uncertainty import aggregate_paths_based_on_scores, extract_last_numerical_value, extract_final_answer, extract_proper_nouns
 import gc
 
 import torch
 import torch.nn.functional as F
 from transformers import PreTrainedModel, PreTrainedTokenizer
+
+from src.uncertainty import aggregate_paths_based_on_scores, extract_last_numerical_value, extract_final_answer, extract_proper_nouns
+from src.utils import construct_prompt, p_true_second_query_construct_prompt
 
 
 def _k_generation(
@@ -28,7 +27,6 @@ def _k_generation(
         nlp,
         few_shot,
         few_shot_path,
-        sampling_strategy,
 ):
 
     batch_size = len(batch_questions)
@@ -46,14 +44,6 @@ def _k_generation(
             tokenized_batch = batch_messages_creation(
                 tokenizer, batch_questions, batch_answers, few_shot, few_shot_path, multihop, device, 1)
 
-            # sampling strategy: (0) DEFAULT_SAMPLING (1) "GREEDY_NUMBER_SAMPLING", (2) CONFIDENCE_SAMPLING
-            if sampling_strategy == "GREEDY_NUMBER_SAMPLING":
-                sampling_extension = 1
-            elif sampling_strategy == "CONFIDENCE_SAMPLING":  # future: copy code from sampling to transformers.utils
-                sampling_extension = 2
-            else:
-                sampling_extension = 0  # DEFAULT_SAMPLING
-
             batch_output = model.generate(
                 **tokenized_batch,
                 max_new_tokens=max_new_tokens,
@@ -69,8 +59,6 @@ def _k_generation(
                 eos_token_id=tokenizer.eos_token_id,
                 output_scores=True,
                 return_dict_in_generate=True,
-                sampling_extension=sampling_extension,
-                tokenizer=tokenizer,
             )
 
             batch_output_scores = []
@@ -202,7 +190,6 @@ def p_true(
         nlp,
         few_shot,
         few_shot_path,
-        sampling_strategy,
         num_beams=1,
         temperature=1.0,
         top_p=1.0,
@@ -241,7 +228,6 @@ def p_true(
         nlp=nlp,
         few_shot=few_shot,
         few_shot_path=few_shot_path,
-        sampling_strategy=sampling_strategy,
     )
 
     # for testing

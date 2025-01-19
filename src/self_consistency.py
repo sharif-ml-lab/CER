@@ -18,7 +18,7 @@ class SelfConsistency:
 
         self.num_samples = num_samples
 
-    def generate_responses(self, message, sampling_strategy):
+    def generate_responses(self, message: str):
         input_ids = self.tokenizer.encode(
             message, return_tensors="pt").to(self.device)
         attention_mask = torch.ones_like(input_ids).to(self.device)
@@ -26,15 +26,6 @@ class SelfConsistency:
         responses = []
         probs = []
         for _ in range(self.num_samples):
-
-            # sampling strategy: (0) DEFAULT_SAMPLING (1) "GREEDY_NUMBER_SAMPLING", (2) CONFIDENCE_SAMPLING
-            if sampling_strategy == "GREEDY_NUMBER_SAMPLING":
-                sampling_extension = 1
-            elif sampling_strategy == "CONFIDENCE_SAMPLING":  # future: copy code from sampling to transformers.utils
-                sampling_extension = 2
-            else:
-                sampling_extension = 0  # DEFAULT_SAMPLING
-
             output = self.model.generate(
                 input_ids,
                 attention_mask=attention_mask,
@@ -50,8 +41,6 @@ class SelfConsistency:
                 eos_token_id=self.tokenizer.eos_token_id,
                 output_scores=True,
                 return_dict_in_generate=True,
-                sampling_extension=sampling_extension,
-                tokenizer=self.tokenizer,
             )
 
             generated_sequence = output.sequences[0]
@@ -63,8 +52,8 @@ class SelfConsistency:
             responses.append(answer_text)
         return responses, probs
 
-    def evaluate(self, prompt, multihop, sampling_strategy):
-        responses, probs = self.generate_responses(prompt, sampling_strategy)
+    def evaluate(self, prompt, multihop):
+        responses, probs = self.generate_responses(prompt)
 
         voting = dict()
         for response in responses:
@@ -90,9 +79,7 @@ def self_consistency_decode(
         tokenizer,
         messages,
         k,
-        multihop,
-        sampling_strategy,
-):
+        multihop):
     batch_results = []
 
     for message in messages:
@@ -106,8 +93,7 @@ def self_consistency_decode(
             input_text += "\nassistant:"
 
         self_consistency = SelfConsistency(model, tokenizer, num_samples=k)
-        result = self_consistency.evaluate(
-            input_text, multihop, sampling_strategy)
+        result = self_consistency.evaluate(input_text, multihop)
 
         batch_results.append(result)
 

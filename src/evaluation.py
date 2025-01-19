@@ -72,7 +72,6 @@ def evaluate_batch_examples(
             batch_messages,
             k=k,
             multihop=multihop,
-            sampling_strategy=sampling_strategy,
         )
     elif baseline_cot in ("branch_greedy_special", "seperated_greedy_special"):
         # These functions return lists of results, confidences, and final answers
@@ -102,7 +101,6 @@ def evaluate_batch_examples(
             nlp=nlp,
             few_shot=few_shot,
             few_shot_path=few_shot_path,
-            sampling_strategy=sampling_strategy,
         )
     else:
         raise ValueError(f"Unsupported baseline_cot mode: {baseline_cot}")
