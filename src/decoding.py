@@ -36,8 +36,10 @@ def _k_seperate_generation(
     # sampling strategy: (0) DEFAULT_SAMPLING (1) "GREEDY_NUMBER_SAMPLING", (2) CONFIDENCE_SAMPLING
     if sampling_strategy == "GREEDY_NUMBER_SAMPLING":
         sampling_extension = 1
-    elif sampling_strategy == "CONFIDENCE_SAMPLING": # future: copy code from sampling to transformers.utils
+    elif sampling_strategy == "PROPER_NOUN_SAMPLING":
         sampling_extension = 2
+    elif sampling_strategy == "CONFIDENCE_SAMPLING": # future: copy code from sampling to transformers.utils
+        sampling_extension = 3
     else:
         sampling_extension = 0 # DEFAULT_SAMPLING
 
@@ -60,6 +62,7 @@ def _k_seperate_generation(
             return_dict_in_generate=True,
             sampling_extension=sampling_extension,
             tokenizer=tokenizer,
+            nlp=nlp,
         )
 
         batch_output_scores = []
@@ -178,10 +181,13 @@ def _k_branch_generation(
     # sampling strategy: (0) DEFAULT_SAMPLING (1) "GREEDY_NUMBER_SAMPLING", (2) CONFIDENCE_SAMPLING
     if sampling_strategy == "GREEDY_NUMBER_SAMPLING":
         sampling_extension = 1
-    elif sampling_strategy == "CONFIDENCE_SAMPLING": # future: copy code from sampling to transformers.utils
+    elif sampling_strategy == "PROPER_NOUN_SAMPLING":
         sampling_extension = 2
+    elif sampling_strategy == "CONFIDENCE_SAMPLING": # future: copy code from sampling to transformers.utils
+        sampling_extension = 3
     else:
         sampling_extension = 0 # DEFAULT_SAMPLING
+
 
     expanded_output = model.generate(
         input_ids=expanded_input_ids,
@@ -201,6 +207,7 @@ def _k_branch_generation(
         return_dict_in_generate=True,
         sampling_extension=sampling_extension,
         tokenizer=tokenizer,
+        nlp=nlp,
     )
 
     # Prepare a list of lists to store generated paths for each item

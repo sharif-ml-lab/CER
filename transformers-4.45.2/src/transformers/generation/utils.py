@@ -1787,7 +1787,8 @@ class GenerationMixin:
         streamer: Optional["BaseStreamer"] = None,
         negative_prompt_ids: Optional[torch.Tensor] = None,
         negative_prompt_attention_mask: Optional[torch.Tensor] = None,
-        sampling_extension=1,  # 0: existing 1: greedy_number_sampling 2: confidence_sampling
+        sampling_extension=1,  # 0: existing 1: greedy_number_sampling 2: proper_noun_sampling 3: confidence_sampling
+        nlp=None,
         **kwargs,
     ) -> Union[GenerateOutput, torch.LongTensor]:
         r"""
@@ -2144,6 +2145,7 @@ class GenerationMixin:
                 streamer=streamer,
                 sampling_extension=sampling_extension,
                 tokenizer=tokenizer,
+                nlp=nlp,
                 ** model_kwargs,
             )
 
@@ -3076,6 +3078,7 @@ class GenerationMixin:
         streamer: Optional["BaseStreamer"],
         sampling_extension: int,
         tokenizer,
+        nlp,
         **model_kwargs,
     ) -> Union[GenerateNonBeamOutput, torch.LongTensor]:
         r"""
@@ -3204,18 +3207,61 @@ class GenerationMixin:
                     next_tokens = torch.argmax(next_token_scores, dim=-1)
 
             elif sampling_extension == 1:  # greedy_number sampling
-                next_tokens = torch.argmax(
+                top_next_tokens = torch.argmax(
                     next_token_scores, dim=-1)
-                top_token_str = tokenizer.decode(
-                    next_tokens, skip_special_tokens=True)
+                top_token_strs = list(zip([tokenizer.decode([token_id], skip_special_tokens=True) for token_id in top_next_tokens], top_next_tokens.tolist()))
                 
-                if not top_token_str.strip().isnumeric():
-                    probs = nn.functional.softmax(next_token_scores, dim=-1)
-                    next_tokens = torch.multinomial(
-                        probs, num_samples=1).squeeze(1)
+                next_tokens = []
+                for idx, (token_str, token_id) in enumerate(top_token_strs):
+                    if not token_str.strip().isnumeric():
+                        probs = nn.functional.softmax(next_token_scores[idx], dim=-1)
+                        next_token = torch.multinomial(
+                            probs, num_samples=1)
+                        next_tokens.append(next_token)
+                    else:
+                        next_tokens.append(token_id)
 
-            elif sampling_extension == 2:  # confidence sampling
+                next_tokens = torch.tensor(next_tokens).to('cuda')
+
+            elif sampling_extension == 2:  # proper_noun sampling
+                top_next_tokens = torch.argmax(
+                    next_token_scores, dim=-1)
+                top_token_strs = list(zip([tokenizer.decode([token_id], skip_special_tokens=True) for token_id in top_next_tokens], top_next_tokens.tolist()))
+                docs = list(nlp.pipe([(top_token_str) for top_token_str, _ in top_token_strs]))
+
+                next_tokens = []
+                for idx, (token_str, token_id) in enumerate(top_token_strs):
+                    if not any(token_nlp.pos_ == "PROPN" for token_nlp in docs[idx]):
+                        probs = nn.functional.softmax(next_token_scores[idx], dim=-1)
+                        next_token = torch.multinomial(
+                            probs, num_samples=1)
+                        next_tokens.append(next_token)
+                    else:
+                        next_tokens.append(token_id)
+
+                next_tokens = torch.tensor(next_tokens).to('cuda')
+
+            elif sampling_extension == 3:  # confidence sampling
+                # print(input_ids)
                 exit()
+                # answer_ids = input_ids[original_length:]
+                # answer_text = tokenizer.decode(
+                #     answer_ids, skip_special_tokens=True)
+
+                # result = _handle_all_decoding(tokenizer, "cuda", answer_text, output_scores, answer_ids, scoring_mode="log",
+                #                             confidence_method="default", multihop=False, doc=None, random_selection=False, random_selection_number_words=None)
+
+                # if result == None:
+                #     confidence = 1.0
+                # else:
+                #     confidence = result[1]
+
+                # if confidence < 0.5:
+                #     chosen_token_id = top_token_ids[batch_sample_id]
+                # else:
+                #     probs = nn.functional.softmax(next_token_scores, dim=-1)
+                #     next_tokens = torch.multinomial(
+                #         probs, num_samples=1).squeeze(1)
 
             # finished sentences should have their next token be a padding token
             if has_eos_stopping_criteria:

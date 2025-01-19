@@ -49,10 +49,13 @@ def _k_generation(
             # sampling strategy: (0) DEFAULT_SAMPLING (1) "GREEDY_NUMBER_SAMPLING", (2) CONFIDENCE_SAMPLING
             if sampling_strategy == "GREEDY_NUMBER_SAMPLING":
                 sampling_extension = 1
-            elif sampling_strategy == "CONFIDENCE_SAMPLING":  # future: copy code from sampling to transformers.utils
+            elif sampling_strategy == "PROPER_NOUN_SAMPLING":
                 sampling_extension = 2
+            elif sampling_strategy == "CONFIDENCE_SAMPLING": # future: copy code from sampling to transformers.utils
+                sampling_extension = 3
             else:
-                sampling_extension = 0  # DEFAULT_SAMPLING
+                sampling_extension = 0 # DEFAULT_SAMPLING
+
 
             batch_output = model.generate(
                 **tokenized_batch,
@@ -71,6 +74,7 @@ def _k_generation(
                 return_dict_in_generate=True,
                 sampling_extension=sampling_extension,
                 tokenizer=tokenizer,
+                nlp=nlp,
             )
 
             batch_output_scores = []
