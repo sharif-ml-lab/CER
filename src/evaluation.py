@@ -131,7 +131,7 @@ def evaluate_batch_examples(
                         is_correct = model_answer.lower() == correct_answer.lower()
                     elif dataset_name == "trivia":
                         is_correct = (model_answer.lower() in correct_answer) or (
-                            model_answer in correct_answer)
+                                model_answer in correct_answer)
 
         except ValueError:
             print(
@@ -239,7 +239,8 @@ def evaluate_dataset(
 
     # Save and print final results
     save_results_to_csv(
-        results, f"outputs/{description}_evaluation_results_{'few_shot' if few_shot else 'zero_shot'}{'_random' if random_selection else ''}.csv")
+        results,
+        f"outputs/{description}_evaluation_results_{'few_shot' if few_shot else 'zero_shot'}{'_random' if random_selection else ''}.csv")
     accuracy = (correct_answers / total_questions) * 100
     print_final_accuracy(description, accuracy)
     return accuracy
@@ -305,12 +306,10 @@ def run_dataset(config: Config):
                 if few_shot:
                     if dataset_name == "allenai":
                         few_shot_path = config.allenai_shots
-                    elif dataset_name == "open_math":
-                        few_shot_path = config.open_math_shots
+                    elif dataset_name == "math":
+                        few_shot_path = config.math_shots
                     elif dataset_name == "multiarith":
                         few_shot_path = config.multiarith_shots
-                    elif dataset_name == "metamath":
-                        few_shot_path = config.metamath_shots
                     elif dataset_name == "gsm8k":
                         few_shot_path = config.gsm8k_shots
                     elif dataset_name == "hotpot":
