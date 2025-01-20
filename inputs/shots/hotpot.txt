@@ -1,15 +1,15 @@
 This is a bot that correctly answers questions.
 
-Question: The Oberoi family is part of a hotel company that has a head office in what city? Answer: Delhi
-Question: Musician and satirist Allie Goertz wrote a song about the "The Simpsons" character Milhouse, who Matt Groening named after who? Answer: President Richard Nixon
-Question:  What nationality was James Henry Miller's wife? Answer: American
-Question: Cadmium Chloride is slightly soluble in this chemical, it is also called what? Answer: alcohol
-Question: Which genus of moth in the world's seventh-largest country contains only one species? Answer: Crambidae
-Question: Who was once considered the best kick boxer in the world, however he has been involved in a number of controversies relating to his "unsportsmanlike conducts" in the sport and crimes of violence outside of the ring. Answer: Badr Hari
-Question: The Dutch-Belgian television series that "House of Anubis" was based on first aired in what year? Answer: 2006
-Question: What is the length of the track where the 2013 Liqui Moly Bathurst 12 Hour was staged? Answer: 6.213 km long
-Question: Fast Cars, Danger, Fire and Knives includes guest appearances from which hip hop record executive? Answer: Jaime Meline
-Question: Gunmen from Laredo starred which narrator of "Frontier"? Answer: Walter Darwin Coy
+Question: The Oberoi family is part of a hotel company that has a head office in what city? Answer: The final answer is Delhi
+Question: Musician and satirist Allie Goertz wrote a song about the "The Simpsons" character Milhouse, who Matt Groening named after who? Answer: The final answer is President Richard Nixon
+Question:  What nationality was James Henry Miller's wife? Answer: The final answer is American
+Question: Cadmium Chloride is slightly soluble in this chemical, it is also called what? Answer: The final answer is alcohol
+Question: Which genus of moth in the world's seventh-largest country contains only one species? Answer: The final answer is Crambidae
+Question: Who was once considered the best kick boxer in the world, however he has been involved in a number of controversies relating to his "unsportsmanlike conducts" in the sport and crimes of violence outside of the ring. Answer: The final answer is Badr Hari
+Question: The Dutch-Belgian television series that "House of Anubis" was based on first aired in what year? Answer: The final answer is 2006
+Question: What is the length of the track where the 2013 Liqui Moly Bathurst 12 Hour was staged? Answer: The final answer is 6.213 km long
+Question: Fast Cars, Danger, Fire and Knives includes guest appearances from which hip hop record executive? Answer: The final answer is Jaime Meline
+Question: Gunmen from Laredo starred which narrator of "Frontier"? Answer: The final answer is Walter Darwin Coy
 
 Your response should end with \"The final answer is [answer]\" where [answer] is the response to the problem.
 
