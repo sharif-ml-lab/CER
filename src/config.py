@@ -60,6 +60,7 @@ multi_run_configs = {
 =======
     # },
 
+<<<<<<< HEAD
     "CoT Decoding": {
         "decoding_mode": 'last',  # "all": all the numbers "last": the last number
         "baseline_cot": "k-branch",  # [k-branch, k-seperate, self_consistency, p_true]
@@ -69,6 +70,16 @@ multi_run_configs = {
         "confidence": "top_2_diff"  # Options: "default", "sum", "entropy", "top_2_diff"
     },
 >>>>>>> parent of d458f55 (Update the configs)
+=======
+    # "CoT Decoding": {
+    #     "decoding_mode": 'last',  # "all": all the numbers "last": the last number
+    #     "baseline_cot": "k-branch",  # [k-branch, k-seperate, self_consistency, p_true]
+    #     "scoring_mode": 'log',  # log, min, max, h_mean, mean, weighted_mean
+    #     "sampling_mode": "greedy",
+    #     # "temperature": temperature sampling  "greedy": greedy sampling # (I'm not sure which one is correct?)
+    #     "confidence": "top_2_diff"  # Options: "default", "sum", "entropy", "top_2_diff"
+    # },
+>>>>>>> parent of 3782a66 (greedy-number sampling add to the transformer library)
 
     # "P_True": {
     #     "decoding_mode": 'all',  # "all": all the numbers "last": the last number
