@@ -297,12 +297,10 @@ def run_dataset(config: Config):
                 if few_shot:
                     if dataset_name == "allenai":
                         few_shot_path = config.allenai_shots
-                    elif dataset_name == "open_math":
-                        few_shot_path = config.open_math_shots
+                    elif dataset_name == "math":
+                        few_shot_path = config.math_shots
                     elif dataset_name == "multiarith":
                         few_shot_path = config.multiarith_shots
-                    elif dataset_name == "metamath":
-                        few_shot_path = config.metamath_shots
                     elif dataset_name == "gsm8k":
                         few_shot_path = config.gsm8k_shots
                     elif dataset_name == "hotpot":
