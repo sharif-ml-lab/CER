@@ -235,7 +235,8 @@ class Config:
         "math": "src_datasets_math_dataset_test_processed.parquet",
         "gsm8k": "openai_gsm8k_test_processed.parquet",
         "hotpot": "hotpotqa_processed.parquet",
-        "trivia": "triviaqa_processed.parquet"
+        "trivia": "triviaqa_processed.parquet",
+        "popqa": "popqa_processed.parquet",
     }"""))
 
     batch_size = int(os.getenv("BATCH_SIZE", 1))

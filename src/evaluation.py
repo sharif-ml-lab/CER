@@ -125,9 +125,9 @@ def evaluate_batch_examples(
                 else:
                     if dataset_name == "hotpot":
                         is_correct = model_answer.lower() == correct_answer.lower()
-                    elif dataset_name == "trivia":
+                    elif dataset_name == "trivia" or dataset_name == "popqa":
                         is_correct = (model_answer.lower() in correct_answer) or (
-                                model_answer in correct_answer)
+                            model_answer in correct_answer)
 
         except ValueError:
             print(

@@ -1,7 +1,7 @@
 from datasets import load_dataset
 import pandas as pd
 
-dataset_name = "hotpot"
+dataset_name = "popqa"
 
 if dataset_name == "hotpot":
     # http://curtis.ml.cmu.edu/datasets/hotpot/hotpot_test_fullwiki_v1.json
@@ -31,3 +31,14 @@ elif dataset_name == "trivia":
     df = dataset.dropna(subset=['answer'])
     df.to_parquet(
         f"data/triviaqa_processed.parquet", index=False)
+
+
+elif dataset_name == "popqa":
+
+    dataset = load_dataset("akariasai/PopQA")
+    dataset = dataset['test'].to_pandas()
+    dataset = dataset[['question', 'possible_answers']]
+    dataset['answer'] = dataset['possible_answers']
+    df = dataset.dropna(subset=['answer'])
+    df.to_parquet(
+        f"data/popqa_processed.parquet", index=False)
