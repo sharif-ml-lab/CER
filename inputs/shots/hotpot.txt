@@ -1,6 +1,6 @@
-This is a bot that correctly answers questions.
+Below, you will find some demonstrations that illustrate key problem-solving techniques. Let’s think step by step to arrive at the answer. Keep your answer concise and limited to at most five sentences.
 
-Question: The Oberoi family is part of a hotel company that has a head office in what city? Answer: The final answer is Delhi
+Question: The Oberoi family is part of a hotel company that has a head office in what city? Answer: The Oberoi family is associated with Oberoi Hotels, a prominent hotel chain in India. Their head office is located in New Delhi. The final answer is Delhi.
 Question: Musician and satirist Allie Goertz wrote a song about the "The Simpsons" character Milhouse, who Matt Groening named after who? Answer: The final answer is President Richard Nixon
 Question:  What nationality was James Henry Miller's wife? Answer: The final answer is American
 Question: Cadmium Chloride is slightly soluble in this chemical, it is also called what? Answer: The final answer is alcohol
