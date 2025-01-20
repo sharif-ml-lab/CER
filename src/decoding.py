@@ -80,12 +80,12 @@ def _k_seperate_generation(
 
             if decoding_mode == "last":
                 result = _handle_last_decoding(tokenizer, device, answer_text, output_scores, answer_ids,
-                                               confidence_method, multihop, doc,)
+                                               confidence_method, multihop, doc, )
             else:
                 result = _handle_all_decoding(tokenizer, device, answer_text, output_scores, answer_ids, scoring_mode,
                                               confidence_method, multihop, doc,
                                               random_selection,
-                                              random_selection_number_words,)
+                                              random_selection_number_words, )
 
             # Only append valid results
             if result is not None:
@@ -218,10 +218,11 @@ def _k_branch_generation(
         # Decide which decoding function to apply
         if decoding_mode == "last":
             result = _handle_last_decoding(
-                tokenizer, device, answer_text, output_scores, answer_ids, confidence_method, multihop, doc,)
+                tokenizer, device, answer_text, output_scores, answer_ids, confidence_method, multihop, doc, )
         else:
             result = _handle_all_decoding(
-                tokenizer, device, answer_text, output_scores, answer_ids, scoring_mode, confidence_method, multihop, doc,
+                tokenizer, device, answer_text, output_scores, answer_ids, scoring_mode, confidence_method, multihop,
+                doc,
                 random_selection,
                 random_selection_number_words,
             )

@@ -130,6 +130,23 @@ def preprocess_multi_arith(df, answer_column, old_question_column, new_question_
     return df
 
 
+def combine_all_splits(dataset_name):
+    try:
+        # Load the dataset with all available splits
+        dataset = load_dataset(dataset_name, trust_remote_code=True)
+
+        # Combine all splits into one dataset
+        all_splits = [split for split in dataset.keys()]
+        combined_dataset = concatenate_datasets([dataset[split] for split in all_splits])
+
+        print(f"Combined dataset contains {len(combined_dataset)} samples.")
+        return combined_dataset
+
+    except Exception as e:
+        print(f"Error loading or processing dataset: {e}")
+        return None
+
+
 # Function to process and save a dataset
 def process_and_save_dataset(dataset_info, save_path):
     dataset_name = dataset_info["dataset_name"]
@@ -141,11 +158,14 @@ def process_and_save_dataset(dataset_info, save_path):
     config_name = dataset_info.get("config_name", None)
 
     # Load the dataset split
-    if config_name:
-        dataset = load_dataset(
-            dataset_name, config_name, split=split, trust_remote_code=True)
+    if split == 'combine':
+        dataset = combine_all_splits(dataset_name)
     else:
-        dataset = load_dataset(dataset_name, split=split, trust_remote_code=True)
+        if config_name:
+            dataset = load_dataset(
+                dataset_name, config_name, split=split, trust_remote_code=True)
+        else:
+            dataset = load_dataset(dataset_name, split=split, trust_remote_code=True)
 
     # Convert to pandas DataFrame for easier manipulation
     df = dataset.to_pandas()
@@ -179,12 +199,12 @@ if __name__ == '__main__':
          "old_question_column": "question",
          "new_question_column": "question",
          },
-        {"dataset_name": "ChilleD/MultiArith", "split": "test", "answer_column": "final_ans",
+        {"dataset_name": "ChilleD/MultiArith", "split": "combine", "answer_column": "final_ans",
          "preprocess_function": preprocess_multi_arith,
          "old_question_column": "question",
          "new_question_column": "question"
          },
-        {"dataset_name": "src/datasets/math_dataset.py", "split": "test", "answer_column": "solution",
+        {"dataset_name": "src/custom_datasets/math_dataset.py", "split": "test", "answer_column": "solution",
          "preprocess_function": preprocess_math,
          "old_question_column": "problem",
          "new_question_column": "question"

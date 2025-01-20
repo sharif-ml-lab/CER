@@ -127,7 +127,7 @@ def evaluate_batch_examples(
                         is_correct = model_answer.lower() == correct_answer.lower()
                     elif dataset_name == "trivia":
                         is_correct = (model_answer.lower() in correct_answer) or (
-                            model_answer in correct_answer)
+                                model_answer in correct_answer)
 
         except ValueError:
             print(
@@ -233,7 +233,8 @@ def evaluate_dataset(
 
     # Save and print final results
     save_results_to_csv(
-        results, f"outputs/{description}_evaluation_results_{'few_shot' if few_shot else 'zero_shot'}{'_random' if random_selection else ''}.csv")
+        results,
+        f"outputs/{description}_evaluation_results_{'few_shot' if few_shot else 'zero_shot'}{'_random' if random_selection else ''}.csv")
     accuracy = (correct_answers / total_questions) * 100
     print_final_accuracy(description, accuracy)
     return accuracy
