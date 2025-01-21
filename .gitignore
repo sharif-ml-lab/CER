@@ -171,3 +171,4 @@ CoT_Decoding/chart/
 playground.py
 outputs
 .vscode/
+results_csv/
