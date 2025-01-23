@@ -127,7 +127,7 @@ def evaluate_batch_examples(
                         is_correct = model_answer.lower() == correct_answer.lower()
                     elif dataset_name == "trivia" or dataset_name == "popqa":
                         is_correct = (model_answer.lower() in correct_answer) or (
-                            model_answer in correct_answer)
+                                model_answer in correct_answer)
 
         except ValueError:
             print(
@@ -322,7 +322,7 @@ def run_dataset(config: Config):
                     k=K,
                     aggregate=aggregate,
                     decoding_mode=cfg['decoding_mode'],
-                    description=f"{dataset_name}_{cfg_run_name}",
+                    description=f"{dataset_name}_{cfg_run_name}_{model_name.replace('/', '_')}",
                     scoring_mode=cfg['scoring_mode'],
                     baseline_cot=cfg['baseline_cot'],
                     sampling_mode=cfg['sampling_mode'],
