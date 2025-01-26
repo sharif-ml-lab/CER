@@ -27,6 +27,7 @@ def _k_seperate_generation(
         nlp,
         random_selection,
         random_selection_number_words,
+        step_decomposition,
 ):
     # Prepare a list of lists to store paths for each item in the batch
     batch_size = tokenized_batch["input_ids"].shape[0]
@@ -69,6 +70,10 @@ def _k_seperate_generation(
             batch_answer_texts.append(answer_text)
             batch_output_scores.append(output_scores)
 
+        # print(batch_answer_texts)
+        # print('-----')
+        # exit()
+
         if multihop:
             batch_docs = list(nlp.pipe(batch_answer_texts))
 
@@ -85,7 +90,7 @@ def _k_seperate_generation(
                 result = _handle_all_decoding(tokenizer, device, answer_text, output_scores, answer_ids, scoring_mode,
                                               confidence_method, multihop, doc,
                                               random_selection,
-                                              random_selection_number_words, )
+                                              random_selection_number_words, step_decomposition)
 
             # Only append valid results
             if result is not None:
@@ -94,7 +99,7 @@ def _k_seperate_generation(
     # for testing
     # for path in paths:
     #     print(path)
-    # print("======================================")
+    # print(40*"-")
 
     return paths
 
@@ -252,6 +257,7 @@ def cot_decode(
         nlp,
         random_selection,
         random_selection_number_words,
+        step_decomposition,
         num_beams=1,
         temperature=1.0,
         top_p=1.0,
@@ -328,6 +334,7 @@ def cot_decode(
             nlp=nlp,
             random_selection=random_selection,
             random_selection_number_words=random_selection_number_words,
+            step_decomposition=step_decomposition,
         )
 
     elif baseline_cot == "k-seperate":
@@ -355,6 +362,7 @@ def cot_decode(
             nlp=nlp,
             random_selection=random_selection,
             random_selection_number_words=random_selection_number_words,
+            step_decomposition=step_decomposition,
         )
     else:
         raise ValueError(f"Unsupported baseline_cot mode: {baseline_cot}")

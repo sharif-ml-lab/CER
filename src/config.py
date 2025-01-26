@@ -221,6 +221,7 @@ class Config:
     # Number of samples to process
     number_samples: int = int(os.getenv("N_SAMPLE", 500))
     seed: int = int(os.getenv("SEED", 11))  # Seed for shuffling the dataset
+    step_decomposition: bool = eval(os.getenv("STEP_DECOMPOSITION", 'False'))
 
     gsm8k_shots: str = "inputs/shots/gsm8k.txt"  # path to shots of gsm8k
     multiarith_shots: str = "inputs/shots/multiarith.txt"  # path to shots of multiarith

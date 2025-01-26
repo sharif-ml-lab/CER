@@ -31,6 +31,7 @@ def evaluate_batch_examples(
         nlp,
         random_selection,
         random_selection_number_words,
+        step_decomposition,
 ):
     # Construct a list of messages for each question in the batch
     batch_messages = []
@@ -39,7 +40,7 @@ def evaluate_batch_examples(
             question=question,
             few_shot=few_shot,
             few_shot_path=few_shot_path,
-            multihop=multihop)}])
+            multihop=multihop,)}])
 
         # for testing
         # print(batch_messages)
@@ -62,6 +63,7 @@ def evaluate_batch_examples(
             nlp=nlp,
             random_selection=random_selection,
             random_selection_number_words=random_selection_number_words,
+            step_decomposition=step_decomposition,
         )
     elif baseline_cot == "self_consistency":
         batch_results = self_consistency_decode(
@@ -127,7 +129,7 @@ def evaluate_batch_examples(
                         is_correct = model_answer.lower() == correct_answer.lower()
                     elif dataset_name == "trivia" or dataset_name == "popqa":
                         is_correct = (model_answer.lower() in correct_answer) or (
-                                model_answer in correct_answer)
+                            model_answer in correct_answer)
 
         except ValueError:
             print(
@@ -167,6 +169,7 @@ def evaluate_dataset(
         nlp,
         random_selection,
         random_selection_number_words,
+        step_decomposition,
 ):
     # Extract lists of questions and answers directly from the dataframe
     questions = dataset["question"].tolist()
@@ -214,6 +217,7 @@ def evaluate_dataset(
                 nlp,
                 random_selection,
                 random_selection_number_words,
+                step_decomposition,
             )
 
             # for testing
@@ -255,6 +259,7 @@ def run_dataset(config: Config):
     multihop = config.multihop
     random_selection = config.random_selection
     random_selection_number_words = config.random_selection_number_words
+    step_decomposition = config.step_decomposition
 
     # Print the provided configurations
     print("======================================")
@@ -335,6 +340,7 @@ def run_dataset(config: Config):
                     nlp=nlp,
                     random_selection=random_selection,
                     random_selection_number_words=random_selection_number_words,
+                    step_decomposition=step_decomposition
                 )
 
             print(f"Finished run: {cfg_run_name}")

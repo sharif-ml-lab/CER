@@ -171,7 +171,7 @@ def load_csv_file(csv_path):
 
     df['confidence_score'] = df['confidence_score'].fillna(0)
     df['normalized_confidence'] = (df['confidence_score'] - df['confidence_score'].min()) / \
-        (df['confidence_score'].max() - df['confidence_score'].min())
+        (df['confidence_score'].max() - df['confidence_score'].min() + 1e-12)
 
     df['is_correct'] = df['is_correct'].astype(int)
     is_correct_list = np.array(df['is_correct'].tolist())
@@ -180,26 +180,29 @@ def load_csv_file(csv_path):
     return confidence_list, is_correct_list
 
 
-results_csvdir_path = "results_csv"
-output_dir = "outputs/visualizations"
+results_csvـdir_path = "outputs/results_csv1"
+output_dir = "outputs/visualizations1"
 os.makedirs(output_dir, exist_ok=True)
 
 
 def process_csv_files(directory, output_dir):
     for file_name in os.listdir(directory):
-        if file_name.endswith(".csv"):
-            csv_path = os.path.join(directory, file_name)
-            save_path = os.path.join(
-                output_dir, f"vis1_{os.path.splitext(file_name)[0]}.png")
+        try:
+            if file_name.endswith(".csv"):
+                csv_path = os.path.join(directory, file_name)
+                save_path = os.path.join(
+                    output_dir, f"vis1_{os.path.splitext(file_name)[0]}.png")
 
-            bins = 10
-            confidences, is_corrected = load_csv_file(csv_path)
-            bin_sizes, bin_corrects = make_bins(
-                confidences, is_corrected, bins=bins)
-            results = compute_conf_metrics(is_corrected, confidences)
-            visualization(bin_sizes, bin_corrects,
-                          save_path, results['acc'], results['ece'], results['auroc'], bins=bins)
-            print(f"Processed and saved visualization for {file_name}")
+                bins = 10
+                confidences, is_corrected = load_csv_file(csv_path)
+                bin_sizes, bin_corrects = make_bins(
+                    confidences, is_corrected, bins=bins)
+                results = compute_conf_metrics(is_corrected, confidences)
+                visualization(bin_sizes, bin_corrects,
+                              save_path, results['acc'], results['ece'], results['auroc'], bins=bins)
+                # print(f"Processed and saved visualization for {file_name}")
+        except:
+            print(file_name)
 
 
-process_csv_files(results_csvdir_path, output_dir)
+process_csv_files(results_csvـdir_path, output_dir)

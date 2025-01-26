@@ -1,10 +1,11 @@
 import random
+import copy
 
 import torch
 import numpy as np
 
 from transformers import PreTrainedModel, PreTrainedTokenizer
-from src.utils import extract_all_numerical_values, extract_final_answer, extract_last_numerical_value, extract_proper_nouns, postprocess_final_answer
+from src.utils import extract_all_numerical_values, extract_final_answer, extract_last_numerical_value, extract_proper_nouns, postprocess_final_answer, extract_all_steps, extract_last_proper_noun
 
 
 # extract the final numerical value.
@@ -72,11 +73,33 @@ def _handle_all_decoding(
         confidence_method,
         multihop, doc,
         random_selection,
-        random_selection_number_words):
+        random_selection_number_words,
+        step_decomposition):
 
     if not random_selection:
         if not multihop:
-            all_values = extract_all_numerical_values(answer_text)
+            # step by step extracting
+            if step_decomposition:
+                steps = extract_all_steps(answer_text)
+                seen_dict = {}
+                all_values = [extract_all_numerical_values(
+                    step) for step in steps]
+                new_all_values = []
+                for all_value in all_values:
+                    for num_value in all_value:
+                        seen_dict[num_value] = seen_dict.get(num_value, 0) + 1
+                    new_all_values.append(
+                        (seen_dict[all_value[-1]], all_value[-1]))
+                all_values = new_all_values.copy()
+                final_answer = extract_all_numerical_values(answer_text)[-1]
+
+                if not all_values:
+                    step_decomposition = False
+                    all_values = extract_all_numerical_values(answer_text)
+
+            else:
+                if not all_values:
+                    all_values = extract_all_numerical_values(answer_text)
         else:
             all_values = extract_proper_nouns(doc)
             final_answer = extract_final_answer(answer_text)
@@ -111,9 +134,14 @@ def _handle_all_decoding(
     seen_dict = {}
 
     for num_idx, num_value in enumerate(all_values):
-        seen_dict[num_value] = seen_dict.get(num_value, 0) + 1
+
+        if step_decomposition:
+            occurrence_count, num_value = num_value
+        else:
+            seen_dict[num_value] = seen_dict.get(num_value, 0) + 1
+            occurrence_count = seen_dict[num_value]
+
         num_value_ids = tokenizer.encode(num_value, add_special_tokens=False)
-        occurrence_count = seen_dict[num_value]
 
         value_start_idx = _find_subsequence_indices(
             answer_ids_list, num_value_ids, occurrence_count)
@@ -178,8 +206,10 @@ def _handle_all_decoding(
             raise NotImplementedError
 
         if not multihop:
-            final_answer = postprocess_final_answer(all_values[-1])
+            if not step_decomposition:
+                final_answer = postprocess_final_answer(all_values[-1])
         else:
+            # previous method
             final_answer = all_values[-1]
 
             # for testing

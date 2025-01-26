@@ -67,9 +67,11 @@ def construct_prompt(question, few_shot=True, few_shot_path=None, multihop=False
         base_prompt = few_shots.format(question=question)
     else:  # zero-shot setting
         if not multihop:
-            base_prompt = f"Q: {question}\nA: Let's think step by step.\n Your response should end with \"The final answer is [answer]\" where [answer] is the response to the problem."
+            # original base_prompt = f"Q: {question}\nA: Let's think step by step.\n Your response should end with \"The final answer is [answer]\" where [answer] is the response to the problem."
+            base_prompt = f"Carefully work through the problem step by step. For each step, perform any required reasoning, and express the answer at the end of the step. After completing the steps, provide the final answer based on the reasoning developed throughout the process. Your response should end with The final answer is [answer] where [answer] is the response to the problem. Q: {question}"
         else:
-            base_prompt = f"Q: {question}\nA: Let's Solve step by step.\n focusing only on the essential steps and limiting your response to 5 sentences. Your response should end with \"The final answer is [answer]\" where [answer] is the response to the problem."
+            # original base_prompt = f"Q: {question}\nA: Let's Solve step by step.\n focusing only on the essential steps and limiting your response to 5 sentences. Your response should end with \"The final answer is [answer]\" where [answer] is the response to the problem."
+            base_prompt = f"Carefully work through the problem step by step. For each step, perform any required reasoning, and express the answer at the end of the step. After completing the steps, provide the final answer based on the reasoning developed throughout the process. Your response should end with The final answer is [answer] where [answer] is the response to the problem. Q: {question}"
     return base_prompt
 
 
@@ -94,10 +96,34 @@ def extract_last_numerical_value(text):
     return matches[-1] if matches else None
 
 
+def extract_last_proper_noun(doc):
+    proper_nouns = []
+    current_proper_noun = []
+
+    for token in doc:
+        if token.pos_ == "PROPN":
+            current_proper_noun.append(token.text)
+        elif current_proper_noun and (token.like_num or "-" in token.text):
+            current_proper_noun.append(token.text)
+        elif current_proper_noun:
+            proper_nouns.append(" ".join(current_proper_noun))
+            current_proper_noun = []
+
+    if current_proper_noun:
+        proper_nouns.append(" ".join(current_proper_noun))
+    return proper_nouns
+
 # extract all numerical values from a given text
+
+
 def extract_all_numerical_values(text):
     return re.findall(r'([+-]?\d?[0-9.,/*\-+]*\d)', text)
 
+
+# extract all steps from the answer text
+def extract_all_steps(text):
+    regex = r"(Step \d+:.*?)(?=\n\n|$)"
+    return re.findall(regex, text, re.DOTALL)
 
 # write content in a file_path
 
