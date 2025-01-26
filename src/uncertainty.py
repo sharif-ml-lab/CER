@@ -208,6 +208,8 @@ def _handle_all_decoding(
         if not multihop:
             if not step_decomposition:
                 final_answer = postprocess_final_answer(all_values[-1])
+            else:
+                final_answer = postprocess_final_answer(final_answer)
         else:
             # previous method
             final_answer = all_values[-1]

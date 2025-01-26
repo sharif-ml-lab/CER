@@ -32,6 +32,7 @@ def evaluate_batch_examples(
         random_selection,
         random_selection_number_words,
         step_decomposition,
+        use_base_prompt,
 ):
     # Construct a list of messages for each question in the batch
     batch_messages = []
@@ -40,7 +41,7 @@ def evaluate_batch_examples(
             question=question,
             few_shot=few_shot,
             few_shot_path=few_shot_path,
-            multihop=multihop,)}])
+            multihop=multihop, use_base_prompt=use_base_prompt)}])
 
         # for testing
         # print(batch_messages)
@@ -117,7 +118,8 @@ def evaluate_batch_examples(
                 model_answer = float(predicted_final_answer)
                 correct_answer = float(
                     postprocess_final_answer(correct_answer_str))
-                is_correct = abs(model_answer - correct_answer) <= 1e-2
+                is_correct = abs(
+                    model_answer - correct_answer) <= max(0.01 * correct_answer, 1e-2)
             else:
                 model_answer = predicted_final_answer
                 correct_answer = correct_answer_str
@@ -170,6 +172,7 @@ def evaluate_dataset(
         random_selection,
         random_selection_number_words,
         step_decomposition,
+        use_base_prompt,
 ):
     # Extract lists of questions and answers directly from the dataframe
     questions = dataset["question"].tolist()
@@ -218,6 +221,7 @@ def evaluate_dataset(
                 random_selection,
                 random_selection_number_words,
                 step_decomposition,
+                use_base_prompt,
             )
 
             # for testing
@@ -340,7 +344,8 @@ def run_dataset(config: Config):
                     nlp=nlp,
                     random_selection=random_selection,
                     random_selection_number_words=random_selection_number_words,
-                    step_decomposition=step_decomposition
+                    step_decomposition=step_decomposition,
+                    use_base_prompt=cfg['use_base_prompt'] if 'use_base_prompt' in cfg else False,
                 )
 
             print(f"Finished run: {cfg_run_name}")
