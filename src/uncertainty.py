@@ -1,5 +1,5 @@
 import random
-import copy
+import json
 
 import torch
 import numpy as np
@@ -8,7 +8,6 @@ from transformers import PreTrainedModel, PreTrainedTokenizer
 from src.utils import extract_all_numerical_values, extract_final_answer, extract_last_numerical_value, extract_proper_nouns, postprocess_final_answer, extract_all_steps, extract_last_proper_noun
 
 
-# extract the final numerical value.
 def _handle_last_decoding(
         tokenizer: PreTrainedTokenizer,
         device,
@@ -53,7 +52,7 @@ def _handle_last_decoding(
 
     final_answer_scores = output_scores[final_answer_start_idx:
                                         final_answer_start_idx + len(final_answer_ids)]
-    confidence = calculate_confidence_for_final_answer(final_answer_scores,
+    confidence = calculate_confidence_for_final_answer(tokenizer, final_answer_scores,
                                                        torch.tensor(final_answer_ids, device=device), confidence_method)
 
     if not multihop:
@@ -62,7 +61,72 @@ def _handle_last_decoding(
     return answer_text, confidence, final_answer
 
 
-# extract all numerical values.
+def number_step_by_step_extraction(answer_text, step_decomposition):
+    # step by step extracting
+    if step_decomposition:
+        steps = extract_all_steps(answer_text)
+        seen_dict = {}
+        all_values = [extract_all_numerical_values(
+            step) for step in steps]
+        new_all_values = []
+        for all_value in all_values:
+            for num_value in all_value:
+                seen_dict[num_value] = seen_dict.get(num_value, 0) + 1
+            new_all_values.append(
+                (seen_dict[all_value[-1]], all_value[-1]))
+        all_values = new_all_values.copy()
+
+        if len(extract_all_numerical_values(answer_text)) > 0:
+            final_answer = extract_all_numerical_values(
+                answer_text)[-1]
+        else:
+            final_answer = None
+
+        if not all_values:
+            step_decomposition = False
+            all_values = extract_all_numerical_values(answer_text)
+
+    else:
+        all_values = extract_all_numerical_values(answer_text)
+
+    return final_answer, all_values, step_decomposition
+
+
+def proper_noun_step_by_step_extraction(answer_text, nlp, step_decomposition, doc):
+    if step_decomposition:
+        steps = extract_all_steps(answer_text)
+        doc_steps = list(nlp.pipe(steps))
+        seen_dict = {}
+        all_values = [extract_proper_nouns(
+            doc_step) for doc_step in doc_steps]
+        final_answer = extract_final_answer(answer_text)
+
+        if final_answer:
+            all_values.append([final_answer])
+
+        new_all_values = []
+        for all_value in all_values:
+            for proper_noun_value in all_value:
+                seen_dict[proper_noun_value] = seen_dict.get(
+                    proper_noun_value, 0) + 1
+            if len(all_value) > 0:
+                new_all_values.append(
+                    (seen_dict[all_value[-1]], all_value[-1]))
+        all_values = new_all_values.copy()
+
+        # print(all_values)
+
+        if not all_values:
+            step_decomposition = False
+            all_values = extract_proper_nouns(doc)
+
+    else:
+        all_values = extract_proper_nouns(doc)
+        final_answer = extract_final_answer(answer_text)
+
+    return final_answer, all_values, step_decomposition
+
+
 def _handle_all_decoding(
         tokenizer: PreTrainedTokenizer,
         device,
@@ -74,35 +138,17 @@ def _handle_all_decoding(
         multihop, doc,
         random_selection,
         random_selection_number_words,
-        step_decomposition):
+        step_decomposition,
+        nlp,):
 
     if not random_selection:
         if not multihop:
-            # step by step extracting
-            if step_decomposition:
-                steps = extract_all_steps(answer_text)
-                seen_dict = {}
-                all_values = [extract_all_numerical_values(
-                    step) for step in steps]
-                new_all_values = []
-                for all_value in all_values:
-                    for num_value in all_value:
-                        seen_dict[num_value] = seen_dict.get(num_value, 0) + 1
-                    new_all_values.append(
-                        (seen_dict[all_value[-1]], all_value[-1]))
-                all_values = new_all_values.copy()
-                final_answer = extract_all_numerical_values(answer_text)[-1]
-
-                if not all_values:
-                    step_decomposition = False
-                    all_values = extract_all_numerical_values(answer_text)
-
-            else:
-                if not all_values:
-                    all_values = extract_all_numerical_values(answer_text)
+            final_answer, all_values, step_decomposition = number_step_by_step_extraction(
+                answer_text, step_decomposition)
         else:
-            all_values = extract_proper_nouns(doc)
-            final_answer = extract_final_answer(answer_text)
+            # step by step extracting
+            final_answer, all_values, step_decomposition = proper_noun_step_by_step_extraction(
+                answer_text, nlp, step_decomposition, doc)
 
             if not all_values and not final_answer:
                 return None
@@ -110,9 +156,10 @@ def _handle_all_decoding(
             if not all_values and final_answer:
                 all_values.append(final_answer)
 
-            elif all_values[-1] != final_answer and final_answer:
+            elif not step_decomposition and all_values[-1] != final_answer and final_answer:
                 all_values.append(final_answer)
     else:
+        step_decomposition = False
         all_values = random.sample(
             answer_text.split(), min(random_selection_number_words, len(answer_text.split())))
         if not multihop:
@@ -162,7 +209,7 @@ def _handle_all_decoding(
 
         num_value_scores = output_scores[value_start_idx:
                                          value_start_idx + len(num_value_ids)]
-        conf_val = calculate_confidence_for_final_answer(num_value_scores, torch.tensor(num_value_ids, device=device),
+        conf_val = calculate_confidence_for_final_answer(tokenizer, num_value_scores, torch.tensor(num_value_ids, device=device),
                                                          confidence_method)
 
         if scoring_mode == 'log':  # (lop(1 + c1) + ... + log(1 + cn)) / n
@@ -212,7 +259,11 @@ def _handle_all_decoding(
                 final_answer = postprocess_final_answer(final_answer)
         else:
             # previous method
-            final_answer = all_values[-1]
+            if not step_decomposition:
+                final_answer = all_values[-1]
+
+            else:
+                final_answer = all_values[-1][-1]
 
             # for testing
             # print(final_answer)
@@ -224,7 +275,7 @@ def _handle_all_decoding(
 #  compute the confidence for a single numerical value occurrence in the generated answer.
 
 
-def compute_confidence_for_value(output_scores, answer_ids, value_ids, device, confidence_method):
+def compute_confidence_for_value(tokenizer, output_scores, answer_ids, value_ids, device, confidence_method):
     value_start_idx = _find_subsequence_indices(answer_ids, value_ids, 1)
     if value_start_idx == -1:
         return None
@@ -235,11 +286,11 @@ def compute_confidence_for_value(output_scores, answer_ids, value_ids, device, c
 
     value_scores = output_scores[value_start_idx:
                                  value_start_idx + len(value_ids)]
-    return calculate_confidence_for_final_answer(value_scores, torch.tensor(value_ids, device=device), confidence_method)
+    return calculate_confidence_for_final_answer(tokenizer, value_scores, torch.tensor(value_ids, device=device), confidence_method)
 
 
 # calculate the confidence score (Δ) for the final answer tokens.
-def calculate_confidence_for_final_answer(logits, answer_ids, confidence_method: str = "default"):
+def calculate_confidence_for_final_answer(tokenizer, logits, answer_ids, confidence_method: str = "default"):
     confidence_sum = 1.0
     valid_tokens = 0
 
@@ -273,6 +324,13 @@ def calculate_confidence_for_final_answer(logits, answer_ids, confidence_method:
                 confidence_sum += (top_2_probs[0] - top_2_probs[1]).item()
             else:
                 confidence_sum += 1.0
+        elif confidence_method == "top_2_diff_extension":
+            top_20_probs, top_20_indices = torch.topk(
+                probs, min(20, probs.size(-1)))
+            top_token_strs = [tokenizer.decode(
+                token_id, skip_special_tokens=True) for token_id in top_20_indices]
+            print(top_token_strs)
+            confidence_sum += (top_20_probs[0] - top_20_probs[1]).item()
         else:
             raise NotImplementedError(
                 "Unsupported confidence calculation mode")

@@ -90,7 +90,7 @@ def _k_seperate_generation(
                 result = _handle_all_decoding(tokenizer, device, answer_text, output_scores, answer_ids, scoring_mode,
                                               confidence_method, multihop, doc,
                                               random_selection,
-                                              random_selection_number_words, step_decomposition)
+                                              random_selection_number_words, step_decomposition, nlp)
 
             # Only append valid results
             if result is not None:
@@ -231,7 +231,7 @@ def _k_branch_generation(
                 doc,
                 random_selection,
                 random_selection_number_words,
-                step_decomposition
+                step_decomposition, nlp
             )
 
         # Append valid result to the corresponding batch item
