@@ -127,6 +127,7 @@ def _k_branch_generation(
         nlp,
         random_selection,
         random_selection_number_words,
+        step_decomposition,
 ):
     input_ids = tokenized_batch["input_ids"]
     attention_mask = tokenized_batch["attention_mask"]
@@ -230,6 +231,7 @@ def _k_branch_generation(
                 doc,
                 random_selection,
                 random_selection_number_words,
+                step_decomposition
             )
 
         # Append valid result to the corresponding batch item

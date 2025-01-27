@@ -1,4 +1,5 @@
 from tqdm import tqdm
+from pathlib import Path
 
 import spacy
 
@@ -240,9 +241,11 @@ def evaluate_dataset(
             pbar.update(end_idx - start_idx)
 
     # Save and print final results
+    directory_path = Path("outputs")
+    directory_path.mkdir(parents=True, exist_ok=True)
     save_results_to_csv(
         results,
-        f"outputs/{description}_evaluation_results_{'few_shot' if few_shot else 'zero_shot'}{'_random' if random_selection else ''}.csv")
+        f"{directory_path}/{description}_evaluation_results_{'few_shot' if few_shot else 'zero_shot'}{'_random' if random_selection else ''}.csv")
     accuracy = (correct_answers / total_questions) * 100
     print_final_accuracy(description, accuracy)
     return accuracy
