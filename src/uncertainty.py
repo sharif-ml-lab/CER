@@ -1,5 +1,6 @@
 import random
 import json
+import re
 
 import torch
 import numpy as np
@@ -94,7 +95,12 @@ def number_step_by_step_extraction(answer_text, step_decomposition):
 
 def proper_noun_step_by_step_extraction(answer_text, nlp, step_decomposition, doc):
     if step_decomposition:
-        steps = extract_all_steps(answer_text)
+        # check the period and split based on this.
+        steps = re.split(r"\.\s+", answer_text)
+        steps = [step for step in steps if len(step)]
+
+        # steps = extract_all_steps(answer_text)
+
         doc_steps = list(nlp.pipe(steps))
         seen_dict = {}
         all_values = [extract_proper_nouns(
