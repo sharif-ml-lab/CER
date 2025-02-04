@@ -4,7 +4,7 @@ import pandas as pd
 from fpdf import FPDF
 
 
-model_names = ["Llama", "Mistral", "Olmo"]
+model_names = ['Llama 3.1 8B', 'Mistral 7B', 'Olmo 2 7B', 'Llama 3.2 3B',]
 modes = ["math", "multihop"]
 save_directory = "outputs/pdf_results"
 metrics = ["Accuracy"]
@@ -42,23 +42,19 @@ for mode in modes:
 
                 if metric == "Accuracy":
                     df = pd.read_csv(
-                        "inputs/csv_inputs/Decoding - Zero Shot Results.csv")
+                        "inputs/csv_inputs/Decoding - Step Conf Zero Shot Results.csv")
 
                 df = df.drop(columns=['GSM8K'])
                 df = df.rename(columns={'Unnamed: 8': 'GSM8K'})
 
-                df = df.drop(columns=['MultiArith'])
-                df = df.rename(columns={'Unnamed: 14': 'MultiArith'})
-
                 df = df.drop(columns=['MATH'])
-                df = df.rename(columns={'Unnamed: 17': 'MATH'})
+                df = df.rename(columns={'Unnamed: 11': 'MATH'})
 
                 df = df.drop(columns=['Math QA'])
-                df = df.rename(columns={'Unnamed: 20': 'Math QA'})
+                df = df.rename(columns={'Unnamed: 14': 'Math QA'})
 
                 model_df = df[df['model'].str.contains(model_name, na=False)]
-                model_df = model_df[['Method', 'GSM8K',
-                                    'MultiArith', 'MATH', 'Math QA']]
+                model_df = model_df[['Method', 'GSM8K', 'MATH', 'Math QA']]
 
                 model_df = model_df.reset_index(drop=True)
 
