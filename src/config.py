@@ -147,9 +147,38 @@ multi_run_configs = {
 
     # "Greedy"
 
-    # "Predictive Entropy"
+    "Predictive Entropy": {
+        "decoding_mode": 'all',  # "all": all the numbers "last": the last number
+        # [k-seperate, self_consistency, p_true, PE, NL, NE]
+        "baseline_cot": "PE",
+        "scoring_mode": 'log',  # log, min, max, h_mean, mean, weighted_mean
+        # "temperature": temperature sampling  "greedy": greedy sampling
+        "sampling_mode": "temperature",
+        "confidence": "top_2_diff",  # Options: "default", "sum", "entropy",
+        "use_base_prompt": True,
+    },
 
-    # "Normilized Likelihood"
+    "Normilized-length Likelihood": {
+        "decoding_mode": 'all',  # "all": all the numbers "last": the last number
+        # [k-seperate, self_consistency, p_true, PE, NL, NE]
+        "baseline_cot": "NL",
+        "scoring_mode": 'log',  # log, min, max, h_mean, mean, weighted_mean
+        # "temperature": temperature sampling  "greedy": greedy sampling
+        "sampling_mode": "temperature",
+        "confidence": "top_2_diff",  # Options: "default", "sum", "entropy",
+        "use_base_prompt": True,
+    },
+
+    "Normalized-length Entropy": {
+        "decoding_mode": 'all',  # "all": all the numbers "last": the last number
+        # [k-seperate, self_consistency, p_true, PE, NL, NE]
+        "baseline_cot": "NE",
+        "scoring_mode": 'log',  # log, min, max, h_mean, mean, weighted_mean
+        # "temperature": temperature sampling  "greedy": greedy sampling
+        "sampling_mode": "temperature",
+        "confidence": "top_2_diff",  # Options: "default", "sum", "entropy",
+        "use_base_prompt": True,
+    },
 
 }
 

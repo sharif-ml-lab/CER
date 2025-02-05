@@ -146,7 +146,8 @@ def batch_messages_creation(tokenizer, batch_questions, batch_answers, few_shot,
                 question=question,
                 few_shot=few_shot,
                 few_shot_path=few_shot_path,
-                multihop=multihop)}])
+                multihop=multihop,
+                use_base_prompt=True)}])
 
     elif query_number == 2:
         for question, answer in list(zip(batch_questions, batch_answers)):

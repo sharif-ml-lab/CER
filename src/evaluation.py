@@ -3,13 +3,15 @@ from pathlib import Path
 
 import spacy
 
-from src.self_consistency import self_consistency_decode
+from src.baselines.self_consistency import self_consistency_decode
 from src.decoding import cot_decode
 from src.greedy_on_numbers import special_greedy_decode
 from src.utils import load_model_and_tokenizer, construct_prompt, print_final_accuracy, save_results_to_csv, \
     load_and_sample_parquet_datasets, postprocess_final_answer
 from src.config import Config, multi_run_configs
-from src.true_baseline import p_true
+from src.baselines.true_baseline import p_true
+from src.baselines.nll import nll
+from src.baselines.pe import pe
 
 
 # evaluate the model on a batch of exapmles
@@ -103,6 +105,50 @@ def evaluate_batch_examples(
             nlp=nlp,
             few_shot=few_shot,
             few_shot_path=few_shot_path,
+        )
+
+    elif baseline_cot == "PE":  # predictive entropy
+        batch_results = pe(
+            model,
+            tokenizer,
+            batch_questions,
+            aggregate_paths=aggregate,
+            k=k,
+            sampling_mode=sampling_mode,
+            multihop=multihop,
+            nlp=nlp,
+            few_shot=few_shot,
+            few_shot_path=few_shot_path,
+            normalize_length=False,
+        )
+
+    elif baseline_cot == "NL":  # normalized-length likelihood
+        batch_results = nll(
+            model,
+            tokenizer,
+            batch_questions,
+            aggregate_paths=aggregate,
+            k=k,
+            sampling_mode=sampling_mode,
+            multihop=multihop,
+            nlp=nlp,
+            few_shot=few_shot,
+            few_shot_path=few_shot_path,
+        )
+
+    elif baseline_cot == "NE":  # normalized-length predictive entropy
+        batch_results = pe(
+            model,
+            tokenizer,
+            batch_questions,
+            aggregate_paths=aggregate,
+            k=k,
+            sampling_mode=sampling_mode,
+            multihop=multihop,
+            nlp=nlp,
+            few_shot=few_shot,
+            few_shot_path=few_shot_path,
+            normalize_length=True,
         )
     else:
         raise ValueError(f"Unsupported baseline_cot mode: {baseline_cot}")
