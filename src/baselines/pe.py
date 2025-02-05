@@ -26,24 +26,30 @@ def get_pe(normalized_length, generated_logits, generated_ids, pad_token_id):
     return pe
 
 
-def aggregate_paths_based_on_scores(paths):
-    # answer_scores = {}
-    # best_full_ans = None
-    # for answer, delta, final_answer in paths:
-    #     answer_scores[final_answer] = answer_scores.get(
-    #         final_answer, 0) + delta
+def aggregate_paths_based_on_scores(paths, use_min=False):
+    if use_min:
+        best_answer, min_delta, best_final_answer = min(
+            paths, key=lambda x: x[1])
+        return best_answer, min_delta, best_final_answer
 
-    # best_answer = min(answer_scores, key=answer_scores.get)
+    else:
+        y_max = max(y for _, y, _ in paths)
+        normalized_paths = [(x, y_max - y, z) for x, y, z in paths]
 
-    # for answer, delta, final_answer in paths:
-    #     if final_answer == best_answer:
-    #         best_full_ans = answer
-    #         break
+        answer_scores = {}
+        best_full_ans = None
+        for answer, delta, final_answer in normalized_paths:
+            answer_scores[final_answer] = answer_scores.get(
+                final_answer, 0) + delta
 
-    # return best_full_ans, answer_scores[best_answer], best_answer
+        best_answer = max(answer_scores, key=answer_scores.get)
 
-    best_answer, min_delta, best_final_answer = min(paths, key=lambda x: x[1])
-    return best_answer, min_delta, best_final_answer
+        for answer, delta, final_answer in normalized_paths:
+            if final_answer == best_answer:
+                best_full_ans = answer
+                break
+
+        return best_full_ans, answer_scores[best_answer], best_answer
 
 
 def _k_generation(
