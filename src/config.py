@@ -17,14 +17,14 @@ multi_run_configs = {
     #     "confidence": "sum"  # Options: "default", "sum", "entropy",
     # },
 
-    "Ours + Temp + * P + log": {
-        "decoding_mode": 'all',  # "all": all the numbers "last": the last number
-        "baseline_cot": "k-seperate",
-        "scoring_mode": 'log',  # log, min, max, h_mean, mean, weighted_mean
-        # "temperature": temperature sampling  "greedy": greedy sampling
-        "sampling_mode": "temperature",
-        "confidence": "default"  # Options: "default", "sum", "entropy",
-    },
+    # "Ours + Temp + * P + log": {
+    #     "decoding_mode": 'all',  # "all": all the numbers "last": the last number
+    #     "baseline_cot": "k-seperate",
+    #     "scoring_mode": 'log',  # log, min, max, h_mean, mean, weighted_mean
+    #     # "temperature": temperature sampling  "greedy": greedy sampling
+    #     "sampling_mode": "temperature",
+    #     "confidence": "default"  # Options: "default", "sum", "entropy",
+    # },
 
     # "Ours + Temp + H + log": {
     #     "decoding_mode": 'all',  # "all": all the numbers "last": the last number
@@ -36,41 +36,41 @@ multi_run_configs = {
     #     "confidence": "entropy"
     # },
 
-    "Ours + Temp + * P + min": {
-        "decoding_mode": 'all',  # "all": all the numbers "last": the last number
-        "baseline_cot": "k-seperate",
-        "scoring_mode": 'min',  # log, min, max, h_mean, mean, weighted_mean
-        # "temperature": temperature sampling  "greedy": greedy sampling
-        "sampling_mode": "temperature",
-        "confidence": "default"  # Options: "default", "sum", "entropy",
-    },
+    # "Ours + Temp + * P + min": {
+    #     "decoding_mode": 'all',  # "all": all the numbers "last": the last number
+    #     "baseline_cot": "k-seperate",
+    #     "scoring_mode": 'min',  # log, min, max, h_mean, mean, weighted_mean
+    #     # "temperature": temperature sampling  "greedy": greedy sampling
+    #     "sampling_mode": "temperature",
+    #     "confidence": "default"  # Options: "default", "sum", "entropy",
+    # },
 
-    "Ours + Temp + * P + max": {
-        "decoding_mode": 'all',  # "all": all the numbers "last": the last number
-        "baseline_cot": "k-seperate",
-        "scoring_mode": 'max',  # log, min, max, h_mean, mean, weighted_mean
-        # "temperature": temperature sampling  "greedy": greedy sampling
-        "sampling_mode": "temperature",
-        "confidence": "default"  # Options: "default", "sum", "entropy",
-    },
+    # "Ours + Temp + * P + max": {
+    #     "decoding_mode": 'all',  # "all": all the numbers "last": the last number
+    #     "baseline_cot": "k-seperate",
+    #     "scoring_mode": 'max',  # log, min, max, h_mean, mean, weighted_mean
+    #     # "temperature": temperature sampling  "greedy": greedy sampling
+    #     "sampling_mode": "temperature",
+    #     "confidence": "default"  # Options: "default", "sum", "entropy",
+    # },
 
-    "Ours + Temp + * P + h_mean": {
-        "decoding_mode": 'all',  # "all": all the numbers "last": the last number
-        "baseline_cot": "k-seperate",
-        "scoring_mode": 'h_mean',  # log, min, max, h_mean, mean, weighted_mean
-        # "temperature": temperature sampling  "greedy": greedy sampling
-        "sampling_mode": "temperature",
-        "confidence": "default"  # Options: "default", "sum", "entropy",
-    },
+    # "Ours + Temp + * P + h_mean": {
+    #     "decoding_mode": 'all',  # "all": all the numbers "last": the last number
+    #     "baseline_cot": "k-seperate",
+    #     "scoring_mode": 'h_mean',  # log, min, max, h_mean, mean, weighted_mean
+    #     # "temperature": temperature sampling  "greedy": greedy sampling
+    #     "sampling_mode": "temperature",
+    #     "confidence": "default"  # Options: "default", "sum", "entropy",
+    # },
 
-    "Ours + Temp + * P + weighted_mean": {
-        "decoding_mode": 'all',  # "all": all the numbers "last": the last number
-        "baseline_cot": "k-seperate",
-        "scoring_mode": 'weighted_mean',  # log, min, max, h_mean, mean, weighted_mean
-        # "temperature": temperature sampling  "greedy": greedy sampling
-        "sampling_mode": "temperature",
-        "confidence": "default"  # Options: "default", "sum", "entropy",
-    },
+    # "Ours + Temp + * P + weighted_mean": {
+    #     "decoding_mode": 'all',  # "all": all the numbers "last": the last number
+    #     "baseline_cot": "k-seperate",
+    #     "scoring_mode": 'weighted_mean',  # log, min, max, h_mean, mean, weighted_mean
+    #     # "temperature": temperature sampling  "greedy": greedy sampling
+    #     "sampling_mode": "temperature",
+    #     "confidence": "default"  # Options: "default", "sum", "entropy",
+    # },
 
     # "Ours + Temp + H + min": {
     #     "decoding_mode": 'all',  # "all": all the numbers "last": the last number
@@ -102,14 +102,14 @@ multi_run_configs = {
     #     "confidence": "entropy"
     # },
 
-    "Ours + Temp + * P + last": {
-        "decoding_mode": 'last',  # "all": all the numbers "last": the last number
-        "baseline_cot": "k-seperate",
-        "scoring_mode": 'log',  # log, min, max, h_mean, mean, weighted_mean
-        # "temperature": temperature sampling  "greedy": greedy sampling
-        "sampling_mode": "temperature",
-        "confidence": "default"  # Options: "default", "sum", "entropy",
-    },
+    # "Ours + Temp + * P + last": {
+    #     "decoding_mode": 'last',  # "all": all the numbers "last": the last number
+    #     "baseline_cot": "k-seperate",
+    #     "scoring_mode": 'log',  # log, min, max, h_mean, mean, weighted_mean
+    #     # "temperature": temperature sampling  "greedy": greedy sampling
+    #     "sampling_mode": "temperature",
+    #     "confidence": "default"  # Options: "default", "sum", "entropy",
+    # },
 
     # "Ours + Temp + H + last": {
     #     "decoding_mode": 'last',  # "all": all the numbers "last": the last number
@@ -123,40 +123,40 @@ multi_run_configs = {
 
     ############ baselines ##########
 
-    "Self Const": {
-        "decoding_mode": 'all',  # "all": all the numbers "last": the last number
-        # [k-seperate, self_consistency, p_true]
-        "baseline_cot": 'self_consistency',
-        "scoring_mode": 'log',  # log, min, max, h_mean, mean, weighted_mean
-        # "temperature": temperature sampling  "greedy": greedy sampling
-        "sampling_mode": "temperature",
-        "confidence": "default",  # Options: "default", "sum", "entropy",
-        "use_base_prompt": True,
-    },
+    # "Self Const": {
+    #     "decoding_mode": 'all',  # "all": all the numbers "last": the last number
+    #     # [k-seperate, self_consistency, p_true]
+    #     "baseline_cot": 'self_consistency',
+    #     "scoring_mode": 'log',  # log, min, max, h_mean, mean, weighted_mean
+    #     # "temperature": temperature sampling  "greedy": greedy sampling
+    #     "sampling_mode": "temperature",
+    #     "confidence": "default",  # Options: "default", "sum", "entropy",
+    #     "use_base_prompt": True,
+    # },
 
-    "P_True": {
-        "decoding_mode": 'all',  # "all": all the numbers "last": the last number
-        # [k-seperate, self_consistency, p_true]
-        "baseline_cot": "p_true",
-        "scoring_mode": 'log',  # log, min, max, h_mean, mean, weighted_mean
-        # "temperature": temperature sampling  "greedy": greedy sampling
-        "sampling_mode": "temperature",
-        "confidence": "top_2_diff",  # Options: "default", "sum", "entropy",
-        "use_base_prompt": True,
-    },
+    # "P_True": {
+    #     "decoding_mode": 'all',  # "all": all the numbers "last": the last number
+    #     # [k-seperate, self_consistency, p_true]
+    #     "baseline_cot": "p_true",
+    #     "scoring_mode": 'log',  # log, min, max, h_mean, mean, weighted_mean
+    #     # "temperature": temperature sampling  "greedy": greedy sampling
+    #     "sampling_mode": "temperature",
+    #     "confidence": "top_2_diff",  # Options: "default", "sum", "entropy",
+    #     "use_base_prompt": True,
+    # },
 
     # "Greedy"
 
-    "Predictive Entropy": {
-        "decoding_mode": 'all',  # "all": all the numbers "last": the last number
-        # [k-seperate, self_consistency, p_true, PE, NL, NE]
-        "baseline_cot": "PE",
-        "scoring_mode": 'log',  # log, min, max, h_mean, mean, weighted_mean
-        # "temperature": temperature sampling  "greedy": greedy sampling
-        "sampling_mode": "temperature",
-        "confidence": "top_2_diff",  # Options: "default", "sum", "entropy",
-        "use_base_prompt": True,
-    },
+    # "Predictive Entropy": {
+    #     "decoding_mode": 'all',  # "all": all the numbers "last": the last number
+    #     # [k-seperate, self_consistency, p_true, PE, NL, NE]
+    #     "baseline_cot": "PE",
+    #     "scoring_mode": 'log',  # log, min, max, h_mean, mean, weighted_mean
+    #     # "temperature": temperature sampling  "greedy": greedy sampling
+    #     "sampling_mode": "temperature",
+    #     "confidence": "top_2_diff",  # Options: "default", "sum", "entropy",
+    #     "use_base_prompt": True,
+    # },
 
     "Normilized-length Likelihood": {
         "decoding_mode": 'all',  # "all": all the numbers "last": the last number

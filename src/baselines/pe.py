@@ -26,7 +26,7 @@ def get_pe(normalized_length, generated_logits, generated_ids, pad_token_id):
     return pe
 
 
-def aggregate_paths_based_on_scores(paths, use_min=False):
+def aggregate_paths_based_on_scores(paths, use_min=True):
     if use_min:
         best_answer, min_delta, best_final_answer = min(
             paths, key=lambda x: x[1])
