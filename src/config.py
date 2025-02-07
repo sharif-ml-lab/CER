@@ -72,6 +72,16 @@ multi_run_configs = {
     #     "confidence": "default"  # Options: "default", "sum", "entropy",
     # },
 
+    # "Ours + Temp + H + weighted_mean": {
+    #     "decoding_mode": 'all',  # "all": all the numbers "last": the last number
+    #     "baseline_cot": "k-seperate",
+    #     "scoring_mode": 'weighted_mean',  # log, min, max, h_mean, mean, weighted_mean
+    #     # "temperature": temperature sampling  "greedy": greedy sampling
+    #     "sampling_mode": "temperature",
+    #     # Options: "default", "sum", "entropy",
+    #     "confidence": "entropy"
+    # },
+
     # "Ours + Temp + H + min": {
     #     "decoding_mode": 'all',  # "all": all the numbers "last": the last number
     #     "baseline_cot": "k-seperate",
@@ -145,18 +155,18 @@ multi_run_configs = {
     #     "use_base_prompt": True,
     # },
 
-    # "Greedy"
+    # # "Greedy"
 
-    # "Predictive Entropy": {
-    #     "decoding_mode": 'all',  # "all": all the numbers "last": the last number
-    #     # [k-seperate, self_consistency, p_true, PE, NL, NE]
-    #     "baseline_cot": "PE",
-    #     "scoring_mode": 'log',  # log, min, max, h_mean, mean, weighted_mean
-    #     # "temperature": temperature sampling  "greedy": greedy sampling
-    #     "sampling_mode": "temperature",
-    #     "confidence": "top_2_diff",  # Options: "default", "sum", "entropy",
-    #     "use_base_prompt": True,
-    # },
+    "Predictive Entropy": {
+        "decoding_mode": 'all',  # "all": all the numbers "last": the last number
+        # [k-seperate, self_consistency, p_true, PE, NL, NE]
+        "baseline_cot": "PE",
+        "scoring_mode": 'log',  # log, min, max, h_mean, mean, weighted_mean
+        # "temperature": temperature sampling  "greedy": greedy sampling
+        "sampling_mode": "temperature",
+        "confidence": "top_2_diff",  # Options: "default", "sum", "entropy",
+        "use_base_prompt": True,
+    },
 
     "Normilized-length Likelihood": {
         "decoding_mode": 'all',  # "all": all the numbers "last": the last number
