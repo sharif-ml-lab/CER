@@ -247,7 +247,8 @@ def _handle_all_decoding(
                 confidence_sum += conf_val  # coeff=1 for others
             else:
                 # coeff=total-1 for the last
-                confidence_sum += (total - 1) * conf_val
+                confidence_sum += (total - 1) * \
+                    conf_val if total > 1 else conf_val
 
         # (2^0*c1 + ... 2^(n-1)*cn) / (2^n - )
         elif scoring_mode == "weighted_2":
@@ -268,7 +269,8 @@ def _handle_all_decoding(
         elif scoring_mode == 'h_mean':
             confidence = total_valid_values / confidence_sum
         elif scoring_mode == "weighted_half":
-            confidence = confidence_sum / (2 * (len(all_values) - 1))
+            confidence = confidence_sum / \
+                (2 * (len(all_values) - 1)) if len(all_values) > 1 else confidence_sum
         elif scoring_mode == "weighted_2":
             confidence = confidence_sum / ((2 ** len(all_values)) - 1)
         else:
