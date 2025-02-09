@@ -162,6 +162,8 @@ def evaluate_batch_examples(
         # Compare numeric answers if both are valid floats
         try:
             if not multihop:
+                if not predicted_final_answer:
+                    raise ValueError("Predicted final answer is None.")
                 model_answer = float(predicted_final_answer)
                 correct_answer = float(
                     postprocess_final_answer(correct_answer_str))

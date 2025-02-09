@@ -241,6 +241,18 @@ def _handle_all_decoding(
         elif scoring_mode == "weighted_mean":
             confidence_sum += (((1 + num_idx) * conf_val) /
                                ((len(all_values) * len(all_values)) / 2))
+        elif scoring_mode == "weighted_half":  # half: final answer, half: all the others
+            total = len(all_values)
+            if total - 1 != num_idx:
+                confidence_sum += conf_val  # coeff=1 for others
+            else:
+                # coeff=total-1 for the last
+                confidence_sum += (total - 1) * conf_val
+
+        # (2^0*c1 + ... 2^(n-1)*cn) / (2^n - )
+        elif scoring_mode == "weighted_2":
+            confidence_sum += (2**num_idx) * conf_val
+
         else:
             raise NotImplementedError("Unsupported scoring_mode")
 
@@ -255,6 +267,10 @@ def _handle_all_decoding(
             confidence = confidence_sum
         elif scoring_mode == 'h_mean':
             confidence = total_valid_values / confidence_sum
+        elif scoring_mode == "weighted_half":
+            confidence = confidence_sum / (2 * (len(all_values) - 1))
+        elif scoring_mode == "weighted_2":
+            confidence = confidence_sum / ((2 ** len(all_values)) - 1)
         else:
             raise NotImplementedError
 
