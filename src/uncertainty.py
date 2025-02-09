@@ -272,7 +272,8 @@ def _handle_all_decoding(
             confidence = confidence_sum / \
                 (2 * (len(all_values) - 1)) if len(all_values) > 1 else confidence_sum
         elif scoring_mode == "weighted_2":
-            confidence = confidence_sum / ((2 ** len(all_values)) - 1)
+            confidence = confidence_sum / \
+                ((2 ** len(all_values)) - 1) if len(all_values) > 1 else confidence_sum
         else:
             raise NotImplementedError
 
