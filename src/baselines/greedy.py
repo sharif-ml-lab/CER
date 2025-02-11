@@ -182,8 +182,8 @@ def greedy_baseline(
         few_shot_path=few_shot_path,
     )
 
-    print(batch_questions)
-    print(40*'-')
+    # print(batch_questions)
+    # print(40*'-')
 
     # If no paths returned, ensure we have a default result for each input.
     if not paths_for_batch or len(paths_for_batch) != len(batch_questions):
