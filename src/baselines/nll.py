@@ -9,7 +9,7 @@ from src.uncertainty import extract_last_numerical_value, extract_final_answer, 
 from src.utils import construct_prompt, postprocess_final_answer
 
 
-def get_normalized_loglikelihoods(generated_logits, generated_ids, pad_token_id):
+def get_normalized_loglikelihoods(generated_logits, generated_ids, pad_token_id, normalize_length):
     log_probs = F.log_softmax(generated_logits, dim=-1)
     token_log_probs = log_probs.gather(
         dim=-1, index=generated_ids.unsqueeze(-1)).squeeze(-1)
@@ -18,8 +18,12 @@ def get_normalized_loglikelihoods(generated_logits, generated_ids, pad_token_id)
         valid_mask = generated_ids != pad_token_id
         token_log_probs = token_log_probs[valid_mask]
 
-    nll = - (token_log_probs).sum() / \
-        len(token_log_probs)  # more -> high uncertainty
+    if normalize_length:
+        nll = - (token_log_probs).sum() / \
+            len(token_log_probs)  # more -> high uncertainty
+    else:
+        nll = - (token_log_probs).sum()  # more -> high uncertainty
+
     return nll.item()
 
 
@@ -68,6 +72,7 @@ def _k_generation(
         nlp,
         few_shot,
         few_shot_path,
+        normalize_length,
 ):
 
     batch_size = len(batch_questions)
@@ -116,7 +121,7 @@ def _k_generation(
                 [x[i] for x in batch_output.scores])
 
             nll = get_normalized_loglikelihoods(
-                output_scores, answer_ids, pad_token_id=tokenizer.pad_token_id)
+                output_scores, answer_ids, pad_token_id=tokenizer.pad_token_id, normalize_length=normalize_length)
 
             batch_answer_ids.append(answer_ids)
             batch_answer_texts.append(answer_text)
@@ -208,6 +213,7 @@ def nll(
         nlp,
         few_shot,
         few_shot_path,
+        normalize_length,
         num_beams=1,
         temperature=1.0,
         top_p=1.0,
@@ -246,6 +252,7 @@ def nll(
         nlp=nlp,
         few_shot=few_shot,
         few_shot_path=few_shot_path,
+        normalize_length=normalize_length,
     )
 
     # If no paths returned, ensure we have a default result for each input.

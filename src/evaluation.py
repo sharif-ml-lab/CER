@@ -135,6 +135,22 @@ def evaluate_batch_examples(
             nlp=nlp,
             few_shot=few_shot,
             few_shot_path=few_shot_path,
+            normalize_length=True,
+        )
+
+    elif baseline_cot == "LL":  # likelihood
+        batch_results = nll(
+            model,
+            tokenizer,
+            batch_questions,
+            aggregate_paths=aggregate,
+            k=k,
+            sampling_mode=sampling_mode,
+            multihop=multihop,
+            nlp=nlp,
+            few_shot=few_shot,
+            few_shot_path=few_shot_path,
+            normalize_length=False,
         )
 
     elif baseline_cot == "NE":  # normalized-length predictive entropy
@@ -256,10 +272,6 @@ def evaluate_dataset(
             # Slice out the batch
             batch_questions = questions[start_idx:end_idx]
             batch_correct_answers = correct_answers_list[start_idx:end_idx]
-
-            # for testing
-            # print(batch_questions)
-            # print(batch_correct_answers)
 
             # Evaluate the batch
             batch_results = evaluate_batch_examples(
