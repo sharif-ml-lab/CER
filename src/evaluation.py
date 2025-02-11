@@ -12,6 +12,7 @@ from src.config import Config, multi_run_configs
 from src.baselines.true_baseline import p_true
 from src.baselines.nll import nll
 from src.baselines.pe import pe
+from src.baselines.greedy import greedy_baseline
 
 
 # evaluate the model on a batch of exapmles
@@ -150,6 +151,17 @@ def evaluate_batch_examples(
             few_shot_path=few_shot_path,
             normalize_length=True,
         )
+    elif baseline_cot == "GREEDY":  # greedy baseline
+        batch_results = greedy_baseline(model,
+                                        tokenizer,
+                                        batch_questions,
+                                        aggregate_paths=aggregate,
+                                        multihop=multihop,
+                                        nlp=nlp,
+                                        few_shot=few_shot,
+                                        few_shot_path=few_shot_path,
+                                        )
+
     else:
         raise ValueError(f"Unsupported baseline_cot mode: {baseline_cot}")
 
