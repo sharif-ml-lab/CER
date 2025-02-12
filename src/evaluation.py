@@ -74,7 +74,7 @@ def evaluate_batch_examples(
         batch_results = self_consistency_decode(
             model,
             tokenizer,
-            batch_messages,
+            batch_questions,
             k=k,
             multihop=multihop,
         )
