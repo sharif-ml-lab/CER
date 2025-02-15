@@ -4,8 +4,7 @@ from pathlib import Path
 import spacy
 
 from src.baselines.self_consistency import self_consistency_decode
-from src.decoding import cot_decode
-from src.greedy_on_numbers import special_greedy_decode
+from src.decoding import cer_decode
 from src.utils import load_model_and_tokenizer, construct_prompt, print_final_accuracy, save_results_to_csv, \
     load_and_sample_parquet_datasets, postprocess_final_answer
 from src.config import Config, multi_run_configs
@@ -33,8 +32,6 @@ def evaluate_batch_examples(
         multihop,
         dataset_name,
         nlp,
-        random_selection,
-        random_selection_number_words,
         step_decomposition,
         use_base_prompt,
 ):
@@ -51,9 +48,9 @@ def evaluate_batch_examples(
         # print(batch_messages)
 
     # Depending on baseline_cot, call the appropriate batch decoding function
-    if baseline_cot in ("k-branch", "k-seperate"):
+    if baseline_cot == "k-seperate":
         # These functions return lists of results, confidences, and final answers
-        batch_results = cot_decode(
+        batch_results = cer_decode(
             model,
             tokenizer,
             batch_messages,
@@ -66,8 +63,6 @@ def evaluate_batch_examples(
             confidence_method=confidence_method,
             multihop=multihop,
             nlp=nlp,
-            random_selection=random_selection,
-            random_selection_number_words=random_selection_number_words,
             step_decomposition=step_decomposition,
         )
     elif baseline_cot == "self_consistency":
@@ -77,22 +72,6 @@ def evaluate_batch_examples(
             batch_questions,
             k=k,
             multihop=multihop,
-        )
-    elif baseline_cot in ("branch_greedy_special", "seperated_greedy_special"):
-        # These functions return lists of results, confidences, and final answers
-        batch_results = special_greedy_decode(
-            model,
-            tokenizer,
-            batch_messages,
-            aggregate_paths=aggregate,
-            k=k,
-            decoding_mode=decoding_mode,
-            sampling_mode=sampling_mode,
-            scoring_mode=scoring_mode,
-            baseline_cot=baseline_cot,
-            confidence_method=confidence_method,
-            multihop=multihop,
-            nlp=nlp,
         )
     elif baseline_cot == "p_true":
         batch_results = p_true(
@@ -206,7 +185,7 @@ def evaluate_batch_examples(
                 else:
                     if dataset_name == "hotpot":
                         is_correct = model_answer.lower() == correct_answer.lower()
-                    elif dataset_name == "trivia" or dataset_name == "popqa":
+                    elif dataset_name == "trivia":
                         is_correct = (model_answer.lower() in correct_answer) or (
                             model_answer in correct_answer)
 
@@ -246,8 +225,6 @@ def evaluate_dataset(
         multihop,
         dataset_name,
         nlp,
-        random_selection,
-        random_selection_number_words,
         step_decomposition,
         use_base_prompt,
 ):
@@ -291,8 +268,6 @@ def evaluate_dataset(
                 multihop,
                 dataset_name,
                 nlp,
-                random_selection,
-                random_selection_number_words,
                 step_decomposition,
                 use_base_prompt,
             )
@@ -317,7 +292,7 @@ def evaluate_dataset(
     directory_path.mkdir(parents=True, exist_ok=True)
     save_results_to_csv(
         results,
-        f"{directory_path}/{description}_evaluation_results_{'few_shot' if few_shot else 'zero_shot'}{'_random' if random_selection else ''}.csv")
+        f"{directory_path}/{description}_evaluation_results_{'few_shot' if few_shot else 'zero_shot'}.csv")
     accuracy = (correct_answers / total_questions) * 100
     print_final_accuracy(description, accuracy)
     return accuracy
@@ -336,8 +311,6 @@ def run_dataset(config: Config):
     batch_size = config.batch_size
     dataset_files = config.datasets
     multihop = config.multihop
-    random_selection = config.random_selection
-    random_selection_number_words = config.random_selection_number_words
     step_decomposition = config.step_decomposition
 
     # Print the provided configurations
@@ -417,8 +390,6 @@ def run_dataset(config: Config):
                     multihop=multihop,
                     dataset_name=dataset_name,
                     nlp=nlp,
-                    random_selection=random_selection,
-                    random_selection_number_words=random_selection_number_words,
                     step_decomposition=step_decomposition,
                     use_base_prompt=cfg['use_base_prompt'] if 'use_base_prompt' in cfg else False,
                 )

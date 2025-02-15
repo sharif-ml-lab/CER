@@ -70,7 +70,6 @@ def construct_prompt(question, few_shot=True, few_shot_path=None, multihop=False
             if use_base_prompt:
                 base_prompt = f"Q: {question}\nA: Let's think step by step.\n Your response should end with \"The final answer is [answer]\" where [answer] is the response to the problem."
             else:
-                # base_prompt = f"Carefully work through the problem step by step. For each step, perform any required reasoning, and express the answer at the end of the step. After completing the steps, provide the final answer based on the reasoning developed throughout the process. Your response should end with The final answer is [answer] where [answer] is the response to the problem. Q: {question}"
                 base_prompt = (
                     f"Carefully work through the problem step by step. For each step, perform any required reasoning, "
                     f"and express the answer at the end of the step, Your response should be in the format Answer: [answer]. After completing the steps, "
@@ -82,14 +81,6 @@ def construct_prompt(question, few_shot=True, few_shot_path=None, multihop=False
                 base_prompt = f"Q: {question}\nA: Let's Solve step by step.\n focusing only on the essential steps and limiting your response to 5 sentences. Your response should end with \"The final answer is [answer]\" where [answer] is the response to the problem."
             else:
                 base_prompt = f"Q: {question}\nA: Let's Solve step by step.\n focusing only on the essential steps and limiting your response to 5 sentences. Your response should end with \"The final answer is [answer]\" where [answer] is the response to the problem."
-
-                # base_prompt = f"Carefully work through the problem step by step. For each step, perform any required reasoning, and express the answer at the end of the step. After completing the steps, provide the final answer based on the reasoning developed throughout the process. Your response should end with The final answer is [answer] where [answer] is the response to the problem. Q: {question}"
-                # base_prompt = (
-                #     f"Carefully work through the problem step by step. For each step, perform any required reasoning, "
-                #     f"and express the answer at the end of the step, Your response should be in the format Answer: [answer]. After completing the steps, "
-                #     f"provide the final answer based on the reasoning developed throughout the process. "
-                #     f"Your response should end with The final answer is [answer], where [answer] is the response to the problem. Q: {question}"
-                # )
     return base_prompt
 
 
@@ -132,8 +123,6 @@ def extract_last_proper_noun(doc):
     return proper_nouns
 
 # extract all numerical values from a given text
-
-
 def extract_all_numerical_values(text):
     return re.findall(r'([+-]?\d?[0-9.,/*\-+]*\d)', text)
 
@@ -144,16 +133,12 @@ def extract_all_steps(text):
     return re.findall(regex, text, re.DOTALL)
 
 # write content in a file_path
-
-
 def write_to_txt(file_path, content):
     with open(file_path, 'w', encoding='utf-8') as file:
         file.write(content)
 
 
 # read content from a file_path
-
-
 def read_from_txt(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
         content = file.read()

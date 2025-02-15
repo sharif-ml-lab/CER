@@ -142,39 +142,27 @@ def _handle_all_decoding(
         scoring_mode,
         confidence_method,
         multihop, doc,
-        random_selection,
-        random_selection_number_words,
         step_decomposition,
         nlp,):
 
-    if not random_selection:
-        if not multihop:
-            final_answer, all_values, step_decomposition = number_step_by_step_extraction(
-                answer_text, step_decomposition)
-        else:
-            # step by step extracting
-            final_answer, all_values, step_decomposition = proper_noun_step_by_step_extraction(
-                answer_text, nlp, step_decomposition, doc)
 
-            if not all_values and not final_answer:
-                return None
-
-            if not all_values and final_answer:
-                all_values.append(final_answer)
-
-            elif not step_decomposition and all_values[-1] != final_answer and final_answer:
-                all_values.append(final_answer)
+    if not multihop:
+        final_answer, all_values, step_decomposition = number_step_by_step_extraction(
+            answer_text, step_decomposition)
     else:
-        step_decomposition = False
-        all_values = random.sample(
-            answer_text.split(), min(random_selection_number_words, len(answer_text.split())))
-        if not multihop:
-            final_answer = extract_last_numerical_value(answer_text)
-        else:
-            final_answer = extract_final_answer(answer_text)
+        # step by step extracting
+        final_answer, all_values, step_decomposition = proper_noun_step_by_step_extraction(
+            answer_text, nlp, step_decomposition, doc)
 
-        if all_values[-1] != final_answer and final_answer:
+        if not all_values and not final_answer:
+            return None
+
+        if not all_values and final_answer:
             all_values.append(final_answer)
+
+        elif not step_decomposition and all_values[-1] != final_answer and final_answer:
+            all_values.append(final_answer)
+   
 
     if not all_values:
         return None
@@ -336,26 +324,6 @@ def calculate_confidence_for_final_answer(tokenizer, logits, answer_ids, confide
             probs = torch.clamp(probs, min=1e-12)
             entropy = - (probs * torch.log(probs)).sum(dim=-1)
             confidence_sum = 1 - entropy.item()
-        elif confidence_method == "top_2_diff_weighted":
-            top_2_probs, _ = torch.topk(probs, min(2, probs.size(-1)))
-            if top_2_probs.size(-1) > 1:
-                confidence_sum += (top_2_probs[0] - top_2_probs[1]
-                                   ).item() * ans_token_prob.item()
-            else:
-                confidence_sum += 1.0
-        elif confidence_method == "top_2_diff":
-            top_2_probs, _ = torch.topk(probs, min(2, probs.size(-1)))
-            if top_2_probs.size(-1) > 1:
-                confidence_sum += (top_2_probs[0] - top_2_probs[1]).item()
-            else:
-                confidence_sum += 1.0
-        elif confidence_method == "top_2_diff_extension":
-            top_20_probs, top_20_indices = torch.topk(
-                probs, min(20, probs.size(-1)))
-            top_token_strs = [tokenizer.decode(
-                token_id, skip_special_tokens=True) for token_id in top_20_indices]
-            print(top_token_strs)
-            confidence_sum += (top_20_probs[0] - top_20_probs[1]).item()
         else:
             raise NotImplementedError(
                 "Unsupported confidence calculation mode")
