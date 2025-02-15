@@ -115,21 +115,6 @@ def preprocess_gsm8k(df, answer_column, old_question_column, new_question_column
     return df
 
 
-def preprocess_multi_arith(df, answer_column, old_question_column, new_question_column):
-    final_answer_column = answer_column
-
-    def get_numeric_final_answer(row):
-        final_answer = row[final_answer_column]
-        final_answer = final_answer.replace(',', '.')
-        if is_valid_number(final_answer):
-            return final_answer
-        return None
-
-    df['numeric_final_answer'] = df.apply(get_numeric_final_answer, axis=1)
-    df = df.rename(columns={old_question_column: new_question_column})
-    return df
-
-
 def combine_all_splits(dataset_name):
     try:
         # Load the dataset with all available splits
@@ -198,11 +183,6 @@ if __name__ == '__main__':
          "preprocess_function": preprocess_gsm8k,
          "old_question_column": "question",
          "new_question_column": "question",
-         },
-        {"dataset_name": "ChilleD/MultiArith", "split": "combine", "answer_column": "final_ans",
-         "preprocess_function": preprocess_multi_arith,
-         "old_question_column": "question",
-         "new_question_column": "question"
          },
         {"dataset_name": "src/custom_datasets/math_dataset.py", "split": "test", "answer_column": "solution",
          "preprocess_function": preprocess_math,
