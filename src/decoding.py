@@ -96,11 +96,6 @@ def _k_seperate_generation(
             if result is not None:
                 paths[i].append(result)
 
-    # for testing
-    # for path in paths:
-    #     print(path)
-    # print(40*"-")
-
     return paths
 
 
