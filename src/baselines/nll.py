@@ -70,8 +70,6 @@ def _k_generation(
         do_sample,
         multihop,
         nlp,
-        few_shot,
-        few_shot_path,
         normalize_length,
 ):
 
@@ -87,7 +85,7 @@ def _k_generation(
         batch_answers = []
         batch_final_answers = []
         tokenized_batch = batch_messages_creation(
-            tokenizer, batch_questions, batch_answers, few_shot, few_shot_path, multihop, device)
+            tokenizer, batch_questions, batch_answers, multihop, device)
 
         batch_output = model.generate(
             **tokenized_batch,
@@ -161,7 +159,7 @@ def _k_generation(
     return paths
 
 
-def batch_messages_creation(tokenizer, batch_questions, batch_answers, few_shot, few_shot_path, multihop, device):
+def batch_messages_creation(tokenizer, batch_questions, batch_answers, multihop, device):
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token_id = tokenizer.eos_token_id
 
@@ -171,8 +169,6 @@ def batch_messages_creation(tokenizer, batch_questions, batch_answers, few_shot,
     for question in batch_questions:
         batch_messages.append([{"role": "user", "content": construct_prompt(
             question=question,
-            few_shot=few_shot,
-            few_shot_path=few_shot_path,
             multihop=multihop,
             use_base_prompt=True)}])
 
@@ -211,8 +207,6 @@ def nll(
         aggregate_paths,
         multihop,
         nlp,
-        few_shot,
-        few_shot_path,
         normalize_length,
         num_beams=1,
         temperature=1.0,
@@ -250,8 +244,6 @@ def nll(
         do_sample=do_sample,
         multihop=multihop,
         nlp=nlp,
-        few_shot=few_shot,
-        few_shot_path=few_shot_path,
         normalize_length=normalize_length,
     )
 

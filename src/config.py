@@ -249,13 +249,11 @@ class Config:
 
     # specify the running mode "all" that means all of them.
     run_name: str = os.getenv("RUN_NAME", "Ours + Temp + * P + weighted_mean")
-    # number of chains in self-consistency or number of branching in cot-decoding
+    # number of chains in self-consistency
     K: int = int(os.getenv("K", 10))
     aggregate: bool = True  # True: aggregate paths False: the best path
     multihop: bool = eval(os.getenv("MULTIHOP", 'False'))
-
-    # True: few-shot False: zero-shot
-    few_shot: bool = eval(os.getenv("FEW_SHOT", 'True'))
+    
     # Number of samples to process
     number_samples: int = int(os.getenv("N_SAMPLE", 500))
     seed: int = int(os.getenv("SEED", 11))  # Seed for shuffling the dataset

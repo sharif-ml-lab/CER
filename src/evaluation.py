@@ -26,8 +26,6 @@ def evaluate_batch_examples(
         scoring_mode,
         baseline_cot,
         sampling_mode,
-        few_shot,
-        few_shot_path,
         confidence_method,
         multihop,
         dataset_name,
@@ -40,8 +38,6 @@ def evaluate_batch_examples(
     for question in batch_questions:
         batch_messages.append([{"role": "user", "content": construct_prompt(
             question=question,
-            few_shot=few_shot,
-            few_shot_path=few_shot_path,
             multihop=multihop, use_base_prompt=use_base_prompt)}])
 
         # for testing
@@ -83,8 +79,6 @@ def evaluate_batch_examples(
             sampling_mode=sampling_mode,
             multihop=multihop,
             nlp=nlp,
-            few_shot=few_shot,
-            few_shot_path=few_shot_path,
         )
 
     elif baseline_cot == "PE":  # predictive entropy
@@ -97,8 +91,6 @@ def evaluate_batch_examples(
             sampling_mode=sampling_mode,
             multihop=multihop,
             nlp=nlp,
-            few_shot=few_shot,
-            few_shot_path=few_shot_path,
             normalize_length=False,
         )
 
@@ -112,8 +104,6 @@ def evaluate_batch_examples(
             sampling_mode=sampling_mode,
             multihop=multihop,
             nlp=nlp,
-            few_shot=few_shot,
-            few_shot_path=few_shot_path,
             normalize_length=True,
         )
 
@@ -127,8 +117,6 @@ def evaluate_batch_examples(
             sampling_mode=sampling_mode,
             multihop=multihop,
             nlp=nlp,
-            few_shot=few_shot,
-            few_shot_path=few_shot_path,
             normalize_length=False,
         )
 
@@ -142,8 +130,6 @@ def evaluate_batch_examples(
             sampling_mode=sampling_mode,
             multihop=multihop,
             nlp=nlp,
-            few_shot=few_shot,
-            few_shot_path=few_shot_path,
             normalize_length=True,
         )
     elif baseline_cot == "GREEDY":  # greedy baseline
@@ -153,8 +139,6 @@ def evaluate_batch_examples(
                                         aggregate_paths=aggregate,
                                         multihop=multihop,
                                         nlp=nlp,
-                                        few_shot=few_shot,
-                                        few_shot_path=few_shot_path,
                                         )
 
     else:
@@ -218,8 +202,6 @@ def evaluate_dataset(
         scoring_mode,
         baseline_cot,
         sampling_mode,
-        few_shot,
-        few_shot_path,
         confidence_method,
         batch_size,
         multihop,
@@ -262,8 +244,6 @@ def evaluate_dataset(
                 scoring_mode,
                 baseline_cot,
                 sampling_mode,
-                few_shot,
-                few_shot_path,
                 confidence_method,
                 multihop,
                 dataset_name,
@@ -292,7 +272,7 @@ def evaluate_dataset(
     directory_path.mkdir(parents=True, exist_ok=True)
     save_results_to_csv(
         results,
-        f"{directory_path}/{description}_evaluation_results_{'few_shot' if few_shot else 'zero_shot'}.csv")
+        f"{directory_path}/{description}_evaluation_results_zero_shot.csv")
     accuracy = (correct_answers / total_questions) * 100
     print_final_accuracy(description, accuracy)
     return accuracy
@@ -302,7 +282,6 @@ def run_dataset(config: Config):
     model_name = config.model_name
     aggregate = config.aggregate
     K = config.K
-    few_shot = config.few_shot
     number_samples = config.number_samples
     seed = config.seed
     read_model_from_huggingface = config.read_model_from_huggingface
@@ -319,7 +298,6 @@ def run_dataset(config: Config):
     print(f"Model Name: {model_name}")
     print(f"Aggregate: {aggregate}")
     print(f"K: {K}")
-    print(f"Few Shot: {few_shot}")
     print(f"Number of Samples: {number_samples}")
     print(f"Seed: {seed}")
     print(f"Data Directory: {data_dir}")
@@ -352,26 +330,6 @@ def run_dataset(config: Config):
             for dataset_name, dataset_df in loaded_datasets.items():
                 print(f"\nEvaluating {dataset_name} using {cfg_run_name} ...")
 
-                if few_shot:
-                    if dataset_name == "allenai":
-                        few_shot_path = config.allenai_shots
-                    elif dataset_name == "math":
-                        few_shot_path = config.math_shots
-                    elif dataset_name == "multiarith":
-                        few_shot_path = config.multiarith_shots
-                    elif dataset_name == "gsm8k":
-                        few_shot_path = config.gsm8k_shots
-                    elif dataset_name == "hotpot":
-                        few_shot_path = config.hotpot_shots
-                    elif dataset_name == "trivia":
-                        few_shot_path = config.trivia_shots
-                    else:
-                        raise ValueError(
-                            'You have to provide the examples for the prompt')
-                else:
-                    # it should be run in a zero-shot format
-                    few_shot_path = None
-
                 evaluate_dataset(
                     model,
                     tokenizer,
@@ -384,8 +342,6 @@ def run_dataset(config: Config):
                     baseline_cot=cfg['baseline_cot'],
                     sampling_mode=cfg['sampling_mode'],
                     confidence_method=cfg['confidence'],
-                    few_shot=few_shot,
-                    few_shot_path=few_shot_path,
                     batch_size=batch_size,
                     multihop=multihop,
                     dataset_name=dataset_name,

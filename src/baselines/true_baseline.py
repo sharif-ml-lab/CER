@@ -25,8 +25,6 @@ def _k_generation(
         do_sample,
         multihop,
         nlp,
-        few_shot,
-        few_shot_path,
 ):
 
     batch_size = len(batch_questions)
@@ -42,7 +40,7 @@ def _k_generation(
             batch_answers = []
             batch_final_answers = []
             tokenized_batch = batch_messages_creation(
-                tokenizer, batch_questions, batch_answers, few_shot, few_shot_path, multihop, device, 1)
+                tokenizer, batch_questions, batch_answers,multihop, device, 1)
 
             batch_output = model.generate(
                 **tokenized_batch,
@@ -102,7 +100,7 @@ def _k_generation(
 
         else:
             tokenized_batch = batch_messages_creation(
-                tokenizer, batch_questions, batch_answers, few_shot, few_shot_path, multihop, device, 2)
+                tokenizer, batch_questions, batch_answers, multihop, device, 2)
 
             generated_ids = tokenized_batch["input_ids"]
             gen_masks = tokenized_batch["attention_mask"]
@@ -133,7 +131,7 @@ def _k_generation(
     return paths
 
 
-def batch_messages_creation(tokenizer, batch_questions, batch_answers, few_shot, few_shot_path, multihop, device, query_number=1):
+def batch_messages_creation(tokenizer, batch_questions, batch_answers, multihop, device, query_number=1):
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token_id = tokenizer.eos_token_id
 
@@ -144,8 +142,6 @@ def batch_messages_creation(tokenizer, batch_questions, batch_answers, few_shot,
         for question in batch_questions:
             batch_messages.append([{"role": "user", "content": construct_prompt(
                 question=question,
-                few_shot=few_shot,
-                few_shot_path=few_shot_path,
                 multihop=multihop,
                 use_base_prompt=True)}])
 
@@ -189,8 +185,6 @@ def p_true(
         aggregate_paths,
         multihop,
         nlp,
-        few_shot,
-        few_shot_path,
         num_beams=1,
         temperature=1.0,
         top_p=1.0,
@@ -227,8 +221,6 @@ def p_true(
         do_sample=do_sample,
         multihop=multihop,
         nlp=nlp,
-        few_shot=few_shot,
-        few_shot_path=few_shot_path,
     )
 
     # for testing
