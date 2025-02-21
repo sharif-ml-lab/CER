@@ -116,7 +116,7 @@ python main.py
 - **N_SAMPLE:**  
   The number of samples to process.
 
-- **SEE:**  
+- **SEED:**  
   The seed value used for shuffling the dataset.
 
 - **BATCH_SIZE:**  
