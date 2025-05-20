@@ -1,6 +1,7 @@
 # CER: Confidence Enhanced Reasoning in LLMs
 
-🏆 **Accepted at ACL 2025 (Main Conference)**  
+🎉 **We are pleased to announce that our paper has been accepted at the ACL 2025 Main Conference.**
+
 Welcome to the official repository for the CER paper. This README provides step-by-step instructions to set up the environment, download necessary datasets, and reproduce the results presented in the paper.
 
 ---
