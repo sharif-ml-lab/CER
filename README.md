@@ -2,7 +2,9 @@
 
 🎉 **We are pleased to announce that our paper has been accepted at the ACL 2025 Main Conference.**
 
-Welcome to the official repository for the CER paper. This README provides step-by-step instructions to set up the environment, download necessary datasets, and reproduce the results presented in the paper.
+This repository contains the official implementation of **CER: Confidence Enhanced Reasoning in LLMs**. [[paper]](https://arxiv.org/abs/2502.14634)
+
+This README provides step-by-step instructions to set up the environment, download necessary datasets, and reproduce the results presented in the paper.
 
 ---
 
@@ -138,3 +140,17 @@ python main.py
       "trivia": "triviaqa_processed.parquet",
   }
   ```
+---
+
+## Reference
+
+Please cite our paper if you find this project helpful:
+
+```
+@article{razghandi2025cer,
+  title={Cer: Confidence enhanced reasoning in llms},
+  author={Razghandi, Ali and Hosseini, Seyed Mohammad Hadi and Baghshah, Mahdieh Soleymani},
+  journal={arXiv preprint arXiv:2502.14634},
+  year={2025}
+}
+```
